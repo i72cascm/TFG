@@ -1,0 +1,31 @@
+/* global.css */
+ 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+ 
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: hsla(205, 9%, 75%, 0.863);
+    border-radius: 5px;
+}
+ 
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: hsla(202, 14%, 85%, 0.61);
+}
+
+/* Handle on active */
+::-webkit-scrollbar-thumb:active {
+    background: hsla(200, 14%, 85%, 0.45);
+}
