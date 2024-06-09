@@ -12,8 +12,9 @@ import AccountValidation from './pages/userPages/AccountValidation'
 import Home from './pages/appPages/Home'
 import RecipeBuilder from './pages/appPages/RecipeBuilder'
 import MyRecipes from './pages/appPages/MyRecipes'
-import AuthProvider from 'react-auth-kit';
+import Recipe from './pages/appPages/Recipe'
 
+import AuthProvider from 'react-auth-kit';
 import { store } from './utils/store';
 
 
@@ -35,6 +36,7 @@ function App() {
 							<Route path='/app/home' element = {<Home/>}/>
 							<Route path='/app/recipe-builder' element = {<RecipeBuilder/>}/>
 							<Route path='/app/my-recipes' element = {<MyRecipes/>}/>
+							<Route path='/app/recipe/:id' element={<Recipe />} />
 						</Route>
 					</Route>
 				</Routes>

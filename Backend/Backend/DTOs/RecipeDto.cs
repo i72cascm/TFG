@@ -4,6 +4,7 @@
     {
         public int ID { get; set; }
         public int UserID { get; set; }
+        public string Title { get; set; }
         public int PreparationTime { get; set; }
         public int ServingsNumber { get; set; }
         public string RecipeImage { get; set; }

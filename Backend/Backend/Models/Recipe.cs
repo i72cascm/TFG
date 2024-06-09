@@ -15,6 +15,8 @@ namespace Backend.Modelos
         [ForeignKey("User")]
         public int UserID { get; set; }
 
+        public string Title { get; set; }
+
         public int PreparationTime { get; set; }
 
         public int ServingsNumber { get; set; }

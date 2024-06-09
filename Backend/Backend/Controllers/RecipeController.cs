@@ -64,6 +64,7 @@ namespace Backend.Controllers
                         {
                             ID = recipe.RecipeID,
                             UserID = recipe.UserID,
+                            Title = recipe.Title,
                             PreparationTime = recipe.PreparationTime,
                             ServingsNumber = recipe.ServingsNumber,
                             RecipeImage = imageDataUrl,
@@ -129,6 +130,7 @@ namespace Backend.Controllers
                         {
                             ID = recipe.RecipeID,
                             UserID = recipe.UserID,
+                            Title = recipe.Title,
                             PreparationTime = recipe.PreparationTime,
                             ServingsNumber = recipe.ServingsNumber,
                             RecipeImage = imageDataUrl,
@@ -138,6 +140,7 @@ namespace Backend.Controllers
                         });
                     }
                 }
+                
                 return Ok(recipesDto);
             }
             catch (Exception ex)
@@ -150,25 +153,56 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<RecipeDto>> GetRecipeById(int id)
         {
-            var recipe = await _recipeContext.Recipes.FindAsync(id);
-
-            if (recipe == null)
+            try
             {
-                return NotFound();
+                var recipe = await _recipeContext.Recipes.FindAsync(id);
+
+                if (recipe == null)
+                {
+                    return NotFound();
+                }
+
+                // Obtener imagen desde AWS S3
+                var client = new AmazonS3Client();
+                var bucketName = "i72cascm-recipes-web-app";
+                var recipesDto = new List<RecipeDto>();
+                var getRequest = new GetObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = recipe.RecipeImage
+                };
+
+                using (var response = await client.GetObjectAsync(getRequest))
+                using (var responseStream = response.ResponseStream)
+                using (var memoryStream = new MemoryStream())
+                {
+                    responseStream.CopyTo(memoryStream);
+                    byte[] imageBytes = memoryStream.ToArray();
+
+                    // Convertir bytes a base64
+                    string base64Image = Convert.ToBase64String(imageBytes);
+                    string imageDataUrl = $"data:{response.Headers["Content-Type"]};base64,{base64Image}";
+
+                    var recipeDto = new RecipeDto
+                    {
+                        ID = recipe.RecipeID,
+                        UserID = recipe.UserID,
+                        Title = recipe.Title,
+                        PreparationTime = recipe.PreparationTime,
+                        ServingsNumber = recipe.ServingsNumber,
+                        RecipeImage = imageDataUrl,
+                        Steps = recipe.Steps,
+                        Ingredients = recipe.Ingredients,
+                        Tag = recipe.Tag
+                    };
+                    return Ok(recipeDto);
+                }
+
             }
-
-            var recipeDto = new RecipeDto
+            catch (Exception ex) 
             {
-                ID = recipe.RecipeID,
-                UserID = recipe.UserID,
-                PreparationTime = recipe.PreparationTime,
-                ServingsNumber = recipe.ServingsNumber,
-                Steps = recipe.Steps,
-                Ingredients = recipe.Ingredients,
-                Tag = recipe.Tag
-            };
-
-            return Ok(recipeDto);
+                return StatusCode(500, new { Message = $"Internal server error {ex.Message}" });
+            }
         }
 
         // Crear nueva Receta
@@ -212,6 +246,7 @@ namespace Backend.Controllers
                 var recipe = new Recipe
                 {
                     UserID = user.UserID,
+                    Title = recipeInsertDto.Title,
                     PreparationTime = recipeInsertDto.PreparationTime,
                     ServingsNumber = recipeInsertDto.ServingsNumber,
                     RecipeImage = imageFileName,
@@ -220,13 +255,12 @@ namespace Backend.Controllers
                     Tag = recipeInsertDto.Tag
                 };
 
-                Console.WriteLine(recipe);
-
                 _recipeContext.Recipes.Add(recipe);
                 await _recipeContext.SaveChangesAsync();
 
                 var recipeDto = new RecipeDto
                 {
+                    Title = recipeInsertDto.Title,
                     PreparationTime = recipeInsertDto.PreparationTime,
                     ServingsNumber = recipeInsertDto.ServingsNumber,
                     RecipeImage = imageFileName,

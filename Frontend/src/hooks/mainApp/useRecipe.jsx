@@ -35,7 +35,7 @@ const useRecipe = () => {
                 return { success: false, message: errorData.Message };
             }
         } catch (error) {
-            console.error("Error fetching recipes:", error);
+            console.error("Error fetching all recipes:", error);
             return { success: false, message: error.message };
         }
     }
@@ -43,6 +43,30 @@ const useRecipe = () => {
     const getUserRecipes = async (userEmail) => {
         try {
             const response = await fetch(`${urlApi}/api/recipe/user/${userEmail}`, {
+                method: 'GET',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": userToken
+                },
+            });
+    
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log(data)
+                return { success: true, data };
+            } else if (response.status === 400 || response.status === 500) {
+                const errorData = await response.json();
+                return { success: false, message: errorData.Message };
+            }
+        } catch (error) {
+            console.error("Error fetching recipe by id:", error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    const getRecipeById = async (id) => {
+        try {
+            const response = await fetch(`${urlApi}/api/recipe/${id}`, {
                 method: 'GET',
                 headers: {
                     "Content-Type": "application/json",
@@ -87,7 +111,7 @@ const useRecipe = () => {
         }
     };
 
-    return { postRecipe, getAllRecipes, getUserRecipes };
+    return { postRecipe, getAllRecipes, getUserRecipes, getRecipeById };
 };
 
 export default useRecipe;

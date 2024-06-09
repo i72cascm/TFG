@@ -33,6 +33,7 @@ const RecipeBuilder = () => {
     const userData = getAuthState();
 
     const [formData, setFormData] = useState({
+        title: "",
         preparationTime: "",
         servings: "",
         image: null,
@@ -99,6 +100,7 @@ const RecipeBuilder = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const requiredFields = [
+            "title",
             "preparationTime",
             "servings",
             "ingredients",
@@ -114,6 +116,7 @@ const RecipeBuilder = () => {
             // Construye el objeto de datos para la solicitud POST
             const recipeData = {
                 UserEmail: formData.userEmail,
+                Title: formData.title,
                 PreparationTime: parseInt(formData.preparationTime),
                 ServingsNumber: parseInt(formData.servings),
                 RecipeImage: formData.image,
@@ -126,6 +129,7 @@ const RecipeBuilder = () => {
             if (result.success) {
                 toast.success("Recipe submitted successfully!");
                 setFormData({
+                    title: "",
                     preparationTime: "",
                     servings: "",
                     image: null,
@@ -176,7 +180,31 @@ const RecipeBuilder = () => {
                             backgroundPosition: "center"
                         }}
                     >
-                        <div className="grid grid-cols-2">
+                        <div className="mt-3 flex flex-col items-center">
+                            <label
+                                className="text-slate-800 font-black text-xl capitalize"
+                                style={{
+                                    backgroundColor:
+                                        "rgba(255, 255, 255, 0.692)",
+                                    padding: "5px 10px",
+                                    borderRadius: "8px",
+                                    boxShadow:
+                                        "0 2px 4px rgba(0, 0, 0, 0.1)",
+                                }}
+                            >
+                                Recipe Title
+                            </label>
+                            <input
+                                name="title"
+                                type="text"
+                                autoComplete="off"
+                                maxLength={50}
+                                value={formData.title}
+                                onChange={handleChange}
+                                className="text-center mt-2 block w-2/4 px-3 py-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div className="mt-3 grid grid-cols-2">
                             <div className="mt-3 flex flex-col items-center">
                                 <label
                                     className="text-slate-800 font-black text-xl capitalize"
@@ -332,7 +360,7 @@ const RecipeBuilder = () => {
                                 rows="5"
                             ></textarea>
                         </div>
-                        <div className="mt-3 flex flex-col items-center">
+                        <div className="mt-6 flex flex-col items-center">
                             <label
                                 className="text-slate-800 font-black text-xl capitalize"
                                 style={{
@@ -354,7 +382,7 @@ const RecipeBuilder = () => {
                             ></textarea>
                         </div>
 
-                        <div className="mt-3 flex flex-col items-center">
+                        <div className="mt-6 flex flex-col items-center">
                             <button
                                 type="submit"
                                 className="w-3/5 px-4 p-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-2xl font-semibold"
