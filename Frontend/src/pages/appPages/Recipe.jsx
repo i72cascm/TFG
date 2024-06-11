@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import fondoPizarra from "/fondoPizarra.png";
 import fondoPizarraMirror from "/fondoPizarraMirror.png";
+import Modal from "react-modal";
 import {
     CircleUserRound,
     Clock,
@@ -12,10 +13,30 @@ import {
     Fullscreen,
 } from "lucide-react";
 
+// Estilo del modal
+const customStyles = {
+    content: {
+        top: "50%",
+        left: "50%",
+        right: "auto",
+        bottom: "auto",
+        marginRight: "-50%",
+        transform: "translate(-50%, -50%)",
+        maxWidth: "90%",
+        maxHeight: "90%",
+        padding: 0,
+        overflow: "hidden",
+    },
+    overlay: {
+        backgroundColor: "rgba(0, 0, 0, 0.75)",
+    },
+};
+
 const Recipe = () => {
     const { id } = useParams();
     const { getRecipeById } = useRecipe();
     const [recipe, setRecipe] = useState(null);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     // Al renderizar la vista, realizar la búsqueda de la receta por su ID
     useEffect(() => {
@@ -63,7 +84,10 @@ const Recipe = () => {
                                     objectFit: "cover",
                                 }}
                             />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
+                            <div
+                                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out"
+                                onClick={() => setModalIsOpen(true)}
+                            >
                                 <Fullscreen size={40} className="text-white" />
                             </div>
                         </div>
@@ -104,7 +128,7 @@ const Recipe = () => {
                             <div className="flex flex-col items-center mt-4">
                                 <CircleUserRound size={25} className="mb-3" />
                                 <p className="font-semibold text-xl mb-3">
-                                    {recipe.userID}
+                                    {recipe.userName}
                                 </p>
                             </div>
                         </div>
@@ -118,8 +142,8 @@ const Recipe = () => {
                         backgroundPosition: "center",
                     }}
                 >
-                    <div className="mt-3 flex flex-col items-center">
-                        <label className="font-semibold text-2xl capitalize text-white my-3">
+                    <div className="mt-2 flex flex-col items-center">
+                        <label className="font-semibold text-3xl capitalize text-white mb-3">
                             Ingredients
                         </label>
                         <textarea
@@ -131,7 +155,7 @@ const Recipe = () => {
                         ></textarea>
                     </div>
                     <div className="mt-6 flex flex-col items-center">
-                        <label className="font-semibold text-2xl capitalize text-white my-3">
+                        <label className="font-semibold text-3xl capitalize text-white my-3">
                             Steps
                         </label>
                         <textarea
@@ -144,6 +168,27 @@ const Recipe = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal para ampliar la imagen de la receta */}
+            <Modal 
+                isOpen={modalIsOpen}
+                onRequestClose={() => setModalIsOpen(false)}
+                style={customStyles}
+                contentLabel="Recipe Image Modal"
+            >
+                <div className="relative">
+                    <img
+                        src={recipe.recipeImage}
+                        alt="Recipe Image"
+                        className="rounded-lg"
+                        style={{
+                            width: "100%",
+                            height: "auto",
+                            objectFit: "contain",
+                        }}
+                    />
+                </div>
+            </Modal>
         </>
     );
 };

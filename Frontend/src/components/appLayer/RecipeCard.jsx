@@ -21,7 +21,7 @@ function RecipeCard({ recipe }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-4 mt-2 p-2">
                 <div className="flex flex-col items-center justify-center">
                     <CircleUserRound size={20} />
-                    <p className="font-medium">{recipe.userID}</p>
+                    <p className="font-medium">{recipe.userName}</p>
                 </div>
                 <div className="flex flex-col items-center justify-center">
                     <Clock size={20} />

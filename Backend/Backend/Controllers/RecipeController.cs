@@ -26,7 +26,6 @@ namespace Backend.Controllers
         private readonly DBContext _recipeContext = recipeContext; // Contexto de la DB
         private readonly IAuthService _authService = authService;
 
-        // Obtener todas las recetas existentes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecipeDto>>> GetAllRecipes()
         {
@@ -63,7 +62,7 @@ namespace Backend.Controllers
                         recipesDto.Add(new RecipeDto
                         {
                             ID = recipe.RecipeID,
-                            UserID = recipe.UserID,
+                            UserName = recipe.User.UserName,
                             Title = recipe.Title,
                             PreparationTime = recipe.PreparationTime,
                             ServingsNumber = recipe.ServingsNumber,
@@ -129,7 +128,7 @@ namespace Backend.Controllers
                         recipesDto.Add(new RecipeDto
                         {
                             ID = recipe.RecipeID,
-                            UserID = recipe.UserID,
+                            UserName = user.UserName,
                             Title = recipe.Title,
                             PreparationTime = recipe.PreparationTime,
                             ServingsNumber = recipe.ServingsNumber,
@@ -140,7 +139,7 @@ namespace Backend.Controllers
                         });
                     }
                 }
-                
+
                 return Ok(recipesDto);
             }
             catch (Exception ex)
@@ -149,13 +148,16 @@ namespace Backend.Controllers
             }
         }
 
+
         // Obtener una receta a través de su ID
         [HttpGet("{id}")]
         public async Task<ActionResult<RecipeDto>> GetRecipeById(int id)
         {
             try
             {
-                var recipe = await _recipeContext.Recipes.FindAsync(id);
+                var recipe = await _recipeContext.Recipes
+                    .Include(r => r.User)  
+                    .FirstOrDefaultAsync(r => r.RecipeID == id);
 
                 if (recipe == null)
                 {
@@ -186,7 +188,7 @@ namespace Backend.Controllers
                     var recipeDto = new RecipeDto
                     {
                         ID = recipe.RecipeID,
-                        UserID = recipe.UserID,
+                        UserName = recipe.User.UserName,
                         Title = recipe.Title,
                         PreparationTime = recipe.PreparationTime,
                         ServingsNumber = recipe.ServingsNumber,
@@ -199,11 +201,12 @@ namespace Backend.Controllers
                 }
 
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return StatusCode(500, new { Message = $"Internal server error {ex.Message}" });
             }
         }
+
 
         // Crear nueva Receta
         [HttpPost]
