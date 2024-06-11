@@ -1,7 +1,10 @@
 import { urlApi } from "../../constants/endpoint";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const useRecipe = () => {
 	
+    const queryClient = useQueryClient();
+
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
         const token = document.cookie
@@ -111,7 +114,16 @@ const useRecipe = () => {
         }
     };
 
-    return { postRecipe, getAllRecipes, getUserRecipes, getRecipeById };
+    const postRecipeMutation = useMutation({
+        mutationFn: postRecipe,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['user-recipes', 'recipes']
+            });
+        }
+    })
+
+    return { postRecipeMutation, getAllRecipes, getUserRecipes, getRecipeById };
 };
 
 export default useRecipe;

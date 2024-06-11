@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Searchbar from "../../components/appLayer/Searchbar";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import RecipeCard from "../../components/appLayer/RecipeCard";
@@ -7,26 +7,41 @@ const Home = () => {
     // Llamada de los métodos en el hook de recetas
     const { getAllRecipes } = useRecipe();
 
-    // Array de las recetas
-    const [recipeList, setRecipeList] = useState([]);
-
     // Al renderizar esta página, llamar al método de obtención de recetas y guardarlas en el array de listas
-    useEffect(() => {
-        const loadMyRecipes = async () => {
-            const result = await getAllRecipes();
-            if (result.success) {
-                setRecipeList(result.data);
-            } else {
-                console.error("Failed to fetch recipes:", result.message);
-            }
-        };
-
-        loadMyRecipes();
-    }, []);
+    const {
+        data: recipeList,
+        error,
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ["recipes"],
+        queryFn: getAllRecipes,
+        select: (data) => data?.data || [], // Accede a la propiedad 'data' del objeto y utiliza un array vacío como valor por defecto
+        keepPreviousData: true,
+    });
 
     const handleSearchSubmit = () => {
         console.log("Searching...");
     };
+
+    // Mensaje de cargando recetas
+    if (isLoading) {
+        return (
+            <div className="flex justify-center mt-6">
+                <h1 className="text-3xl text-stone-300">Loading recipes... </h1>
+            </div>
+        );
+    }
+
+    // Mensaje en caso de fallo de carga de las recetas
+    if (isError) {
+        console.error("Failed to fetch recipes:", error.message);
+        return (
+            <div className="flex justify-center mt-6">
+                <h1 className="text-3xl text-stone-300">Failed to load recipes... </h1>
+            </div>
+        );
+    }
 
     return (
         <>

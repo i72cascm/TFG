@@ -7,7 +7,7 @@ import tableCreateRecipe2 from "/tableCreateRecipe2.png";
 
 const RecipeBuilder = () => {
     // Llamada de los métodos en el hook de recetas
-    const { postRecipe } = useRecipe();
+    const { postRecipeMutation } = useRecipe();
 
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
@@ -125,24 +125,26 @@ const RecipeBuilder = () => {
                 Tag: formData.tags,
             };
             console.log(recipeData);
-            const result = await postRecipe(recipeData);
-            if (result.success) {
-                toast.success("Recipe submitted successfully!");
-                setFormData({
-                    title: "",
-                    preparationTime: "",
-                    servings: "",
-                    image: null,
-                    steps: "",
-                    ingredients: "",
-                    tags: "",
-                    userEmail: userData ? userData.email : null,
-                });
-            } else {
-                toast.error(
-                    `An error occurred while submitting the recipe: ${result.message}`
-                );
-            }
+            postRecipeMutation.mutate(recipeData, {
+                onSuccess: () => {
+                    toast.success("Recipe submitted successfully!");
+                    setFormData({
+                        title: "",
+                        preparationTime: "",
+                        servings: "",
+                        image: null,
+                        steps: "",
+                        ingredients: "",
+                        tags: "",
+                        userEmail: userData ? userData.email : null,
+                    });
+                },
+                onError: () => {
+                    toast.error(
+                        `An error occurred while submitting the recipe: ${result.message}`
+                    );
+                },
+            });
         }
     };
 
@@ -177,7 +179,7 @@ const RecipeBuilder = () => {
                         style={{
                             backgroundImage: `url(${tableCreateRecipe})`,
                             backgroundSize: "cover",
-                            backgroundPosition: "center"
+                            backgroundPosition: "center",
                         }}
                     >
                         <div className="mt-3 flex flex-col items-center">
@@ -188,8 +190,7 @@ const RecipeBuilder = () => {
                                         "rgba(255, 255, 255, 0.692)",
                                     padding: "5px 10px",
                                     borderRadius: "8px",
-                                    boxShadow:
-                                        "0 2px 4px rgba(0, 0, 0, 0.1)",
+                                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                                 }}
                             >
                                 Recipe Title

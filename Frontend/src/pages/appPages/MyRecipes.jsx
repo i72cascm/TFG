@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import RecipeCard from "../../components/appLayer/RecipeCard";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 
 const MyRecipes = () => {
     // Llamada de los métodos en el hook de recetas
     const { getUserRecipes } = useRecipe();
-
-    // Array de las recetas
-    const [recipeList, setRecipeList] = useState([]);
 
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
@@ -33,18 +30,36 @@ const MyRecipes = () => {
     const userData = getAuthState();
 
     // Al renderizar esta página, llamar al método de obtención de recetas y guardarlas en el array de listas
-    useEffect(() => {
-        const loadMyRecipes = async () => {
-            const result = await getUserRecipes(userData.email);
-            if (result.success) {
-                setRecipeList(result.data);
-            } else {
-                console.error("Failed to fetch user recipes:", result.message);
-            }
-        };
+    const {
+        data: recipeList,
+        error,
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ["user-recipes", userData?.Email],
+        queryFn: () => getUserRecipes(userData?.email),
+        select: (data) => data?.data || [], // Accede a la propiedad 'data' del objeto y utiliza un array vacío como valor por defecto
+        keepPreviousData: true,
+    });
 
-        loadMyRecipes();
-    }, []);
+    // Mensaje de cargando recetas
+    if (isLoading) {
+        return (
+            <div className="flex justify-center mt-6">
+                <h1 className="text-3xl text-stone-300">Loading recipes... </h1>
+            </div>
+        );
+    }
+
+    // Mensaje en caso de fallo de carga de las recetas
+    if (isError) {
+        console.error("Failed to fetch recipes:", error.message);
+        return (
+            <div className="flex justify-center mt-6">
+                <h1 className="text-3xl text-stone-300">Failed to load recipes... </h1>
+            </div>
+        );
+    }
 
     return (
         <>
