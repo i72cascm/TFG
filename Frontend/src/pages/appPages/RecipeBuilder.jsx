@@ -387,8 +387,9 @@ const RecipeBuilder = () => {
                             <button
                                 type="submit"
                                 className="w-3/5 px-4 p-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-2xl font-semibold"
+                                disabled={postRecipeMutation.isPending}
                             >
-                                Create Recipe
+                                {postRecipeMutation.isPending ? "Submitting..." : "Create Recipe"}
                             </button>
                         </div>
                     </div>
