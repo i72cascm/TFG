@@ -19,10 +19,9 @@ namespace Backend.Controllers
     [ServiceFilter(typeof(ValidateTokenAttribute))]
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(DBContext userContext, IValidator<UserInsertDto> userInsertValidator) : ControllerBase
+    public class UserController(DBContext userContext) : ControllerBase
     {
         private readonly DBContext _userContext = userContext; // Contexto de la base de datos
-        private readonly IValidator<UserInsertDto> _userInsertValidator = userInsertValidator; // Validador para agregar usuarios
         
         // Obtener todos los usuarios de la base de datos
         [HttpGet]
@@ -62,60 +61,6 @@ namespace Backend.Controllers
             };
 
             return Ok(userDto);
-        }
-
-        // Insertar nuevo usuario
-        [HttpPost]
-        public async Task<ActionResult<UserDto>> Add(UserInsertDto userInsertDto)
-        {
-            var validationResult = await _userInsertValidator.ValidateAsync(userInsertDto);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
-            // Verificar si el correo electrónico ya existe en la BD
-            bool emailExists = await _userContext.Users.AnyAsync(u => u.Email == userInsertDto.Email);
-            if (emailExists)
-            {
-                return BadRequest(new  { message = "Email alredy in use" });
-            }
-
-            // Verificar si el nombre de usuario ya existe en la BD
-            bool userNameExists = await _userContext.Users.AnyAsync(u => u.UserName == userInsertDto.UserName);
-            if (userNameExists)
-            {
-                return BadRequest(new { message = "Username alredy in use" });
-            }
-
-            // Encriptación de la contraseña antes 
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userInsertDto.Password);
-
-            var user = new User()
-            {
-                Email = userInsertDto.Email,
-                Name = userInsertDto.Name,
-                LastNames = userInsertDto.LastNames,
-                UserName = userInsertDto.UserName,
-                Password = hashedPassword,
-                BirthDate = userInsertDto.BirthDate
-            };
-
-            await _userContext.Users.AddAsync(user); // Indicamos al entity framework que se realizará una insercción
-            await _userContext.SaveChangesAsync(); // Se guardan los cambios en la base de datos
-
-            var userDto = new UserDto
-            {
-                ID = user.UserID,
-                Email = userInsertDto.Email,
-                Name = userInsertDto.Name,
-                LastNames = userInsertDto.LastNames,
-                UserName = userInsertDto.UserName,
-                BirthDate = userInsertDto.BirthDate
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = user.UserID }, userDto);
         }
 
         // Modificar un usuario

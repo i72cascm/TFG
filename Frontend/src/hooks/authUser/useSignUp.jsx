@@ -95,7 +95,7 @@ const useSignUp = () => {
         };
 
         try {
-            const response = await fetch(`${urlApi}/api/User`,{
+            const response = await fetch(`${urlApi}/api/Auth`,{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -110,9 +110,7 @@ const useSignUp = () => {
             }
 
             // En caso de respuesta exitosa
-            const result = await response.json();
-            console.log(result);
-            navigate(`/account-validation/${result.id}`);
+            navigate(`/`);
             
         } catch (error) {
             console.error('Error creating user: ', error.message);

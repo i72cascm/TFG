@@ -48,6 +48,9 @@ namespace Backend
             });
             builder.Services.AddAuthorization();
 
+            // Email Service
+            builder.Services.AddTransient<IEmailService, EmailService>();
+
             // Add Validators
             builder.Services.AddScoped<IValidator<UserInsertDto>, UserInsertValidator>();
 
