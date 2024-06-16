@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { urlApi } from '../../constants/endpoint';
 
-const useSignUp = () => {
+const useSignUp = (setSignUpCorrect) => {
     const [ name, setName ] = useState('')
     const [ lastnames, setLastnames ] = useState('')
     const [ birthdate, setBirthdate ] = useState('')
@@ -11,8 +10,6 @@ const useSignUp = () => {
     const [ password, setPassword ] = useState('')
     const [ repeatPassword, setRepeatPassword ] = useState('')
     const [ alert, setAlert ] = useState({})
-
-    const navigate = useNavigate();
 
     const validateFields = () => {
         
@@ -110,7 +107,7 @@ const useSignUp = () => {
             }
 
             // En caso de respuesta exitosa
-            navigate(`/`);
+            setSignUpCorrect(true);
             
         } catch (error) {
             console.error('Error creating user: ', error.message);

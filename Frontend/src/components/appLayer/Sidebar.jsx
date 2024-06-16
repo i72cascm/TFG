@@ -1,18 +1,26 @@
-import { ChevronFirst, ChevronLast } from "lucide-react";
+import { ChevronFirst, ChevronLast, LogOut } from "lucide-react";
 import { createContext, useState } from 'react';
 import logo from '/logo.png';
 import { SidebarItem } from "./SidebarItem";
 import { LifeBuoy, Apple, Home, CookingPot, Receipt, ScrollText, LayoutDashboard, Settings} from "lucide-react"
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import useSignOut from 'react-auth-kit/hooks/useSignOut';
 
 export const SidebarContext = createContext()
-
 
 export default function Sidebar(){
     const [expanded, setExpanded] = useState(true)
     const location = useLocation();
+    const signOut = useSignOut();
+    const navigate = useNavigate();
 
     const isActive = (path) => location.pathname === path;
+
+    // Función para manejar el cierre de sesión
+    const handleLogout = () => {
+        signOut();  // Cierra la sesión
+        navigate('/');
+    };
 
     return (
         <aside className='h-screen'>
@@ -30,21 +38,25 @@ export default function Sidebar(){
                           {expanded? <ChevronFirst />: <ChevronLast />}
                       </button>   
                     </div>
-                    
                 </div>
                 
                 <SidebarContext.Provider value={{ expanded }}>
-                    <ul className="flex-1 px-3"> 
-                        <SidebarItem icon={<Home size={25} />} text="Home Page" to="/app/home" active={isActive('/app/home')}/>
-                        <SidebarItem icon={<CookingPot size={25}/>} text="Recipe Builder" to="/app/recipe-builder" active={isActive('/app/recipe-builder')}/>
-                        <SidebarItem icon={<ScrollText size={25} />} text="My Recipes" to="/app/my-recipes" active={isActive('/app/my-recipes')}/>
-                        <SidebarItem icon={<Receipt size={25} />} text="Shopping List"/>
-                        <SidebarItem icon={<LayoutDashboard size={25} />} text="Weekly Planner"/>
-                        <SidebarItem icon={<Apple size={25} />} text="Healthy Recipes"/>
-                        <hr className='my-3' style={{ borderTop: '1px solid #000000' }}/>
-                        <SidebarItem icon={<Settings size={25} />} text="User Settings" />
-                        <SidebarItem icon={<LifeBuoy size={25} />} text="Help" />    
-                    </ul>
+                    <div className="flex-1 flex flex-col">
+                        <ul className="px-3 flex-grow">
+                            <SidebarItem icon={<Home size={25} />} text="Home Page" to="/app/home" active={isActive('/app/home')}/>
+                            <SidebarItem icon={<CookingPot size={25}/>} text="Recipe Builder" to="/app/recipe-builder" active={isActive('/app/recipe-builder')}/>
+                            <SidebarItem icon={<ScrollText size={25} />} text="My Recipes" to="/app/my-recipes" active={isActive('/app/my-recipes')}/>
+                            <SidebarItem icon={<Receipt size={25} />} text="Shopping List"/>
+                            <SidebarItem icon={<LayoutDashboard size={25} />} text="Weekly Planner"/>
+                            <SidebarItem icon={<Apple size={25} />} text="Healthy Recipes"/>
+                            <hr className='my-3' style={{ borderTop: '1px solid #000000' }}/>
+                            <SidebarItem icon={<Settings size={25} />} text="User Settings" />
+                            <SidebarItem icon={<LifeBuoy size={25} />} text="Help" />
+                        </ul>
+                        <div className="px-3 mb-3">
+                            <SidebarItem icon={<LogOut size={25} />} text="Log Out" onClick={handleLogout} isLogOut={true}/>
+                        </div>
+                    </div>
                 </SidebarContext.Provider>
             </nav>
         </aside>

@@ -27,8 +27,8 @@ function App() {
 						<Route path = "/" element = {<Login/>} />
 						<Route path = "sign-up" element = {<SignUp/>} />
 						<Route path = "forget-password" element = {<ForgetPassword/>} />
-						<Route path = "forget-password/:token" element = {<NewPassword/>} />
-						<Route path = "account-validation/:id" element = {<AccountValidation/>} />
+						<Route path = "new-password" element = {<NewPassword/>} />
+						<Route path = "account-validation" element = {<AccountValidation/>} />
 					</Route>
 
 					<Route element={<AuthOutlet fallbackPath='/' />}>

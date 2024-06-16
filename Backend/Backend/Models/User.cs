@@ -31,5 +31,12 @@ namespace Backend.Modelos
 
         public List<Recipe> Recipes { get; set; }
 
+        public string Role { get; set; }
+
+        public Boolean Validate { get; set; }
+
+        public string ValidateToken { get; set; }
+
+        public string ResetPasswordToken { get; set; }
     }
 }
