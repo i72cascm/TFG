@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Searchbar from "../../components/appLayer/Searchbar";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import RecipeCard from "../../components/appLayer/RecipeCard";

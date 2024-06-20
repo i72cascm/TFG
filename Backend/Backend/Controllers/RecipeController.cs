@@ -207,7 +207,6 @@ namespace Backend.Controllers
             }
         }
 
-
         // Crear nueva Receta
         [HttpPost]
         public async Task<ActionResult<RecipeInsertDto>> Add(RecipeInsertDto recipeInsertDto)
@@ -280,5 +279,54 @@ namespace Backend.Controllers
             }
             
         }
+
+        // Eliminar todas las recetas de un usuario dado su email
+        [HttpDelete("user/{email}")]
+        public async Task<IActionResult> DeleteUserRecipes(string email)
+        {
+            try
+            {
+                // Buscar el usuario por email
+                var user = await _recipeContext.Users.SingleOrDefaultAsync(u => u.Email == email);
+                if (user == null)
+                {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                // Obtener todas las recetas del usuario
+                var userRecipes = await _recipeContext.Recipes
+                    .Where(r => r.UserID == user.UserID)
+                    .ToListAsync();
+
+                if (userRecipes.Count == 0)
+                {
+                    return Ok(new { Message = "No recipes found for this user." });
+                }
+
+                // Eliminar las recetas de la base de datos
+                _recipeContext.Recipes.RemoveRange(userRecipes);
+                await _recipeContext.SaveChangesAsync();
+
+                // Eliminar las imágenes de S3
+                var client = new AmazonS3Client();
+                var bucketName = "i72cascm-recipes-web-app";
+                foreach (var recipe in userRecipes)
+                {
+                    var deleteRequest = new DeleteObjectRequest
+                    {
+                        BucketName = bucketName,
+                        Key = recipe.RecipeImage
+                    };
+                    await client.DeleteObjectAsync(deleteRequest);
+                }
+
+                return Ok(new { Message = "All recipes deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
     }
 }

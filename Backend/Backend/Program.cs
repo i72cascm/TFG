@@ -1,6 +1,7 @@
 
 using System.Text;
 using Amazon.S3;
+using Backend.Controllers;
 using Backend.DTOs;
 using Backend.Filters;
 using Backend.Models;
@@ -59,6 +60,9 @@ namespace Backend
 
             // Register the ValidateTokenAttribute
             builder.Services.AddScoped<ValidateTokenAttribute>();
+
+            // Register RecipeController and its dependencies
+            builder.Services.AddScoped<RecipeController>();
 
             // Configure controllers
             builder.Services.AddControllers();

@@ -87,7 +87,8 @@ namespace Backend.Controllers
                 BirthDate = userInsertDto.BirthDate,
                 Role = "User",
                 Validate = false,
-                ValidateToken = Guid.NewGuid().ToString()
+                ValidateToken = Guid.NewGuid().ToString(),
+                ResetPasswordToken = "-"
             };
 
             await _userContext.Users.AddAsync(user); // Indicamos al entity framework que se realizará una insercción

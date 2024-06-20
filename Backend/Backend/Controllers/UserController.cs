@@ -19,10 +19,11 @@ namespace Backend.Controllers
     [ServiceFilter(typeof(ValidateTokenAttribute))]
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(DBContext userContext) : ControllerBase
+    public class UserController(DBContext userContext, RecipeController recipeController) : ControllerBase
     {
         private readonly DBContext _userContext = userContext; // Contexto de la base de datos
-        
+        private readonly RecipeController _recipeController = recipeController; // Inyección de dependencias del contorlador de recetas para usar sus métodos aquí
+
         // Obtener todos los usuarios de la base de datos
         [HttpGet]
         public async Task<IEnumerable<UserDto>> Get() =>
@@ -38,11 +39,11 @@ namespace Backend.Controllers
             }).ToListAsync();
 
 
-        // Obtener un único usuario a partir de su ID
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetById(int id)
+        // Obtener un único usuario a partir de su Email
+        [HttpGet("{email}")]
+        public async Task<ActionResult<UserDto>> GetByEmail(string email)
         {
-            var user = await _userContext.Users.FindAsync(id);
+            var user = await _userContext.Users.SingleOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
@@ -51,12 +52,9 @@ namespace Backend.Controllers
 
             var userDto = new UserDto
             {
-                ID = user.UserID,
-                Email = user.Email,
                 Name = user.Name,
                 LastNames = user.LastNames,
                 UserName = user.UserName,
-                Password = user.Password,
                 BirthDate = user.BirthDate
             };
 
@@ -64,33 +62,35 @@ namespace Backend.Controllers
         }
 
         // Modificar un usuario
-        [HttpPut("{id}")]
-        public async Task<ActionResult<UserDto>> Update(int id, UserUpdateDto userUpdateDto)
+        [HttpPut("{email}")]
+        public async Task<ActionResult<UserDto>> UpdateUser(string email, UserUpdateDto userUpdateDto)
         {
-            var user = await _userContext.Users.FindAsync(id);
+            var user = await _userContext.Users.SingleOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            user.Email = userUpdateDto.Email;
+            // Comprobar si el nuevo UserName ya existe en la base de datos
+            var userNameExists = await _userContext.Users.AnyAsync(u => u.UserName == userUpdateDto.UserName && u.Email != email);
+            if (userNameExists)
+            {
+                return BadRequest(new { message = "The UserName is already taken.." });
+            }
+
             user.Name = userUpdateDto.Name;
             user.LastNames = userUpdateDto.LastNames;
             user.UserName = userUpdateDto.UserName;
-            user.Password = userUpdateDto.Password;
             user.BirthDate = userUpdateDto.BirthDate;
 
             await _userContext.SaveChangesAsync(); // Guardar datos en la BD (no se añade al entity framework porque ya ha sido cargado previamente mediante FindAsync)
 
             var userDto = new UserDto
             {
-                ID = user.UserID,
-                Email = user.Email,
                 Name = user.Name,
                 LastNames = user.LastNames,
                 UserName = user.UserName,
-                Password = user.Password,
                 BirthDate = user.BirthDate
             };
 
@@ -98,14 +98,25 @@ namespace Backend.Controllers
         }
 
         // Eliminar un usuario
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        [HttpDelete("{email}")]
+        public async Task<ActionResult> DeleteUser(string email)
         {
-            var user = await _userContext.Users.FindAsync(id);
+            var user = await _userContext.Users.SingleOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
                 return NotFound();
+            }
+
+            // Eliminar las recetas del usuario mediante el controlador de recetas (intección de dependencias)
+            var result = await _recipeController.DeleteUserRecipes(email);
+            if (result is NotFoundObjectResult)
+            {
+                return NotFound(new { Message = "User not found or no recipes found." });
+            }
+            else if (result is ObjectResult errorResult && errorResult.StatusCode == 500)
+            {
+                return StatusCode(500, new { Message = "Error deleting user recipes." });
             }
 
             _userContext.Users.Remove(user);
