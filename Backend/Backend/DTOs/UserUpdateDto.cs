@@ -2,9 +2,9 @@
 {
     public class UserUpdateDto
     {
-        public string Name { get; set; }
-        public string LastNames { get; set; }
-        public string UserName { get; set; }
+        public required string Name { get; set; }
+        public required string LastNames { get; set; }
+        public required string UserName { get; set; }
         public DateOnly BirthDate { get; set; }
     }
 }

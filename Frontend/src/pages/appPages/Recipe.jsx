@@ -118,7 +118,7 @@ const Recipe = () => {
                                 </div>
                                 <div className="font-semibold flex flex-col items-center">
                                     <Tag size={25} className="mb-3" />
-                                    <p className="text-xl mb-3">{recipe.tag}</p>
+                                    <p className="text-xl mb-3">{recipe.tagName}</p>
                                 </div>
                                 <div className="font-semibold flex flex-col items-center">
                                     <Heart size={25} className="mb-3" />

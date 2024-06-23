@@ -1,13 +1,15 @@
-import { useState, useRef } from "react";
+import { useState, useEffect ,useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import tableCreateRecipe from "/tableCreateRecipe.png";
 import tableCreateRecipe2 from "/tableCreateRecipe2.png";
+import useRecipeTag from "../../hooks/mainApp/useRecipeTag";
 
 const RecipeBuilder = () => {
     // Llamada de los métodos en el hook de recetas
     const { postRecipeMutation } = useRecipe();
+    const { getAllRecipeTags } = useRecipeTag();
 
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
@@ -32,6 +34,7 @@ const RecipeBuilder = () => {
     };
     const userData = getAuthState();
 
+    const [tags, setTags] = useState([]);
     const [formData, setFormData] = useState({
         title: "",
         preparationTime: "",
@@ -39,11 +42,29 @@ const RecipeBuilder = () => {
         image: null,
         steps: "",
         ingredients: "",
-        tags: "",
+        tags: 0,
         userEmail: userData ? userData.email : null,
     });
 
     const fileInputRef = useRef(null);
+
+    // Pedir al back todos los tags de recetas
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const tagData = await getAllRecipeTags();
+                if (tagData.success) {
+                    setTags(tagData.data);
+                } else {
+                    toast.error("Failed to fetch recipe tags.");
+                }
+            } catch (error) {
+                toast.error("Error fetching tags: " + error.message);
+            }
+        };
+
+        fetchTags();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -122,9 +143,8 @@ const RecipeBuilder = () => {
                 RecipeImage: formData.image,
                 Steps: formData.steps,
                 Ingredients: formData.ingredients,
-                Tag: formData.tags,
+                RecipeTagID: formData.tags,
             };
-            console.log(recipeData);
             postRecipeMutation.mutate(recipeData, {
                 onSuccess: () => {
                     toast.success("Recipe submitted successfully!");
@@ -135,7 +155,7 @@ const RecipeBuilder = () => {
                         image: null,
                         steps: "",
                         ingredients: "",
-                        tags: "",
+                        tags: 0,
                         userEmail: userData ? userData.email : null,
                     });
                 },
@@ -278,10 +298,14 @@ const RecipeBuilder = () => {
                                 className="capitalize text-slate-700 font-bold text-center block w-5/6 mt-2 px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 custom-select"
                             >
                                 <option value="">Select Type of recipe</option>
-                                <option value="vegan">Vegan</option>
-                                <option value="gluten-free">Gluten-free</option>
-                                <option value="low-calorie">Low-calorie</option>
-                                <option value="fast-food">Fast food</option>
+                                {tags.map((tag) => (
+                                    <option
+                                        key={tag.recipeTagID}
+                                        value={tag.recipeTagID}
+                                    >
+                                        {tag.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div className="mt-2 flex flex-col items-center">
@@ -389,7 +413,9 @@ const RecipeBuilder = () => {
                                 className="w-3/5 px-4 p-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-2xl font-semibold"
                                 disabled={postRecipeMutation.isPending}
                             >
-                                {postRecipeMutation.isPending ? "Submitting..." : "Create Recipe"}
+                                {postRecipeMutation.isPending
+                                    ? "Submitting..."
+                                    : "Create Recipe"}
                             </button>
                         </div>
                     </div>

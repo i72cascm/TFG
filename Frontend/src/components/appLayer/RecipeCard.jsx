@@ -3,15 +3,19 @@ import { CircleUserRound, Clock, Users, Heart } from "lucide-react";
 import { formatNumber, truncateText } from "../../utils/auxFunc";
 
 function RecipeCard({ recipe }) {
-
     return (
         <div className="rounded-2xl" style={{ backgroundColor: "#00ADB5" }}>
             <Link to={`/app/recipe/${recipe.id}`}>
-                <img
-                    src={recipe.recipeImage}
-                    alt="Recipe Image"
-                    className="rounded-t-lg w-full h-52 object-cover"
-                />
+                <div className="relative">
+                    <img
+                        src={recipe.recipeImage}
+                        alt="Recipe Image"
+                        className="rounded-t-lg w-full h-52 object-cover"
+                    />
+                    <span className="absolute bottom-0 right-0 py-1 px-2 text-sm font-medium text-gray-900 rounded-l-lg mb-3" style={{ backgroundColor: "#00ADB5" }}>
+                        {recipe.tagName}
+                    </span>
+                </div>
             </Link>
             <div>
                 <h5 className="text-center mt-5 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -25,9 +29,7 @@ function RecipeCard({ recipe }) {
                 </div>
                 <div className="flex flex-col items-center justify-center">
                     <Clock size={20} />
-                    <p className="font-medium">
-                        {recipe.preparationTime} minutes
-                    </p>
+                    <p className="font-medium">{recipe.Tag} minutes</p>
                 </div>
                 <div className="flex flex-col items-center justify-center">
                     <Users size={20} />

@@ -13,30 +13,33 @@ namespace Backend.Modelos
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Required]
-        public string LastNames { get; set; }
+        public required string LastNames { get; set; }
 
         [Required]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
 
         [Required]
-        public string Password { get; set; }
+        public required string Password { get; set; }
 
         public DateOnly BirthDate { get; set; }
 
-        public List<Recipe> Recipes { get; set; }
+        public List<Recipe>? Recipes { get; set; }
 
-        public string Role { get; set; }
+        public required string Role { get; set; }
 
         public Boolean Validate { get; set; }
 
-        public string ValidateToken { get; set; }
+        public required string ValidateToken { get; set; }
 
-        public string ResetPasswordToken { get; set; }
+        public required string ResetPasswordToken { get; set; }
+
+        // Lista de UserTags para gestionar la relación con los tags
+        public List<UserTag>? UserTags { get; set; }
     }
 }

@@ -32,7 +32,10 @@ namespace Backend.Controllers
             try
             {
                 // Obtener todas las recetas
-                var recipes = await _recipeContext.Recipes.Include(r => r.User).ToListAsync();
+                var recipes = await _recipeContext.Recipes
+                    .Include(r => r.User)
+                    .Include(r => r.RecipeTag) 
+                    .ToListAsync();
 
                 var client = new AmazonS3Client();
                 var bucketName = "i72cascm-recipes-web-app";
@@ -62,14 +65,14 @@ namespace Backend.Controllers
                         recipesDto.Add(new RecipeDto
                         {
                             ID = recipe.RecipeID,
-                            UserName = recipe.User.UserName,
+                            UserName = recipe.User?.UserName,
                             Title = recipe.Title,
                             PreparationTime = recipe.PreparationTime,
                             ServingsNumber = recipe.ServingsNumber,
                             RecipeImage = imageDataUrl,
                             Steps = recipe.Steps,
                             Ingredients = recipe.Ingredients,
-                            Tag = recipe.Tag
+                            TagName = recipe.RecipeTag?.Name
                         });
                     }
                 }
@@ -98,6 +101,7 @@ namespace Backend.Controllers
                 var recipes = await _recipeContext.Recipes
                     .Where(r => r.UserID == user.UserID)
                     .Include(r => r.User)
+                    .Include(r => r.RecipeTag) 
                     .ToListAsync();
 
                 var client = new AmazonS3Client();
@@ -135,7 +139,7 @@ namespace Backend.Controllers
                             RecipeImage = imageDataUrl,
                             Steps = recipe.Steps,
                             Ingredients = recipe.Ingredients,
-                            Tag = recipe.Tag
+                            TagName = recipe.RecipeTag?.Name
                         });
                     }
                 }
@@ -156,7 +160,8 @@ namespace Backend.Controllers
             try
             {
                 var recipe = await _recipeContext.Recipes
-                    .Include(r => r.User)  
+                    .Include(r => r.User)
+                    .Include(r => r.RecipeTag)
                     .FirstOrDefaultAsync(r => r.RecipeID == id);
 
                 if (recipe == null)
@@ -188,14 +193,14 @@ namespace Backend.Controllers
                     var recipeDto = new RecipeDto
                     {
                         ID = recipe.RecipeID,
-                        UserName = recipe.User.UserName,
+                        UserName = recipe.User?.UserName,
                         Title = recipe.Title,
                         PreparationTime = recipe.PreparationTime,
                         ServingsNumber = recipe.ServingsNumber,
                         RecipeImage = imageDataUrl,
                         Steps = recipe.Steps,
                         Ingredients = recipe.Ingredients,
-                        Tag = recipe.Tag
+                        TagName = recipe.RecipeTag?.Name
                     };
                     return Ok(recipeDto);
                 }
@@ -254,7 +259,7 @@ namespace Backend.Controllers
                     RecipeImage = imageFileName,
                     Steps = recipeInsertDto.Steps,
                     Ingredients = recipeInsertDto.Ingredients,
-                    Tag = recipeInsertDto.Tag
+                    RecipeTagID = recipeInsertDto.RecipeTagID
                 };
 
                 _recipeContext.Recipes.Add(recipe);
@@ -268,7 +273,7 @@ namespace Backend.Controllers
                     RecipeImage = imageFileName,
                     Steps = recipeInsertDto.Steps,
                     Ingredients = recipeInsertDto.Ingredients,
-                    Tag = recipeInsertDto.Tag
+                    TagName = recipe.RecipeTag?.Name
                 };
 
                 return CreatedAtAction(nameof(GetRecipeById), new { id = recipe.RecipeID }, recipeDto);

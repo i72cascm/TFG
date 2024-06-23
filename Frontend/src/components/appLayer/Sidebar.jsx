@@ -3,7 +3,6 @@ import { createContext, useState } from "react";
 import logo from "/logo.png";
 import { SidebarItem } from "./SidebarItem";
 import {
-    LifeBuoy,
     Apple,
     Home,
     CookingPot,
@@ -120,26 +119,25 @@ export default function Sidebar() {
                                 className="my-3"
                                 style={{ borderTop: "1px solid #000000" }}
                             />
+                            {userData && userData.name && (
+                                <div className="flex items-center justify-center py-2 my-1 font-medium rounded-md h-12 text-gray-600 bg-gradient-to-tr from-gray-700 to-gray-400">
+                                    {expanded ? (
+                                        <p className="text-white">
+                                            {userData.name}
+                                        </p>
+                                    ) : (
+                                        <User size={25} color="white" />
+                                    )}
+                                </div>
+                            )}
                             <SidebarItem
                                 icon={<Settings size={25} />}
                                 text="User Settings"
                                 to="/app/user-settings"
                                 active={isActive("/app/user-settings")}
                             />
-                            <SidebarItem
-                                icon={<LifeBuoy size={25} />}
-                                text="Help"
-                            />
                         </ul>
-                        {userData && userData.name && (
-                            <div className="flex items-center justify-center mx-3 py-2 my-1 font-medium rounded-md h-12 text-gray-600 bg-gradient-to-tr from-gray-700 to-gray-400">
-                                {expanded ? (
-                                    <p className="text-white">{userData.name}</p>
-                                ) : (
-                                    <User size={25} color="white" />
-                                )}
-                            </div>
-                        )}
+
                         <div className="px-3 mb-3">
                             <SidebarItem
                                 icon={<LogOut size={25} />}

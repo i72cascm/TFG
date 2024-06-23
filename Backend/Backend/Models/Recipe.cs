@@ -15,25 +15,29 @@ namespace Backend.Modelos
         [ForeignKey("User")]
         public int UserID { get; set; }
 
-        public string Title { get; set; }
+        [Required]
+        public required string Title { get; set; }
 
+        [Required]
         public int PreparationTime { get; set; }
 
+        [Required]
         public int ServingsNumber { get; set; }
 
         [Required]
-        public string RecipeImage { get; set; }
+        public required string RecipeImage { get; set; }
 
         [Required]
-        public string Steps {  get; set; }
+        public required string Steps {  get; set; }
 
         [Required]
-        public string Ingredients { get; set; }
+        public required string Ingredients { get; set; }
 
-        [Required]
-        public string Tag { get; set; }
+        [ForeignKey("RecipeTag")]
+        public int RecipeTagID { get; set; }
 
-        public User User { get; set; }
+        public User? User { get; set; }
+        public RecipeTag? RecipeTag { get; set; }
 
     }
 }
