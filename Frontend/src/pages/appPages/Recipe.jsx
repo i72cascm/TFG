@@ -53,7 +53,11 @@ const Recipe = () => {
     }, [id]);
 
     if (!recipe) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex justify-center mt-6">
+                <h1 className="text-3xl text-stone-300">Loading recipe... </h1>
+            </div>
+        );
     }
 
     return (
@@ -118,7 +122,9 @@ const Recipe = () => {
                                 </div>
                                 <div className="font-semibold flex flex-col items-center">
                                     <Tag size={25} className="mb-3" />
-                                    <p className="text-xl mb-3">{recipe.tagName}</p>
+                                    <p className="text-xl mb-3">
+                                        {recipe.tagName}
+                                    </p>
                                 </div>
                                 <div className="font-semibold flex flex-col items-center">
                                     <Heart size={25} className="mb-3" />
@@ -170,7 +176,7 @@ const Recipe = () => {
             </div>
 
             {/* Modal para ampliar la imagen de la receta */}
-            <Modal 
+            <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={() => setModalIsOpen(false)}
                 style={customStyles}
