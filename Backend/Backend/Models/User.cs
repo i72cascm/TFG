@@ -41,5 +41,9 @@ namespace Backend.Modelos
 
         // Lista de UserTags para gestionar la relación con los tags
         public List<UserTag>? UserTags { get; set; }
+
+        // Lista de ShoppingList para gestionar la relación con las listas de compra
+        public List<ShoppingList>? ShoppingLists { get; set; }
+
     }
 }

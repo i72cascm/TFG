@@ -145,6 +145,9 @@ const UserSettings = () => {
 
     // Cargar las tags que ya tenia el usuario asignadas en los select
     useEffect(() => {
+        setTag1("");
+        setTag2("");
+        setTag3("");
         if (dataTags && dataTags.success && dataTags.data.length > 0) {
             setTag1(dataTags.data[0].recipeTagID || "");
             setTag2(dataTags.data[1]?.recipeTagID || "");

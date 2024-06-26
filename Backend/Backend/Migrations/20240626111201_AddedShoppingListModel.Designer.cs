@@ -4,6 +4,7 @@ using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20240626111201_AddedShoppingListModel")]
+    partial class AddedShoppingListModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,30 +24,6 @@ namespace Backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Backend.Modelos.ProductLine", b =>
-                {
-                    b.Property<int>("ProductLineID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductLineID"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.Property<float>("Price")
-                        .HasColumnType("real");
-
-                    b.Property<int>("ShoppingListID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductLineID");
-
-                    b.HasIndex("ShoppingListID");
-
-                    b.ToTable("ProductLine");
-                });
 
             modelBuilder.Entity("Backend.Modelos.Recipe", b =>
                 {
@@ -214,17 +193,6 @@ namespace Backend.Migrations
                     b.ToTable("RecipeTags");
                 });
 
-            modelBuilder.Entity("Backend.Modelos.ProductLine", b =>
-                {
-                    b.HasOne("Backend.Modelos.ShoppingList", "ShoppingList")
-                        .WithMany("ProductLines")
-                        .HasForeignKey("ShoppingListID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ShoppingList");
-                });
-
             modelBuilder.Entity("Backend.Modelos.Recipe", b =>
                 {
                     b.HasOne("Backend.Models.RecipeTag", "RecipeTag")
@@ -272,11 +240,6 @@ namespace Backend.Migrations
                     b.Navigation("RecipeTag");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>
-                {
-                    b.Navigation("ProductLines");
                 });
 
             modelBuilder.Entity("Backend.Modelos.User", b =>

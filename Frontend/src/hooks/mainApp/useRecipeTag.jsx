@@ -67,8 +67,6 @@ const useRecipeTag = () => {
 
     const postRecipeTags = async (email ,tags) => {
         try {
-            console.log(tags)
-            console.log(email)
             const response = await fetch(`${urlApi}/api/recipetag/${email}`, {
                 method: "POST",
                 headers: {
