@@ -10,6 +10,6 @@ namespace Backend.Models
         public int RecipeTagID { get; set; }
 
         [Required]
-        public required string Name { get; set; }
+        public required string TagName { get; set; }
     }
 }

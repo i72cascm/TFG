@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20240622102204_RecipeTags")]
-    partial class RecipeTags
+    [Migration("20240627121926_Correciones")]
+    partial class Correciones
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,30 @@ namespace Backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Backend.Modelos.ProductLine", b =>
+                {
+                    b.Property<int>("ProductLineID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductLineID"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
+
+                    b.Property<int>("ShoppingListID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductLineID");
+
+                    b.HasIndex("ShoppingListID");
+
+                    b.ToTable("ProductLines");
+                });
 
             modelBuilder.Entity("Backend.Modelos.Recipe", b =>
                 {
@@ -68,6 +92,31 @@ namespace Backend.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Recipes");
+                });
+
+            modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>
+                {
+                    b.Property<int>("ShoppingListID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShoppingListID"));
+
+                    b.Property<string>("ShoppingListName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Total")
+                        .HasColumnType("real");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ShoppingListID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("ShoppingLists");
                 });
 
             modelBuilder.Entity("Backend.Modelos.User", b =>
@@ -159,13 +208,24 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RecipeTagID"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("TagName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RecipeTagID");
 
                     b.ToTable("RecipeTags");
+                });
+
+            modelBuilder.Entity("Backend.Modelos.ProductLine", b =>
+                {
+                    b.HasOne("Backend.Modelos.ShoppingList", "ShoppingList")
+                        .WithMany("ProductLines")
+                        .HasForeignKey("ShoppingListID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ShoppingList");
                 });
 
             modelBuilder.Entity("Backend.Modelos.Recipe", b =>
@@ -183,6 +243,17 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("RecipeTag");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>
+                {
+                    b.HasOne("Backend.Modelos.User", "User")
+                        .WithMany("ShoppingLists")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -206,9 +277,16 @@ namespace Backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>
+                {
+                    b.Navigation("ProductLines");
+                });
+
             modelBuilder.Entity("Backend.Modelos.User", b =>
                 {
                     b.Navigation("Recipes");
+
+                    b.Navigation("ShoppingLists");
 
                     b.Navigation("UserTags");
                 });

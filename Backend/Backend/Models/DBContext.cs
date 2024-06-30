@@ -12,6 +12,8 @@ namespace Backend.Models
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<RecipeTag> RecipeTags { get; set; }
         public DbSet<UserTag> UserTags { get; set; }
+        public DbSet<ShoppingList> ShoppingLists { get; set; }
+        public DbSet<ProductLine> ProductLines { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,7 +21,7 @@ namespace Backend.Models
 
             // Email debe ser único
             modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email )
+                .HasIndex(u => u.Email)
                 .IsUnique();
 
             // Username debe ser único
@@ -51,6 +53,18 @@ namespace Backend.Models
             modelBuilder.Entity<UserTag>()
                 .HasIndex(ut => new { ut.UserID, ut.RecipeTagID })
                 .IsUnique();
+
+            // Configuración de la relación uno a muchos entre User y ShoppingList
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.ShoppingLists)
+                .WithOne()
+                .HasForeignKey(sl => sl.UserID); ;
+
+            // Configuración de la relación uno a muchos entre ShoppingList y ProductLine
+            modelBuilder.Entity<ShoppingList>()
+                .HasMany(sl => sl.ProductLines) 
+                .WithOne(pl => pl.ShoppingList) 
+                .HasForeignKey(pl => pl.ShoppingListID);
         }
     }
 }

@@ -303,7 +303,7 @@ const RecipeBuilder = () => {
                                         key={tag.recipeTagID}
                                         value={tag.recipeTagID}
                                     >
-                                        {tag.name}
+                                        {tag.tagName}
                                     </option>
                                 ))}
                             </select>

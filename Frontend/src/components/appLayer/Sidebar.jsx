@@ -106,6 +106,8 @@ export default function Sidebar() {
                             <SidebarItem
                                 icon={<Receipt size={25} />}
                                 text="Shopping List"
+                                to="/app/shopping-lists"
+                                active={isActive("/app/shopping-lists")}
                             />
                             <SidebarItem
                                 icon={<LayoutDashboard size={25} />}

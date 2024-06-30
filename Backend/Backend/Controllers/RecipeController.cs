@@ -72,7 +72,7 @@ namespace Backend.Controllers
                             RecipeImage = imageDataUrl,
                             Steps = recipe.Steps,
                             Ingredients = recipe.Ingredients,
-                            TagName = recipe.RecipeTag?.Name
+                            TagName = recipe.RecipeTag?.TagName
                         });
                     }
                 }
@@ -139,7 +139,7 @@ namespace Backend.Controllers
                             RecipeImage = imageDataUrl,
                             Steps = recipe.Steps,
                             Ingredients = recipe.Ingredients,
-                            TagName = recipe.RecipeTag?.Name
+                            TagName = recipe.RecipeTag?.TagName
                         });
                     }
                 }
@@ -200,7 +200,7 @@ namespace Backend.Controllers
                         RecipeImage = imageDataUrl,
                         Steps = recipe.Steps,
                         Ingredients = recipe.Ingredients,
-                        TagName = recipe.RecipeTag?.Name
+                        TagName = recipe.RecipeTag?.TagName
                     };
                     return Ok(recipeDto);
                 }
@@ -273,7 +273,7 @@ namespace Backend.Controllers
                     RecipeImage = imageFileName,
                     Steps = recipeInsertDto.Steps,
                     Ingredients = recipeInsertDto.Ingredients,
-                    TagName = recipe.RecipeTag?.Name
+                    TagName = recipe.RecipeTag?.TagName
                 };
 
                 return CreatedAtAction(nameof(GetRecipeById), new { id = recipe.RecipeID }, recipeDto);

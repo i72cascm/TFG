@@ -32,7 +32,7 @@ namespace Backend.Controllers
             await _recipeTagContext.RecipeTags.Select(b => new RecipeTag
             {
                 RecipeTagID = b.RecipeTagID,
-                Name = b.Name,
+                TagName = b.TagName,
             }).ToListAsync();
 
         // Obtener tags de un usuario por email
@@ -45,7 +45,7 @@ namespace Backend.Controllers
 
             if (user == null)
             {
-                return NotFound("Usuario no encontrado.");
+                return NotFound("User not found.");
             }
 
             // Obtener los tags del usuario
@@ -77,7 +77,7 @@ namespace Backend.Controllers
 
             if (user == null)
             {
-                return NotFound("Usuario no encontrado.");
+                return NotFound("User not found.");
             }
 
             // Borrar todos los UserTags existentes asociados a este usuario

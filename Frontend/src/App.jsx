@@ -1,22 +1,24 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import AuthLayout from './layouts/AuthLayout'
-import AppLayout from './layouts/AppLayout'
-import AuthOutlet from '@auth-kit/react-router/AuthOutlet'
+import AuthLayout from './layouts/AuthLayout';
+import AppLayout from './layouts/AppLayout';
+import AuthOutlet from '@auth-kit/react-router/AuthOutlet';
 
-import Login from './pages/userPages/Login'
-import SignUp from './pages/userPages/SignUp'
-import ForgetPassword from './pages/userPages/ForgetPassword'
-import NewPassword from './pages/userPages/NewPassword'
-import AccountValidation from './pages/userPages/AccountValidation'
-import Home from './pages/appPages/Home'
-import RecipeBuilder from './pages/appPages/RecipeBuilder'
-import MyRecipes from './pages/appPages/MyRecipes'
-import Recipe from './pages/appPages/Recipe'
-import UserSettings from './pages/appPages/UserSettings'
+import Login from './pages/userPages/Login';
+import SignUp from './pages/userPages/SignUp';
+import ForgetPassword from './pages/userPages/ForgetPassword';
+import NewPassword from './pages/userPages/NewPassword';
+import AccountValidation from './pages/userPages/AccountValidation';
+import Home from './pages/appPages/Home';
+import RecipeBuilder from './pages/appPages/RecipeBuilder';
+import MyRecipes from './pages/appPages/MyRecipes';
+import Recipe from './pages/appPages/Recipe';
+import UserSettings from './pages/appPages/UserSettings';
+import ShoppingLists from './pages/appPages/ShoppingLists';
 
 import AuthProvider from 'react-auth-kit';
 import { store } from './utils/store';
+
 
 
 function App() {
@@ -39,6 +41,7 @@ function App() {
 							<Route path='/app/my-recipes' element = {<MyRecipes/>}/>
 							<Route path='/app/recipe/:id' element={<Recipe/>} />
 							<Route path='/app/user-settings' element={<UserSettings/>}/>
+							<Route path='/app/shopping-lists' element={<ShoppingLists/>}/>
 						</Route>
 					</Route>
 				</Routes>

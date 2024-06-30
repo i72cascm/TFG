@@ -43,7 +43,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("ShoppingListID");
 
-                    b.ToTable("ProductLine");
+                    b.ToTable("ProductLines", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.Recipe", b =>
@@ -88,7 +88,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Recipes");
+                    b.ToTable("Recipes", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>
@@ -99,7 +99,7 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShoppingListID"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ShoppingListName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -113,7 +113,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ShoppingList");
+                    b.ToTable("ShoppingLists", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.User", b =>
@@ -170,7 +170,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.UserTag", b =>
@@ -194,7 +194,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserID", "RecipeTagID")
                         .IsUnique();
 
-                    b.ToTable("UserTags");
+                    b.ToTable("UserTags", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.RecipeTag", b =>
@@ -205,13 +205,13 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RecipeTagID"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("TagName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RecipeTagID");
 
-                    b.ToTable("RecipeTags");
+                    b.ToTable("RecipeTags", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.ProductLine", b =>

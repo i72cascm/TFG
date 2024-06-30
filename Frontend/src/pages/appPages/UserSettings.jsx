@@ -21,6 +21,9 @@ const customStyles = {
         transform: "translate(-50%, -50%)",
         padding: "0%",
     },
+    overlay: {
+        backgroundColor: "rgba(0, 0, 0, 0.60)",
+    },
 };
 
 Modal.setAppElement("#root");
@@ -74,7 +77,8 @@ const UserSettings = () => {
         useUserSettings();
     const { requestResetPassword } = useForgetPassword();
     const { deleteAllRecipesByUserMutation } = useRecipe();
-    const { getAllRecipeTags, getRecipesByUser, postRecipeTagsMutation } = useRecipeTag();
+    const { getAllRecipeTags, getRecipesByUser, postRecipeTagsMutation } =
+        useRecipeTag();
 
     // Al renderizar esta página, llamar al método de obtención de datos del usuario
     const { data, isLoading: loadUser } = useQuery({
@@ -90,7 +94,6 @@ const UserSettings = () => {
         keepPreviousData: true,
         enabled: !!userData?.email,
     });
-
 
     const [formData, setFormData] = useState({
         name: "",
@@ -323,7 +326,9 @@ const UserSettings = () => {
     if (loadUser || loadTags) {
         return (
             <div className="flex justify-center mt-6">
-                <h1 className="text-3xl text-stone-300">Loading user settings... </h1>
+                <h1 className="text-3xl text-stone-300">
+                    Loading user settings...{" "}
+                </h1>
             </div>
         );
     }
@@ -500,7 +505,7 @@ const UserSettings = () => {
                                         key={tag.recipeTagID}
                                         value={tag.recipeTagID}
                                     >
-                                        {tag.name}
+                                        {tag.tagName}
                                     </option>
                                 ))}
                             </select>
@@ -518,7 +523,7 @@ const UserSettings = () => {
                                         key={tag.recipeTagID}
                                         value={tag.recipeTagID}
                                     >
-                                        {tag.name}
+                                        {tag.tagName}
                                     </option>
                                 ))}
                             </select>
@@ -536,7 +541,7 @@ const UserSettings = () => {
                                         key={tag.recipeTagID}
                                         value={tag.recipeTagID}
                                     >
-                                        {tag.name}
+                                        {tag.tagName}
                                     </option>
                                 ))}
                             </select>

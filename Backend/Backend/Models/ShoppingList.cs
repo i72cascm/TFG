@@ -14,11 +14,9 @@ namespace Backend.Modelos
         public int UserID { get; set; }
 
         [Required]
-        public required string Name { get; set; }
+        public required string ShoppingListName { get; set; }
 
         public float Total { get; set; }
-
-        public User? User { get; set; }
 
         // Lista de ProductLine para gestionar la relación con las líneas de producto
         public List<ProductLine>? ProductLines { get; set; }
