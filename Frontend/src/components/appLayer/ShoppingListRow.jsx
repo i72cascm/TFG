@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 // Ajusta para recibir y usar correctamente el objeto `list`:
-const ShoppingListRow = ({ isActive, onClick, index, list }) => {
+const ShoppingListRow = ({ isActive, onClick, list }) => {
     const activeColor = "#00ADB5";
     const defaultColor = "rgba(69, 182, 167, 0.534)";
     const hoverColor = "rgba(75, 192, 176, 0.623)";
@@ -22,7 +22,7 @@ const ShoppingListRow = ({ isActive, onClick, index, list }) => {
             }}
             onMouseEnter={() => setBgColor(hoverColor)}
             onMouseLeave={() => setBgColor(isActive ? activeColor : defaultColor)}
-            onMouseDown={() => onClick(index)}
+            onMouseDown={() => onClick(list)}
         >
             <h1 className="text-xl font-semibold">{list.shoppingListName}</h1>
         </button>

@@ -14,11 +14,12 @@ namespace Backend.Modelos
         public int ShoppingListID { get; set; }
 
         [Required]
+        public required string ProductName { get; set; }
+
+        [Required]
         public int Amount { get; set; }
 
         [Required]
         public float Price { get; set; }
-
-        public ShoppingList? ShoppingList { get; set; }
     }
 }

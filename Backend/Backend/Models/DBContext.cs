@@ -58,13 +58,16 @@ namespace Backend.Models
             modelBuilder.Entity<User>()
                 .HasMany(u => u.ShoppingLists)
                 .WithOne()
-                .HasForeignKey(sl => sl.UserID); ;
+                .HasForeignKey(sl => sl.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             // Configuración de la relación uno a muchos entre ShoppingList y ProductLine
             modelBuilder.Entity<ShoppingList>()
                 .HasMany(sl => sl.ProductLines) 
-                .WithOne(pl => pl.ShoppingList) 
-                .HasForeignKey(pl => pl.ShoppingListID);
+                .WithOne() 
+                .HasForeignKey(pl => pl.ShoppingListID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
