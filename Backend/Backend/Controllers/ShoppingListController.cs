@@ -128,5 +128,69 @@ namespace Backend.Controllers
             return Ok(productLines);
         }
 
+        [HttpPost("productLines/{shoppingListID}")]
+        public async Task<ActionResult<ProductLine>> AddProductLine(int shoppingListID, [FromBody] ProductLineInsertDto productLineDto)
+        {
+            // Encuentra la lista de compras a la que pertenecerá la nueva línea
+            var shoppingList = await _shoppingListContext.ShoppingLists
+                .FirstOrDefaultAsync(sl => sl.ShoppingListID == shoppingListID);
+
+            if (shoppingList == null)
+            {
+                return NotFound(new { Message = "Shopping list not found." });
+            }
+
+            // Crea la nueva línea de producto
+            var newProductLine = new ProductLine
+            {
+                ShoppingListID = shoppingListID,
+                ProductName = productLineDto.ProductName,
+                Amount = productLineDto.Amount,
+                Price = productLineDto.Price
+            };
+
+            _shoppingListContext.ProductLines.Add(newProductLine);
+            await _shoppingListContext.SaveChangesAsync();
+
+            return Ok(newProductLine);
+        }
+
+        [HttpPut("productLines/{productLineID}")]
+        public async Task<ActionResult<ProductLine>> UpdateProductLine(int productLineID, [FromBody] ProductLineInsertDto productLineDto)
+        {
+            var productLine = await _shoppingListContext.ProductLines
+                .FirstOrDefaultAsync(pl => pl.ProductLineID == productLineID);
+
+            if (productLine == null)
+            {
+                return NotFound(new { Message = "Product line not found." });
+            }
+
+            productLine.ProductName = productLineDto.ProductName;
+            productLine.Amount = productLineDto.Amount;
+            productLine.Price = productLineDto.Price;
+
+            await _shoppingListContext.SaveChangesAsync();
+
+            return Ok(productLine);
+        }
+
+        [HttpDelete("productLines/{productLineID}")]
+        public async Task<IActionResult> DeleteProductLine(int productLineID)
+        {
+            var productLine = await _shoppingListContext.ProductLines
+                .FirstOrDefaultAsync(pl => pl.ProductLineID == productLineID);
+
+            if (productLine == null)
+            {
+                return NotFound(new { Message = "Product line not found." });
+            }
+
+            _shoppingListContext.ProductLines.Remove(productLine);
+            await _shoppingListContext.SaveChangesAsync();
+
+            return Ok(new { Message = "Product line deleted successfully." });
+        }
+
     }
 }

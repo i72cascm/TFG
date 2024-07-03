@@ -140,7 +140,7 @@ const ShoppingLists = () => {
                         <span style={{ color: "#00ADB5" }}>shopping lists</span>
                     </h1>
                 </div>
-                <div className="grid grid-cols-[4fr,1fr] h-[85vh] gap-4 mx-4">
+                <div className="grid grid-cols-[4fr,1fr] gap-4 mx-4">
                     <div className="mb-4 p-4 rounded-xl border-slate-700 bg-slate-700">
                         {activeList ? (
                             <ShoppingListDetails list={activeList} />
@@ -191,13 +191,13 @@ const ShoppingLists = () => {
                                     <div className="flex gap-10">
                                         <button
                                             onClick={closeModalNewList}
-                                            className="btn btn-secondary font-semibold bg-red-500 hover:bg-red-600 p-2 rounded-xl"
+                                            className="text-white btn btn-secondary font-semibold bg-red-500 hover:bg-red-600 p-2 rounded-xl"
                                         >
                                             Close
                                         </button>
                                         <button
                                             onClick={handleNewList}
-                                            className="btn btn-primary font-semibold bg-blue-500 hover:bg-blue-600 py-2 px-3 rounded-xl"
+                                            className="text-white btn btn-primary font-semibold bg-blue-500 hover:bg-blue-600 py-2 px-3 rounded-xl"
                                         >
                                             Save
                                         </button>

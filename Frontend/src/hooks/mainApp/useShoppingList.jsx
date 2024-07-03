@@ -136,7 +136,105 @@ const useShoppingList = () => {
         }
     }
 
-    return { getShoppingListsByUser, getProductLinesById, postNewListMutation, deleteListMutation };
+    const postProductLine = async (id) => {
+        try {
+            const response = await fetch(`${urlApi}/api/shoppinglist/productLines/${id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": userToken
+                },
+                body: JSON.stringify({ ProductName: "-", Amount: 0, Price: 0 })
+            });
+    
+            if (response.status === 200) {
+                return { success: true };
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error adding new product line");
+            }
+        } catch (error) {
+            console.error("Error adding new product line:", error);
+            throw new Error(error.message);
+        }
+    };
+
+    const postProductLineMutation = useMutation({
+        mutationFn: postProductLine,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['product-lines']
+            });
+        }
+    })
+
+    const putProductLine = async (data) => {
+        try {
+            const productLineID = data.productLineID;
+            const productData = data.updatedProduct
+            const response = await fetch(`${urlApi}/api/shoppinglist/productLines/${productLineID}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": userToken
+                },
+                body: JSON.stringify(productData)
+            });
+    
+            if (response.status === 200) {
+                return { success: true };
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error updating product line");
+            }
+        } catch (error) {
+            console.error("Error updating product line:", error);
+            throw new Error(error.message);
+        }
+    };
+
+    const putProductLineMutation = useMutation({
+        mutationFn: putProductLine,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['product-lines']
+            });
+        }
+    })
+
+    const deleteProductLine  = async (id) => {
+        try {
+            const response = await fetch(`${urlApi}/api/shoppinglist/productLines/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": userToken
+                }
+            });
+    
+            if (response.status === 200) {
+                return { success: true };
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error deleting product line");
+            }
+        } catch (error) {
+            console.error("Error deleting product line:", error);
+            throw new Error(error.message);
+        }
+    };
+
+    const deleteProductLineMutation = useMutation({
+        mutationFn: deleteProductLine ,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['product-lines']
+            });
+        }
+    })
+
+
+    return { getShoppingListsByUser, getProductLinesById, postNewListMutation, deleteListMutation, postProductLineMutation, putProductLineMutation, deleteProductLineMutation };
 }
 
 export default useShoppingList

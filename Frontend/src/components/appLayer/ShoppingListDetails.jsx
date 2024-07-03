@@ -3,6 +3,7 @@ import useShoppingList from "../../hooks/mainApp/useShoppingList";
 import { useQuery } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
 import Modal from "react-modal";
+import { useNavigate } from "react-router-dom";
 
 // Estilos del modal
 const customStyles = {
@@ -26,9 +27,17 @@ const ShoppingListDetails = ({ list }) => {
     // Conjunto de líneas de producto en esta lista
     const [products, setProducts] = useState([]); // Conjunto de listas del usuario
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [total, setTotal] = useState("0.00€");
+    const navigate = useNavigate();
 
     // Hooks
-    const { getProductLinesById, deleteListMutation } = useShoppingList();
+    const {
+        getProductLinesById,
+        deleteListMutation,
+        postProductLineMutation,
+        putProductLineMutation,
+        deleteProductLineMutation,
+    } = useShoppingList();
 
     // Al renderizar el componente, llamar al método de obtención de líneas de producto
     const { data: listProductLines, isLoading: loadProductLines } = useQuery({
@@ -53,7 +62,25 @@ const ShoppingListDetails = ({ list }) => {
         }
     }, [listProductLines]);
 
-    //
+    // Calcular el total cada vez que los productos cambien
+    useEffect(() => {
+        calculateTotal(); 
+    }, [products]);
+
+    // Calculo del total
+    const calculateTotal = () => {
+        const totalSum = products.reduce((acc, product) => {
+            const price = parseFloat(product.price.replace("€", ""));
+            const amount = parseInt(product.amount, 10);
+            if (amount > 0 && price > 0) {
+                return acc + (price * amount);
+            }
+            return acc;
+        }, 0);
+        setTotal(totalSum.toFixed(2) + "€");
+    };
+
+    // Formatear precio
     const formatPrice = (price) => {
         let formattedPrice = price.toString().replace(",", ".");
         const numericValue = parseFloat(formattedPrice);
@@ -72,6 +99,14 @@ const ShoppingListDetails = ({ list }) => {
         const numericValue = parseFloat(formattedValue);
         formattedValue = isNaN(numericValue) ? "0.00" : numericValue.toFixed(2); // Usar "0.00" si no es un número
         updateProduct(productLineID, "price", formattedValue + "€");
+        handleUpdateProductLine(productLineID);
+    };
+
+    // Al perder el focus del nombre, poner "-" si queda vacío
+    const handleNameFormat = (productLineID, value) => {
+        const finalValue = value.trim() === "" ? "-" : value;
+        updateProduct(productLineID, "productName", finalValue);
+        handleUpdateProductLine(productLineID);
     };
 
     // Comprueba que el cambio es válido
@@ -115,7 +150,7 @@ const ShoppingListDetails = ({ list }) => {
     const handleDeleteList = (id) => {
         deleteListMutation.mutate(id, {
             onSuccess: () => {
-                toast.success("Deleted list!");
+                navigate(0);
             },
             onError: (error) => {
                 toast.error(`Failed to delete list: ${error.message}`);
@@ -131,6 +166,65 @@ const ShoppingListDetails = ({ list }) => {
     // Función para cerrar el modal
     const closeModal = () => {
         setModalIsOpen(false);
+    };
+
+    // Función para agregar un nuevo producto
+    const addNewProduct = (id) => {
+        postProductLineMutation.mutate(id, {
+            onError: (error) => {
+                toast.error(
+                    `Failed to create new product line: ${error.message}`
+                );
+            },
+        });
+    };
+
+    // Función para actualizar los valores de una línea ya existente
+    const handleUpdateProductLine = (productLineID) => {
+        const productToUpdate = products.find(
+            (p) => p.productLineID === productLineID
+        );
+        if (productToUpdate) {
+            const productName =
+                productToUpdate.productName.trim() === ""
+                    ? "-"
+                    : productToUpdate.productName; // Necesario para que no de error el back al mandar una cadena vacia
+            putProductLineMutation.mutate(
+                {
+                    productLineID: productLineID,
+                    updatedProduct: {
+                        ProductName: productName,
+                        Amount: productToUpdate.amount,
+                        Price: parseFloat(
+                            productToUpdate.price.replace("€", "").trim()
+                        ),
+                    },
+                },
+                {
+                    onError: (error) => {
+                        toast.error(
+                            `Failed to update product line: ${error.message}`
+                        );
+                    },
+                }
+            );
+        }
+    };
+
+    // Función para eliminar una línea
+    const handleDeleteProductLine = (productLineID) => {
+        deleteProductLineMutation.mutate(productLineID, {
+            onSuccess: () => {
+                setProducts(
+                    products.filter(
+                        (product) => product.productLineID !== productLineID
+                    )
+                );
+            },
+            onError: (error) => {
+                toast.error(`Failed to delete product line: ${error.message}`);
+            },
+        });
     };
 
     // Mensaje de cargando datos de listas
@@ -153,7 +247,7 @@ const ShoppingListDetails = ({ list }) => {
                 {list.shoppingListName}
             </h1>
             <div
-                className="grid grid-cols-5 text-3xl font-semibold mt-4 mb-1 place-items-center text-white border-b-4 border-white pb-2"
+                className="grid grid-cols-6 text-3xl font-semibold mt-4 mb-1 place-items-center text-white border-b-4 border-white pb-2"
                 style={{ letterSpacing: "0.5px" }}
             >
                 <label className="col-span-3">Product</label>
@@ -164,7 +258,7 @@ const ShoppingListDetails = ({ list }) => {
                 {products.map((product, index) => (
                     <div
                         key={product.productLineID}
-                        className={`grid grid-cols-5 text-xl text-white mb-1 place-items-center ${
+                        className={`grid grid-cols-6 text-xl text-white mb-1 place-items-center ${
                             index !== products.length - 1
                                 ? "border-b border-white"
                                 : ""
@@ -181,6 +275,12 @@ const ShoppingListDetails = ({ list }) => {
                                     e.target.value
                                 )
                             }
+                            onBlur={(e) =>
+                                handleNameFormat(
+                                    product.productLineID,
+                                    e.target.value
+                                )
+                            }
                         />
                         <input
                             type="text"
@@ -192,6 +292,9 @@ const ShoppingListDetails = ({ list }) => {
                                     "amount",
                                     e.target.value
                                 )
+                            }
+                            onBlur={() =>
+                                handleUpdateProductLine(product.productLineID)
                             }
                         />
                         <input
@@ -212,18 +315,31 @@ const ShoppingListDetails = ({ list }) => {
                                 )
                             }
                         />
+                        <button
+                            onClick={() =>
+                                handleDeleteProductLine(product.productLineID)
+                            }
+                            className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded-full text-sm mb-1"
+                        >
+                            Delete
+                        </button>
                     </div>
                 ))}
             </div>
             <div>
                 <div className="flex items-center mb-5 justify-between px-14">
                     <span className="font-semibold text-white text-4xl">
-                        Total: 00.00€
+                        Total: {total}
                     </span>
 
-                    <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded text-2xl">
-                        Save List
-                    </button>
+                    <div>
+                        <button
+                            onClick={() => addNewProduct(list.shoppingListID)}
+                            className="mr-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded text-2xl"
+                        >
+                            Add New Product
+                        </button>
+                    </div>
 
                     <button
                         onClick={openModal}
