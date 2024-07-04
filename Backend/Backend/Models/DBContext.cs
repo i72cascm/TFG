@@ -14,6 +14,7 @@ namespace Backend.Models
         public DbSet<UserTag> UserTags { get; set; }
         public DbSet<ShoppingList> ShoppingLists { get; set; }
         public DbSet<ProductLine> ProductLines { get; set; }
+        public DbSet<RecipeLike> RecipeLikes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,6 +69,27 @@ namespace Backend.Models
                 .WithOne() 
                 .HasForeignKey(pl => pl.ShoppingListID)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configuración de la relación muchos-a-muchos para RecipeLikes sin eliminación en cascada
+            modelBuilder.Entity<RecipeLike>()
+                .HasKey(rl => new { rl.UserID, rl.RecipeID });  // Clave primaria compuesta
+
+            modelBuilder.Entity<RecipeLike>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(rl => rl.UserID)
+                .OnDelete(DeleteBehavior.Restrict);  // Cambio a Restrict para evitar problemas de cascada
+
+            modelBuilder.Entity<RecipeLike>()
+                .HasOne<Recipe>()
+                .WithMany()
+                .HasForeignKey(rl => rl.RecipeID)
+                .OnDelete(DeleteBehavior.Restrict);  // Cambio a Restrict para evitar problemas de cascada
+
+            // Añadir índice único para prevenir likes duplicados
+            modelBuilder.Entity<RecipeLike>()
+                .HasIndex(rl => new { rl.UserID, rl.RecipeID })
+                .IsUnique();
         }
     }
 }

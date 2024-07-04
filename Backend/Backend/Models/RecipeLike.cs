@@ -4,19 +4,17 @@ using Backend.Models;
 
 namespace Backend.Modelos
 {
-    public class ShoppingList
+    public class RecipeLike
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ShoppingListID { get; set; }
+        public int RecipeLikeID { get; set; }
 
         [ForeignKey("User")]
         public int UserID { get; set; }
 
-        [Required]
-        public required string ShoppingListName { get; set; }
+        [ForeignKey("Recipe")]
+        public int RecipeID { get; set; }
 
-        // Lista de ProductLine para gestionar la relación con las líneas de producto
-        public List<ProductLine>? ProductLines { get; set; }
     }
 }

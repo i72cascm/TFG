@@ -42,8 +42,7 @@ namespace Backend.Controllers
                                .Select(sl => new ShoppingListDto
                                {
                                    ShoppingListID = sl.ShoppingListID,
-                                   ShoppingListName = sl.ShoppingListName,
-                                   Total = sl.Total
+                                   ShoppingListName = sl.ShoppingListName
                                })
                                .ToListAsync();
 
@@ -74,7 +73,6 @@ namespace Backend.Controllers
             {
                 UserID = user.UserID,
                 ShoppingListName = request.NameList,
-                Total = 0,
                 ProductLines = new List<ProductLine>() // Inicializar la lista de líneas de producto
             };
 

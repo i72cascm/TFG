@@ -4,6 +4,7 @@ using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20240704151959_removeTotal")]
+    partial class removeTotal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,30 +96,6 @@ namespace Backend.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Recipes");
-                });
-
-            modelBuilder.Entity("Backend.Modelos.RecipeLike", b =>
-                {
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RecipeID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RecipeLikeID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RecipeLikeID"));
-
-                    b.HasKey("UserID", "RecipeID");
-
-                    b.HasIndex("RecipeID");
-
-                    b.HasIndex("UserID", "RecipeID")
-                        .IsUnique();
-
-                    b.ToTable("RecipeLikes");
                 });
 
             modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>
@@ -265,21 +244,6 @@ namespace Backend.Migrations
                     b.Navigation("RecipeTag");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Backend.Modelos.RecipeLike", b =>
-                {
-                    b.HasOne("Backend.Modelos.Recipe", null)
-                        .WithMany()
-                        .HasForeignKey("RecipeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Modelos.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>

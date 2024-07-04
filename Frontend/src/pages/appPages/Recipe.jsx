@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useRecipe from "../../hooks/mainApp/useRecipe";
+import useLike from "../../hooks/mainApp/useLike";
 import fondoPizarra from "/fondoPizarra.png";
 import fondoPizarraMirror from "/fondoPizarraMirror.png";
 import Modal from "react-modal";
@@ -34,9 +35,13 @@ const customStyles = {
 
 const Recipe = () => {
     const { id } = useParams();
-    const { getRecipeById } = useRecipe();
     const [recipe, setRecipe] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+
+    // Hooks
+    const { getRecipeById } = useRecipe();
+    const { postLikeMutation, deleteLikeMutation } = useLike();
 
     // Al renderizar la vista, realizar la búsqueda de la receta por su ID
     useEffect(() => {
@@ -51,6 +56,33 @@ const Recipe = () => {
 
         loadRecipe();
     }, [id]);
+
+    // Alternar entre dar like y quitarlo
+    const handleIsLiked = () => {
+        if (isLiked === false){
+            postLikeMutation.mutate({
+                userName: recipe.userName, recipeId: recipe.id 
+            }, {
+                onError: (error) => {
+                    toast.error(
+                        `Failed to give like: ${error.message}`
+                    );
+                },
+            });
+            setIsLiked(true);
+        } else {
+            deleteLikeMutation.mutate({
+                userName: recipe.userName, recipeId: recipe.id 
+            }, {
+                onError: (error) => {
+                    toast.error(
+                        `Failed to remove like: ${error.message}`
+                    );
+                },
+            });
+            setIsLiked(false);
+        }
+    }
 
     if (!recipe) {
         return (
@@ -127,7 +159,9 @@ const Recipe = () => {
                                     </p>
                                 </div>
                                 <div className="font-semibold flex flex-col items-center">
-                                    <Heart size={25} className="mb-3" />
+                                    <button onClick={handleIsLiked}>
+                                        {isLiked ? (<Heart size={25} color="red" fill="red"  className="mb-3" />) : (<Heart size={25} className="mb-3" />)}
+                                    </button>
                                     <p className="text-xl mb-3">Hearts</p>
                                 </div>
                             </div>
