@@ -6,7 +6,29 @@ import RecipeCard from "../../components/appLayer/RecipeCard";
 const Home = () => {
     // Llamada de los métodos en el hook de recetas
     const { getAllRecipes } = useRecipe();
+    
+    const getAuthState = () => {
+        // Obtener el valor de la cookie por su nombre
+        const cookieValue = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("_auth_state="))
+            ?.split("=")[1];
 
+        if (!cookieValue) {
+            return null;
+        }
+
+        // Decodificar el valor URL-encoded de la cookie y parsearlo como JSON
+        try {
+            const decodedValue = decodeURIComponent(cookieValue);
+            const authState = JSON.parse(decodedValue);
+            return authState;
+        } catch (error) {
+            console.error("Error parsing auth state:", error);
+            return null;
+        }
+    };
+    const userData = getAuthState();
     // Al renderizar esta página, llamar al método de obtención de recetas y guardarlas en el array de listas
     const {
         data: recipeList,
@@ -14,10 +36,9 @@ const Home = () => {
         isLoading,
         isError,
     } = useQuery({
-        queryKey: ["recipes"],
+        queryKey: ["recipes", userData?.email],
         queryFn: getAllRecipes,
         select: (data) => data?.data || [], // Accede a la propiedad 'data' del objeto y utiliza un array vacío como valor por defecto
-        keepPreviousData: true,
     });
 
     const handleSearchSubmit = () => {

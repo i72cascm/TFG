@@ -1,8 +1,19 @@
 import { Link } from "react-router-dom";
 import { CircleUserRound, Clock, Users, Heart } from "lucide-react";
 import { formatNumber, truncateText } from "../../utils/auxFunc";
+import { useQuery } from "@tanstack/react-query";
+import useLike from "../../hooks/mainApp/useLike";
 
 function RecipeCard({ recipe }) {
+
+    const { getTotalLikes } = useLike();
+
+    const { data: totalLikes} = useQuery({
+        queryKey: ["recipe-likes", recipe?.id],
+        queryFn: () => getTotalLikes(recipe?.id),
+        enabled: !!recipe, // Solo ejecutar la consulta cuando recipe está disponible
+    });
+
     return (
         <div className="rounded-2xl" style={{ backgroundColor: "#00ADB5" }}>
             <Link to={`/app/recipe/${recipe.id}`}>
@@ -29,7 +40,7 @@ function RecipeCard({ recipe }) {
                 </div>
                 <div className="flex flex-col items-center justify-center">
                     <Clock size={20} />
-                    <p className="font-medium">{recipe.Tag} minutes</p>
+                    <p className="font-medium">{recipe.preparationTime} minutes</p>
                 </div>
                 <div className="flex flex-col items-center justify-center">
                     <Users size={20} />
@@ -40,7 +51,7 @@ function RecipeCard({ recipe }) {
                 <div className="flex flex-col items-center justify-center">
                     <Heart size={20} />
                     <p className="font-medium">
-                        {formatNumber(999999999)} Likes
+                        {formatNumber(totalLikes)} Likes
                     </p>
                 </div>
             </div>

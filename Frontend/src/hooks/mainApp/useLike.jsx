@@ -18,10 +18,58 @@ const useLike = () => {
     };
     const userToken = getAuthState();
     
-    const postLike = async (data) => {
+    const getLikeStatus = async (data) => {
         try {
             const userName = data.userName;
             const recipeId = data.recipeId
+            const response = await fetch(`${urlApi}/api/like/${userName}?recipeId=${recipeId}`, {
+                method: 'GET',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": userToken
+                },
+            });
+    
+            if (response.status === 200) {
+                const data = await response.json();
+                return(data.hasLiked);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error getting like status");
+            }
+        } catch (error) {
+            console.error("Error getting like status:", error);
+            throw new Error(error.message);
+        }
+    }
+
+    const getTotalLikes = async (recipeId) => {
+        try {
+            const response = await fetch(`${urlApi}/api/like/TotalLikes?recipeId=${recipeId}`, {
+                method: 'GET',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": userToken
+                },
+            });
+    
+            if (response.status === 200) {
+                const data = await response.json();
+                return(data.totalLikes);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error fetching total likes");
+            }
+        } catch (error) {
+            console.error("Error fetching total likes:", error);
+            throw new Error(error.message);
+        }
+    }
+
+    const postLike = async (data) => {
+        try {
+            const userName = data.userName;
+            const recipeId = data.recipeId;
             const response = await fetch(`${urlApi}/api/like/${userName}?recipeId=${recipeId}`, {
                 method: "POST",
                 headers: {
@@ -85,7 +133,7 @@ const useLike = () => {
     })
 
 
-    return { postLikeMutation, deleteLikeMutation };
+    return { getTotalLikes, getLikeStatus, postLikeMutation, deleteLikeMutation };
 }
 
 export default useLike

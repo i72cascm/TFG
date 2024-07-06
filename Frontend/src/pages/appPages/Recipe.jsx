@@ -5,6 +5,7 @@ import useLike from "../../hooks/mainApp/useLike";
 import fondoPizarra from "/fondoPizarra.png";
 import fondoPizarraMirror from "/fondoPizarraMirror.png";
 import Modal from "react-modal";
+import { useQuery } from "@tanstack/react-query";
 import {
     CircleUserRound,
     Clock,
@@ -34,14 +35,52 @@ const customStyles = {
 };
 
 const Recipe = () => {
+
+    const getAuthState = () => {
+        // Obtener el valor de la cookie por su nombre
+        const cookieValue = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("_auth_state="))
+            ?.split("=")[1];
+
+        if (!cookieValue) {
+            return null;
+        }
+
+        // Decodificar el valor URL-encoded de la cookie y parsearlo como JSON
+        try {
+            const decodedValue = decodeURIComponent(cookieValue);
+            const authState = JSON.parse(decodedValue);
+            return authState;
+        } catch (error) {
+            console.error("Error parsing auth state:", error);
+            return null;
+        }
+    };
+    const userData = getAuthState();
+
     const { id } = useParams();
     const [recipe, setRecipe] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
 
     // Hooks
     const { getRecipeById } = useRecipe();
-    const { postLikeMutation, deleteLikeMutation } = useLike();
+    const { getTotalLikes, getLikeStatus ,postLikeMutation, deleteLikeMutation } = useLike();
+
+    // Al renderizar el componente, llamar al método de obtención de like status
+    const { data: likeStatus, isLoading: loadLike } = useQuery({
+        queryKey: ["recipe-likes", id],
+        queryFn: () => getLikeStatus({userName: userData.name, recipeId: recipe.id}),
+        options: {
+            keepPreviousData: true
+        },
+    });
+
+    const { data: totalLikes, isLoading: loadTotalLike } = useQuery({
+        queryKey: ["recipe-likes", recipe?.id],
+        queryFn: () => getTotalLikes(recipe?.id),
+        enabled: !!recipe, // Solo ejecutar la consulta cuando recipe está disponible
+    });
 
     // Al renderizar la vista, realizar la búsqueda de la receta por su ID
     useEffect(() => {
@@ -59,9 +98,9 @@ const Recipe = () => {
 
     // Alternar entre dar like y quitarlo
     const handleIsLiked = () => {
-        if (isLiked === false){
+        if (likeStatus === false){
             postLikeMutation.mutate({
-                userName: recipe.userName, recipeId: recipe.id 
+                userName: userData.name, recipeId: recipe.id 
             }, {
                 onError: (error) => {
                     toast.error(
@@ -69,10 +108,9 @@ const Recipe = () => {
                     );
                 },
             });
-            setIsLiked(true);
         } else {
             deleteLikeMutation.mutate({
-                userName: recipe.userName, recipeId: recipe.id 
+                userName: userData.name, recipeId: recipe.id 
             }, {
                 onError: (error) => {
                     toast.error(
@@ -80,11 +118,10 @@ const Recipe = () => {
                     );
                 },
             });
-            setIsLiked(false);
         }
     }
 
-    if (!recipe) {
+    if (!recipe || loadLike || loadTotalLike) {
         return (
             <div className="flex justify-center mt-6">
                 <h1 className="text-3xl text-stone-300">Loading recipe... </h1>
@@ -160,9 +197,9 @@ const Recipe = () => {
                                 </div>
                                 <div className="font-semibold flex flex-col items-center">
                                     <button onClick={handleIsLiked}>
-                                        {isLiked ? (<Heart size={25} color="red" fill="red"  className="mb-3" />) : (<Heart size={25} className="mb-3" />)}
+                                        {likeStatus ? (<Heart size={25} color="red" fill="red"  className="mb-3" />) : (<Heart size={25} className="mb-3" />)}
                                     </button>
-                                    <p className="text-xl mb-3">Hearts</p>
+                                    <p className="text-xl mb-3">{totalLikes} Likes</p>
                                 </div>
                             </div>
                             <div className="flex flex-col items-center mt-4">

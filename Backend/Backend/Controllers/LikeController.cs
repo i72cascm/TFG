@@ -16,6 +16,25 @@ namespace Backend.Controllers
     {
         private readonly DBContext _likeContext = likeContext;
 
+        // Obtener el total de likes de una receta
+        [HttpGet("TotalLikes")]
+        public async Task<ActionResult<int>> GetTotalLikes([FromQuery] int recipeId)
+        {
+            try
+            {
+                // Contar el número de "me gusta" asociados con la receta
+                var totalLikes = await _likeContext.RecipeLikes
+                    .CountAsync(rl => rl.RecipeID == recipeId);
+
+                // Devolver el total de "me gusta"
+                return Ok(new { TotalLikes = totalLikes });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
         // Comprobar si el usuario ha dado like a la receta
         [HttpGet("{userName}")]
         public async Task<ActionResult> HasLiked(string userName, [FromQuery] int recipeId)

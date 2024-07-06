@@ -36,10 +36,9 @@ const MyRecipes = () => {
         isLoading,
         isError,
     } = useQuery({
-        queryKey: ["user-recipes", userData?.Email],
+        queryKey: ["user-recipes", userData?.email],
         queryFn: () => getUserRecipes(userData?.email),
         select: (data) => data?.data || [], // Accede a la propiedad 'data' del objeto y utiliza un array vacío como valor por defecto
-        keepPreviousData: true,
     });
 
     // Mensaje de cargando recetas
