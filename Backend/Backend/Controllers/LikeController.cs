@@ -1,6 +1,4 @@
-﻿using Amazon.S3.Model;
-using Amazon.S3;
-using Backend.DTOs;
+﻿using Backend.DTOs;
 using Backend.Filters;
 using Backend.Modelos;
 using Backend.Models;
@@ -71,7 +69,7 @@ namespace Backend.Controllers
 
         // Dar Like
         [HttpPost("{userName}")]
-        public async Task<ActionResult<RecipeInsertDto>> GiveLike(string userName, [FromQuery] int recipeId)
+        public async Task<ActionResult> GiveLike(string userName, [FromQuery] int recipeId)
         {
             try
             {
@@ -117,7 +115,7 @@ namespace Backend.Controllers
 
         // Quitar Like
         [HttpDelete("{userName}")]
-        public async Task<ActionResult<RecipeInsertDto>> RemoveLike(string userName, [FromQuery] int recipeId)
+        public async Task<ActionResult> RemoveLike(string userName, [FromQuery] int recipeId)
         {
             try
             {

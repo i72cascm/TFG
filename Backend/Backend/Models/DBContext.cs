@@ -15,6 +15,8 @@ namespace Backend.Models
         public DbSet<ShoppingList> ShoppingLists { get; set; }
         public DbSet<ProductLine> ProductLines { get; set; }
         public DbSet<RecipeLike> RecipeLikes { get; set; }
+        public DbSet<RecipeComment> RecipeComments { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -62,15 +64,14 @@ namespace Backend.Models
                 .HasForeignKey(sl => sl.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
             // Configuración de la relación uno a muchos entre ShoppingList y ProductLine
             modelBuilder.Entity<ShoppingList>()
-                .HasMany(sl => sl.ProductLines) 
-                .WithOne() 
+                .HasMany(sl => sl.ProductLines)
+                .WithOne()
                 .HasForeignKey(pl => pl.ShoppingListID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configuración de la relación muchos-a-muchos para RecipeLikes sin eliminación en cascada
+            // Configuración de la relación muchos-a-muchos para RecipeLikes
             modelBuilder.Entity<RecipeLike>()
                 .HasKey(rl => new { rl.UserID, rl.RecipeID });  // Clave primaria compuesta
 
@@ -90,6 +91,20 @@ namespace Backend.Models
             modelBuilder.Entity<RecipeLike>()
                 .HasIndex(rl => new { rl.UserID, rl.RecipeID })
                 .IsUnique();
+
+            // Configuración de la relación entre RecipeComment y User
+            modelBuilder.Entity<RecipeComment>()
+                .HasOne<User>()  
+                .WithMany()      
+                .HasForeignKey(rc => rc.UserID)  
+                .OnDelete(DeleteBehavior.Restrict);  
+
+            // Configuración de la relación entre RecipeComment y Recipe
+            modelBuilder.Entity<RecipeComment>()
+                .HasOne<Recipe>()  
+                .WithMany()        
+                .HasForeignKey(rc => rc.RecipeID)  
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
