@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import useLike from "../../hooks/mainApp/useLike";
+import useComment from "../../hooks/mainApp/useComment";
 import fondoPizarra from "/fondoPizarra.png";
 import fondoPizarraMirror from "/fondoPizarraMirror.png";
 import Modal from "react-modal";
@@ -35,7 +36,6 @@ const customStyles = {
 };
 
 const Recipe = () => {
-
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
         const cookieValue = document.cookie
@@ -62,17 +62,26 @@ const Recipe = () => {
     const { id } = useParams();
     const [recipe, setRecipe] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [comment, setComment] = useState("");
 
     // Hooks
     const { getRecipeById } = useRecipe();
-    const { getTotalLikes, getLikeStatus ,postLikeMutation, deleteLikeMutation } = useLike();
+    const {
+        getTotalLikes,
+        getLikeStatus,
+        postLikeMutation,
+        deleteLikeMutation,
+    } = useLike();
+    const { getComments, postCommentMutation, deleteCommentMutation } =
+        useComment();
 
     // Al renderizar el componente, llamar al método de obtención de like status
     const { data: likeStatus, isLoading: loadLike } = useQuery({
         queryKey: ["recipe-likes", id],
-        queryFn: () => getLikeStatus({userName: userData.name, recipeId: recipe.id}),
+        queryFn: () =>
+            getLikeStatus({ userName: userData.name, recipeId: recipe.id }),
         options: {
-            keepPreviousData: true
+            keepPreviousData: true,
         },
     });
 
@@ -80,6 +89,13 @@ const Recipe = () => {
         queryKey: ["recipe-likes", recipe?.id],
         queryFn: () => getTotalLikes(recipe?.id),
         enabled: !!recipe, // Solo ejecutar la consulta cuando recipe está disponible
+    });
+
+    // Al renderizar el componente, llamar al método de obtención de los comentarios de la receta
+    const { data: comments, isLoading: loadComments } = useQuery({
+        queryKey: ["recipe-comments", recipe?.id],
+        queryFn: () => getComments(recipe?.id),
+        enabled: !!recipe,
     });
 
     // Al renderizar la vista, realizar la búsqueda de la receta por su ID
@@ -96,32 +112,55 @@ const Recipe = () => {
         loadRecipe();
     }, [id]);
 
+    // Postear comentario
+    const handlePostComment = () => {
+        console.log("Posting comment:", comment);
+        postCommentMutation.mutate(
+            {
+                userName: userData.name,
+                recipeId: recipe.id,
+                comment: comment,
+                parentCommentId: 0,
+            },
+            {
+                onError: (error) => {
+                    toast.error(`Failed to post comment: ${error.message}`);
+                },
+            }
+        );
+        setComment("");
+    };
+
     // Alternar entre dar like y quitarlo
     const handleIsLiked = () => {
-        if (likeStatus === false){
-            postLikeMutation.mutate({
-                userName: userData.name, recipeId: recipe.id 
-            }, {
-                onError: (error) => {
-                    toast.error(
-                        `Failed to give like: ${error.message}`
-                    );
+        if (likeStatus === false) {
+            postLikeMutation.mutate(
+                {
+                    userName: userData.name,
+                    recipeId: recipe.id,
                 },
-            });
+                {
+                    onError: (error) => {
+                        toast.error(`Failed to give like: ${error.message}`);
+                    },
+                }
+            );
         } else {
-            deleteLikeMutation.mutate({
-                userName: userData.name, recipeId: recipe.id 
-            }, {
-                onError: (error) => {
-                    toast.error(
-                        `Failed to remove like: ${error.message}`
-                    );
+            deleteLikeMutation.mutate(
+                {
+                    userName: userData.name,
+                    recipeId: recipe.id,
                 },
-            });
+                {
+                    onError: (error) => {
+                        toast.error(`Failed to remove like: ${error.message}`);
+                    },
+                }
+            );
         }
-    }
+    };
 
-    if (!recipe || loadLike || loadTotalLike) {
+    if (!recipe || loadLike || loadTotalLike || loadComments) {
         return (
             <div className="flex justify-center mt-6">
                 <h1 className="text-3xl text-stone-300">Loading recipe... </h1>
@@ -197,9 +236,20 @@ const Recipe = () => {
                                 </div>
                                 <div className="font-semibold flex flex-col items-center">
                                     <button onClick={handleIsLiked}>
-                                        {likeStatus ? (<Heart size={25} color="red" fill="red"  className="mb-3" />) : (<Heart size={25} className="mb-3" />)}
+                                        {likeStatus ? (
+                                            <Heart
+                                                size={25}
+                                                color="red"
+                                                fill="red"
+                                                className="mb-3"
+                                            />
+                                        ) : (
+                                            <Heart size={25} className="mb-3" />
+                                        )}
                                     </button>
-                                    <p className="text-xl mb-3">{totalLikes} Likes</p>
+                                    <p className="text-xl mb-3">
+                                        {totalLikes} Likes
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex flex-col items-center mt-4">
@@ -244,6 +294,82 @@ const Recipe = () => {
                         ></textarea>
                     </div>
                 </div>
+            </div>
+
+            <div className="bg-slate-700 mx-4 px-4 rounded-t-xl">
+                <h2 className="text-4xl font-bold text-white mb-2 pt-2">
+                    Comments Section
+                </h2>
+                <textarea
+                    placeholder="What are your thougths?"
+                    className="resize-none rounded-md border-[2px] border-zinc-400 p-4 w-full text-slate-800 overflow-auto text-xl"
+                    spellCheck="false"
+                    autoCorrect="false"
+                    value={comment}
+                    rows="2"
+                    onChange={(e) => setComment(e.target.value)}
+                />
+                <div className="flex justify-end">
+                    <button
+                        className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-xl"
+                        onClick={handlePostComment}
+                    >
+                        Post Comment
+                    </button>
+                </div>
+                {loadComments ? (
+                    <p>Loading comments...</p>
+                ) : comments && comments.length > 0 ? (
+                    comments
+                        .sort(
+                            // Ordena de más reciente a más antiguo
+                            (a, b) =>
+                                new Date(b.createdAt) - new Date(a.createdAt)
+                        )
+                        .map((comment) => (
+                            <div
+                                key={comment.recipeCommentID}
+                                className="bg-slate-600 p-3 rounded-md my-2"
+                            >
+                                <p className="text-xl text-white">
+                                    {comment.comment}
+                                </p>
+                                <div className="flex justify-between">
+                                    
+                                    <p className="text-gray-400 py-1 px-2">
+                                        {comment.userName}
+                                    </p>
+                                    <div className="flex grid-cols-2 gap-3">
+                                    {comment.userName === userData.name && (
+                                        <button
+                                            onClick={() =>
+                                                deleteCommentMutation.mutate({
+                                                    commentId:
+                                                        comment.recipeCommentID,
+                                                })
+                                            }
+                                            className="text-red-500 font-semibold py-1 px-2 rounded"
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
+
+                                    <p className="text-gray-400 py-1 px-2">
+                                        {new Date(
+                                            comment.createdAt
+                                        ).toLocaleString()}
+                                    </p>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        ))
+                ) : (
+                    <p className="text-white text-xl pb-5">
+                        No comments to display
+                    </p>
+                )}
+                <div className="pb-2"></div>
             </div>
 
             {/* Modal para ampliar la imagen de la receta */}

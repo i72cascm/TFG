@@ -30,6 +30,7 @@ const useComment = () => {
     
             if (response.status === 200) {
                 const data = await response.json();
+                console.log(data)
                 return data;
             } else {
                 const errorData = await response.json();
@@ -111,7 +112,7 @@ const useComment = () => {
     })
 
 
-    return { postCommentMutation, deleteCommentMutation };
+    return { getComments, postCommentMutation, deleteCommentMutation };
 };
 
 export default useComment;

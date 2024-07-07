@@ -8,7 +8,6 @@ namespace Backend.DTOs
         public int RecipeID { get; set; }
 
         [Required]
-        [MaxLength(300)]
         public required string Comment { get; set; }
 
         public int? ParentCommentID { get; set; }

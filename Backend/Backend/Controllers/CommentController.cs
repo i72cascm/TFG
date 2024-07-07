@@ -22,17 +22,20 @@ namespace Backend.Controllers
             {
                 var comments = await _commentContext.RecipeComments
                     .Where(c => c.RecipeID == recipeId)
-                    .Select(c => new RecipeComment
-                    {
-                        RecipeCommentID = c.RecipeCommentID,
-                        UserID = c.UserID,
-                        RecipeID = c.RecipeID,
-                        Comment = c.Comment,
-                        CreatedAt = c.CreatedAt,
-                        ParentCommentID = c.ParentCommentID
-                    })
+                    .Join(_commentContext.Users, 
+                          comment => comment.UserID, 
+                          user => user.UserID, 
+                          (comment, user) => new
+                          {
+                              comment.RecipeCommentID,
+                              user.UserName, 
+                              comment.RecipeID,
+                              comment.Comment,
+                              comment.CreatedAt,
+                              comment.ParentCommentID
+                          })
                     .ToListAsync();
-      
+
                 return Ok(comments);
             }
             catch (Exception ex)
@@ -54,12 +57,15 @@ namespace Backend.Controllers
                     return NotFound(new { Message = "User not found." });
                 }
 
+                var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+                var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneInfo);
+
                 var comment = new RecipeComment
                 {
                     UserID = user.UserID,
                     RecipeID = recipeCommentInsertDto.RecipeID,
                     Comment = recipeCommentInsertDto.Comment,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = localDateTime,
                     ParentCommentID = null
                 };
 

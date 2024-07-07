@@ -17,7 +17,6 @@ namespace Backend.Modelos
         public int RecipeID { get; set; }
 
         [Required]
-        [MaxLength(300)]
         public required string Comment { get; set; }
 
         public DateTime CreatedAt { get; set; }
