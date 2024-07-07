@@ -64,7 +64,7 @@ const ShoppingListDetails = ({ list }) => {
 
     // Calcular el total cada vez que los productos cambien
     useEffect(() => {
-        calculateTotal(); 
+        calculateTotal();
     }, [products]);
 
     // Calculo del total
@@ -73,7 +73,7 @@ const ShoppingListDetails = ({ list }) => {
             const price = parseFloat(product.price.replace("€", ""));
             const amount = parseInt(product.amount, 10);
             if (amount > 0 && price > 0) {
-                return acc + (price * amount);
+                return acc + price * amount;
             }
             return acc;
         }, 0);
@@ -326,29 +326,29 @@ const ShoppingListDetails = ({ list }) => {
                     </div>
                 ))}
             </div>
-            <div>
-                <div className="flex items-center mb-5 justify-between px-14">
-                    <span className="font-semibold text-white text-4xl">
-                        Total: {total}
-                    </span>
 
-                    <div>
-                        <button
-                            onClick={() => addNewProduct(list.shoppingListID)}
-                            className="mr-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded text-2xl"
-                        >
-                            Add New Product
-                        </button>
-                    </div>
-
+            <div className="flex justify-between items-center px-14 mb-5">
+                <span className="flex-1 text-white text-4xl font-semibold whitespace-nowrap">
+                    Total: {total}
+                </span>
+                <div className="flex-1 flex justify-center ml-10">
+                    <button
+                        onClick={() => addNewProduct(list.shoppingListID)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded text-2xl"
+                    >
+                        New Product
+                    </button>
+                </div>
+                <div className="flex-1 flex justify-end">
                     <button
                         onClick={openModal}
-                        className="mr-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded text-2xl"
+                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded text-2xl"
                     >
                         Delete List
                     </button>
                 </div>
             </div>
+
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}

@@ -87,7 +87,7 @@ namespace Backend.Controllers
             }
         }
 
-        // Quitar Like
+        // Eliminar un comentario
         [HttpDelete("{commentId}")]
         public async Task<ActionResult> RemoveComment(int commentId)
         {
