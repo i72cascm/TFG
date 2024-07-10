@@ -308,15 +308,24 @@ namespace Backend.Controllers
                     return Ok(new { Message = "No recipes found for this user." });
                 }
 
-                // Eliminar las recetas de la base de datos
-                _recipeContext.Recipes.RemoveRange(userRecipes);
-                await _recipeContext.SaveChangesAsync();
-
                 // Eliminar las imágenes de S3
                 var client = new AmazonS3Client();
                 var bucketName = "i72cascm-recipes-web-app";
                 foreach (var recipe in userRecipes)
                 {
+                    // Eliminar los likes asociados a la receta
+                    var recipeLikes = await _recipeContext.RecipeLikes
+                        .Where(rl => rl.RecipeID == recipe.RecipeID)
+                        .ToListAsync();
+                    _recipeContext.RecipeLikes.RemoveRange(recipeLikes);
+
+                    // Eliminar los comentarios asociados a la receta
+                    var recipeComments = await _recipeContext.RecipeComments
+                        .Where(rc => rc.RecipeID == recipe.RecipeID)
+                        .ToListAsync();
+                    _recipeContext.RecipeComments.RemoveRange(recipeComments);
+
+                    // Eliminar imagen asociada en el bucket de AWS S3
                     var deleteRequest = new DeleteObjectRequest
                     {
                         BucketName = bucketName,
@@ -324,6 +333,10 @@ namespace Backend.Controllers
                     };
                     await client.DeleteObjectAsync(deleteRequest);
                 }
+
+                // Eliminar las recetas de la base de datos
+                _recipeContext.Recipes.RemoveRange(userRecipes);
+                await _recipeContext.SaveChangesAsync();
 
                 return Ok(new { Message = "All recipes deleted successfully." });
             }

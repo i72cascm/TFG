@@ -85,7 +85,7 @@ const useRecipe = () => {
                 },
             });
 
-            if (response.status === 200) {
+            if (response.status === 204) {
                 return { success: true };
             } else {
                 const errorData = await response.json();

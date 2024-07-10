@@ -93,6 +93,28 @@ namespace Backend.Controllers
             }
         }
 
+        // Método auxiliar para eliminar comentarios recursivamente
+        private async Task RemoveCommentAndChildren(int commentId)
+        {
+            var comment = await _commentContext.RecipeComments.FindAsync(commentId);
+            if (comment != null)
+            {
+                // Buscar comentarios hijo
+                var childComments = await _commentContext.RecipeComments
+                    .Where(c => c.ParentCommentID == commentId)
+                    .ToListAsync();
+
+                // Eliminar recursivamente los comentarios hijo
+                foreach (var childComment in childComments)
+                {
+                    await RemoveCommentAndChildren(childComment.RecipeCommentID);
+                }
+
+                // Eliminar este comentario
+                _commentContext.RecipeComments.Remove(comment);
+            }
+        }
+
         // Eliminar un comentario
         [HttpDelete("{commentId}")]
         public async Task<ActionResult> RemoveComment(int commentId)
@@ -103,11 +125,13 @@ namespace Backend.Controllers
                 var comment = await _commentContext.RecipeComments.FindAsync(commentId);
                 if (comment == null)
                 {
-                    return NotFound(new {Message = "Comment not found." });
+                    return NotFound(new { Message = "Comment not found." });
                 }
 
+                // Llamada as función recursiva de eliminar comentario y sus hijos (EncoderServiceCollectionExtensions caso de tenerlos)
+                await RemoveCommentAndChildren(commentId);
+
                 // Eliminar y guardar la BD
-                _commentContext.RecipeComments.Remove(comment);
                 await _commentContext.SaveChangesAsync();
 
                 return NoContent();

@@ -6,6 +6,7 @@ import useComment from "../../hooks/mainApp/useComment";
 import fondoPizarra from "/fondoPizarra.png";
 import fondoPizarraMirror from "/fondoPizarraMirror.png";
 import Modal from "react-modal";
+import CommentItem from "../../components/appLayer/CommentItem";
 import { useQuery } from "@tanstack/react-query";
 import {
     CircleUserRound,
@@ -63,6 +64,9 @@ const Recipe = () => {
     const [recipe, setRecipe] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [comment, setComment] = useState("");
+    const [replyToId, setReplyToId] = useState(null);
+    const [replyToMessage, setReplyToMessage] = useState("");
+    const [organizedComments, setOrganizedComments] = useState([]);
 
     // Hooks
     const { getRecipeById } = useRecipe();
@@ -113,14 +117,13 @@ const Recipe = () => {
     }, [id]);
 
     // Postear comentario
-    const handlePostComment = () => {
-        console.log("Posting comment:", comment);
+    const handlePostComment = (parentCommentId = null) => {
         postCommentMutation.mutate(
             {
                 userName: userData.name,
                 recipeId: recipe.id,
-                comment: comment,
-                parentCommentId: 0,
+                comment: parentCommentId ? replyToMessage : comment,
+                parentCommentId: parentCommentId,
             },
             {
                 onError: (error) => {
@@ -129,6 +132,17 @@ const Recipe = () => {
             }
         );
         setComment("");
+        setReplyToMessage("");
+        setReplyToId(null);
+    };
+
+    // Eliminar un comentario
+    const handleDeleteComment = (comment) => {
+        deleteCommentMutation.mutate(comment, {
+            onError: (error) => {
+                toast.error(`Failed to delete comment: ${error.message}`);
+            },
+        });
     };
 
     // Alternar entre dar like y quitarlo
@@ -158,6 +172,56 @@ const Recipe = () => {
                 }
             );
         }
+    };
+
+    useEffect(() => {
+        const loadComments = async () => {
+            const organizedComments = organizeComments(comments);
+            setOrganizedComments(organizedComments);
+        };
+
+        if (recipe) {
+            loadComments();
+        }
+    }, [comments]);
+
+    const organizeComments = (comments) => {
+        let commentMap = {};
+        comments.forEach((comment) => {
+            comment.children = [];
+            commentMap[comment.recipeCommentID] = comment;
+        });
+        let rootComments = [];
+        comments.forEach((comment) => {
+            if (comment.parentCommentID) {
+                commentMap[comment.parentCommentID].children.push(comment);
+            } else {
+                rootComments.push(comment);
+            }
+        });
+        return rootComments;
+    };
+
+    const renderComments = (comments) => {
+        return comments.map((comment) => (
+            <div key={comment.recipeCommentID}>
+                <CommentItem
+                    comment={comment}
+                    userData={userData}
+                    replyToId={replyToId}
+                    setReplyToId={setReplyToId}
+                    handleDeleteComment={handleDeleteComment}
+                    handlePostComment={handlePostComment}
+                    replyToMessage={replyToMessage}
+                    setReplyToMessage={setReplyToMessage}
+                />
+                {comment.children.length > 0 && (
+                    <div style={{ marginLeft: "20px" }}>
+                        {renderComments(comment.children)}
+                    </div>
+                )}
+            </div>
+        ));
     };
 
     if (!recipe || loadLike || loadTotalLike || loadComments) {
@@ -296,7 +360,7 @@ const Recipe = () => {
                 </div>
             </div>
 
-            <div className="bg-slate-700 mx-4 px-4 rounded-t-xl">
+            <div className="bg-slate-700 mx-4 px-4 rounded-t-xl pb-4">
                 <h2 className="text-4xl font-bold text-white mb-2 pt-2">
                     Comments Section
                 </h2>
@@ -312,66 +376,15 @@ const Recipe = () => {
                 <div className="flex justify-end">
                     <button
                         className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-xl"
-                        onClick={handlePostComment}
+                        onClick={() => handlePostComment(null)}
                     >
                         Post Comment
                     </button>
                 </div>
-                {loadComments ? (
-                    <p>Loading comments...</p>
-                ) : comments && comments.length > 0 ? (
-                    comments
-                        .sort(
-                            // Ordena de más reciente a más antiguo
-                            (a, b) =>
-                                new Date(b.createdAt) - new Date(a.createdAt)
-                        )
-                        .map((comment) => (
-                            <div
-                                key={comment.recipeCommentID}
-                                className="bg-slate-600 p-3 rounded-md my-2"
-                            >
-                                <p className="text-xl text-white">
-                                    {comment.comment}
-                                </p>
-                                <div className="flex justify-between">
-                                    
-                                    <p className="text-gray-400 py-1 px-2">
-                                        {comment.userName}
-                                    </p>
-                                    <div className="flex grid-cols-2 gap-3">
-                                    {comment.userName === userData.name && (
-                                        <button
-                                            onClick={() =>
-                                                deleteCommentMutation.mutate({
-                                                    commentId:
-                                                        comment.recipeCommentID,
-                                                })
-                                            }
-                                            className="text-red-500 font-semibold py-1 px-2 rounded"
-                                        >
-                                            Delete
-                                        </button>
-                                    )}
 
-                                    <p className="text-gray-400 py-1 px-2">
-                                        {new Date(
-                                            comment.createdAt
-                                        ).toLocaleString()}
-                                    </p>
-                                    </div>
-                                    
-                                </div>
-                            </div>
-                        ))
-                ) : (
-                    <p className="text-white text-xl pb-5">
-                        No comments to display
-                    </p>
-                )}
                 <div className="pb-2"></div>
+            {renderComments(organizedComments)}
             </div>
-
             {/* Modal para ampliar la imagen de la receta */}
             <Modal
                 isOpen={modalIsOpen}

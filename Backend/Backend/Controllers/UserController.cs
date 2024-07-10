@@ -97,6 +97,28 @@ namespace Backend.Controllers
             return Ok(userDto);
         }
 
+        // Método auxiliar para eliminar comentarios recursivamente
+        private async Task RemoveCommentAndChildren(int commentId)
+        {
+            var comment = await _userContext.RecipeComments.FindAsync(commentId);
+            if (comment != null)
+            {
+                // Buscar comentarios hijo
+                var childComments = await _userContext.RecipeComments
+                    .Where(c => c.ParentCommentID == commentId)
+                    .ToListAsync();
+
+                // Eliminar recursivamente los comentarios hijo
+                foreach (var childComment in childComments)
+                {
+                    await RemoveCommentAndChildren(childComment.RecipeCommentID);
+                }
+
+                // Eliminar este comentario
+                _userContext.RecipeComments.Remove(comment);
+            }
+        }
+
         // Eliminar un usuario
         [HttpDelete("{email}")]
         public async Task<ActionResult> DeleteUser(string email)
@@ -108,7 +130,7 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            // Eliminar las recetas del usuario mediante el controlador de recetas (intección de dependencias)
+            // Eliminar las recetas del usuario mediante el controlador de recetas (inyección de dependencias)
             var result = await _recipeController.DeleteUserRecipes(email);
             if (result is NotFoundObjectResult)
             {
@@ -119,6 +141,20 @@ namespace Backend.Controllers
                 return StatusCode(500, new { Message = "Error deleting user recipes." });
             }
 
+            // Obtener todos los likes del usuario y borrarlos
+            var likes = _userContext.RecipeLikes.Where(rl => rl.UserID == user.UserID);
+            _userContext.RecipeLikes.RemoveRange(likes);
+
+            // Eliminar todas los comentarios del usuario (y las respuestas de estos)
+            var comments = await _userContext.RecipeComments
+                              .Where(c => c.UserID == user.UserID)
+                              .ToListAsync();
+            foreach (var comment in comments)
+            {
+                await RemoveCommentAndChildren(comment.RecipeCommentID);
+            }
+
+            // Eliminar usuario
             _userContext.Users.Remove(user);
             await _userContext.SaveChangesAsync();
 

@@ -47,7 +47,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("ShoppingListID");
 
-                    b.ToTable("ProductLines");
+                    b.ToTable("ProductLines", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.Recipe", b =>
@@ -92,7 +92,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Recipes");
+                    b.ToTable("Recipes", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.RecipeComment", b =>
@@ -125,7 +125,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("RecipeComments");
+                    b.ToTable("RecipeComments", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.RecipeLike", b =>
@@ -149,7 +149,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserID", "RecipeID")
                         .IsUnique();
 
-                    b.ToTable("RecipeLikes");
+                    b.ToTable("RecipeLikes", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.ShoppingList", b =>
@@ -171,7 +171,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ShoppingLists");
+                    b.ToTable("ShoppingLists", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.User", b =>
@@ -228,7 +228,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.UserTag", b =>
@@ -252,7 +252,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserID", "RecipeTagID")
                         .IsUnique();
 
-                    b.ToTable("UserTags");
+                    b.ToTable("UserTags", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.RecipeTag", b =>
@@ -269,7 +269,7 @@ namespace Backend.Migrations
 
                     b.HasKey("RecipeTagID");
 
-                    b.ToTable("RecipeTags");
+                    b.ToTable("RecipeTags", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Modelos.ProductLine", b =>
