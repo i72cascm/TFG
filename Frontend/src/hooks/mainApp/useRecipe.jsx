@@ -123,6 +123,37 @@ const useRecipe = () => {
         }
     })
 
+    const deleteRecipe = async (recipeId) => {
+        try {
+            const response = await fetch(`${urlApi}/api/recipe/${recipeId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+					"Authorization": userToken
+                }
+            });
+
+            if (response.status === 204) {
+                return { success: true };
+            } else if (response.status === 400 || response.status === 500) {
+                const errorData = await response.json();
+                return { success: false, message: errorData.Message };
+            }
+        } catch (error) {
+            console.error("Error deleting recipe:", error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    const deleteRecipeMutation = useMutation({
+        mutationFn: deleteRecipe,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['user-recipes', 'recipes']
+            });
+        }
+    })
+
     const deleteAllRecipesByUser = async (email) => {
         try {
             const response = await fetch(`${urlApi}/api/recipe/user/${email}`, {
@@ -154,7 +185,7 @@ const useRecipe = () => {
         }
     })
 
-    return { postRecipeMutation, deleteAllRecipesByUserMutation, getAllRecipes, getUserRecipes, getRecipeById };
+    return { postRecipeMutation, deleteAllRecipesByUserMutation, deleteRecipeMutation, getAllRecipes, getUserRecipes, getRecipeById };
 };
 
 export default useRecipe;

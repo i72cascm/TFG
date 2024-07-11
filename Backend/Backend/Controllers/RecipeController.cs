@@ -34,7 +34,7 @@ namespace Backend.Controllers
                 // Obtener todas las recetas
                 var recipes = await _recipeContext.Recipes
                     .Include(r => r.User)
-                    .Include(r => r.RecipeTag) 
+                    .Include(r => r.RecipeTag)
                     .ToListAsync();
 
                 var client = new AmazonS3Client();
@@ -101,7 +101,7 @@ namespace Backend.Controllers
                 var recipes = await _recipeContext.Recipes
                     .Where(r => r.UserID == user.UserID)
                     .Include(r => r.User)
-                    .Include(r => r.RecipeTag) 
+                    .Include(r => r.RecipeTag)
                     .ToListAsync();
 
                 var client = new AmazonS3Client();
@@ -282,8 +282,56 @@ namespace Backend.Controllers
             {
                 return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
             }
-            
         }
+
+        // Eliminar una receta dada su ID
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecipe(int id)
+        {
+            try
+            {
+                var recipe = await _recipeContext.Recipes
+                    .FirstOrDefaultAsync(r => r.RecipeID == id);
+
+                if (recipe == null)
+                {
+                    return NotFound(new { Message = "Recipe not found." });
+                }
+
+                // Eliminar la imagen en S3
+                var client = new AmazonS3Client();
+                var bucketName = "i72cascm-recipes-web-app";
+                var deleteRequest = new DeleteObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = recipe.RecipeImage
+                };
+                await client.DeleteObjectAsync(deleteRequest);
+
+                // Eliminar los likes asociados a la receta
+                var recipeLikes = await _recipeContext.RecipeLikes
+                    .Where(rl => rl.RecipeID == recipe.RecipeID)
+                    .ToListAsync();
+                _recipeContext.RecipeLikes.RemoveRange(recipeLikes);
+
+                // Eliminar los comentarios asociados a la receta
+                var recipeComments = await _recipeContext.RecipeComments
+                        .Where(rc => rc.RecipeID == recipe.RecipeID)
+                        .ToListAsync();
+                    _recipeContext.RecipeComments.RemoveRange(recipeComments);
+
+                // Eliminar la receta de la base de datos
+                _recipeContext.Recipes.Remove(recipe);
+                await _recipeContext.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
 
         // Eliminar todas las recetas de un usuario dado su email
         [HttpDelete("user/{email}")]

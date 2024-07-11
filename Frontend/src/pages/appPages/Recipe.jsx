@@ -8,6 +8,7 @@ import fondoPizarraMirror from "/fondoPizarraMirror.png";
 import Modal from "react-modal";
 import CommentItem from "../../components/appLayer/CommentItem";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import {
     CircleUserRound,
     Clock,
@@ -67,9 +68,13 @@ const Recipe = () => {
     const [replyToId, setReplyToId] = useState(null);
     const [replyToMessage, setReplyToMessage] = useState("");
     const [organizedComments, setOrganizedComments] = useState([]);
+    const [modalDeleteRecipe, setModalDeleteRecipe] = useState(false);
+    const openDeleteRecipeModal = () => setModalDeleteRecipe(true);
+    const closeDeleteRecipeModal = () => setModalDeleteRecipe(false);
+    const navigate = useNavigate();
 
     // Hooks
-    const { getRecipeById } = useRecipe();
+    const { getRecipeById, deleteRecipeMutation } = useRecipe();
     const {
         getTotalLikes,
         getLikeStatus,
@@ -141,6 +146,23 @@ const Recipe = () => {
         deleteCommentMutation.mutate(comment, {
             onError: (error) => {
                 toast.error(`Failed to delete comment: ${error.message}`);
+            },
+        });
+    };
+
+    // Enviar datos de esta receta a la vista de RecipeBuilder para que el usuario pueda modificarla
+    const handleCopyRecipe = () => {
+        navigate('/app/recipe-builder', { state: { recipeData: recipe } });
+    };
+
+    // Eliminar la receta
+    const handleDeleteRecipe = () => {
+        deleteRecipeMutation.mutate(recipe.id, {
+            onSuccess: () => {
+                navigate("/app/home");
+            },
+            onError: (error) => {
+                toast.error(`Failed to delete recipe: ${error.message}`);
             },
         });
     };
@@ -357,6 +379,20 @@ const Recipe = () => {
                             rows="13"
                         ></textarea>
                     </div>
+                    <div className="flex justify-around m-5">
+                        <button className="px-4 py-2  text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
+                        onClick={handleCopyRecipe}>
+                            Copy Recipe
+                        </button>
+                        {userData.name === recipe.userName && (
+                            <button
+                                onClick={openDeleteRecipeModal}
+                                className="px-4 py-2 text-2xl bg-red-500 text-white rounded hover:bg-red-600 font-semibold"
+                            >
+                                Delete Recipe
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -383,7 +419,7 @@ const Recipe = () => {
                 </div>
 
                 <div className="pb-2"></div>
-            {renderComments(organizedComments)}
+                {renderComments(organizedComments)}
             </div>
             {/* Modal para ampliar la imagen de la receta */}
             <Modal
@@ -403,6 +439,33 @@ const Recipe = () => {
                             objectFit: "contain",
                         }}
                     />
+                </div>
+            </Modal>
+            <Modal
+                isOpen={modalDeleteRecipe}
+                onRequestClose={closeDeleteRecipeModal}
+                style={customStyles}
+                contentLabel="Delete Recipe Modal"
+            >
+                <div className="bg-red-100 p-5">
+                    <h2 className="text-center font-bold text-2xl">Warning</h2>
+                    <p className="mt-3 font-medium">
+                        Are you sure you want to delete this recipe?
+                    </p>
+                    <div className="flex justify-center gap-24 mt-4">
+                        <button
+                            onClick={closeDeleteRecipeModal}
+                            className="px-4 py-2 text-white rounded font-semibold bg-gray-500 hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleDeleteRecipe}
+                            className="px-4 py-2 text-white rounded font-semibold bg-red-500 hover:bg-red-600"
+                        >
+                            Delete
+                        </button>
+                    </div>
                 </div>
             </Modal>
         </>

@@ -5,11 +5,16 @@ import useRecipe from "../../hooks/mainApp/useRecipe";
 import tableCreateRecipe from "/tableCreateRecipe.png";
 import tableCreateRecipe2 from "/tableCreateRecipe2.png";
 import useRecipeTag from "../../hooks/mainApp/useRecipeTag";
+import { useLocation } from 'react-router-dom';
 
 const RecipeBuilder = () => {
     // Llamada de los métodos en el hook de recetas
     const { postRecipeMutation } = useRecipe();
     const { getAllRecipeTags } = useRecipeTag();
+
+    // Estados usados en caso de estar copiando otra receta
+    const location = useLocation();
+    const recipeData = location.state?.recipeData;
 
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
@@ -53,8 +58,24 @@ const RecipeBuilder = () => {
         const fetchTags = async () => {
             try {
                 const tagData = await getAllRecipeTags();
-                if (tagData.success) {
+                if (tagData.success) { 
                     setTags(tagData.data);
+                    if (recipeData) { // IMPORTANTE: En el caso de que esta vista se haya cargado al intentar copiar una receta existente, cargar los valores de la receta original en esta vista
+                        const tag = tagData.data.find(t => t.tagName === recipeData.tagName);
+                        const tagId = tag ? tag.recipeTagID : 0;
+    
+                        setFormData(prev => ({
+                            ...prev,
+                            title: recipeData.title,
+                            preparationTime: recipeData.preparationTime,
+                            servings: recipeData.servingsNumber,
+                            image: recipeData.recipeImage,
+                            steps: recipeData.steps,
+                            ingredients: recipeData.ingredients,
+                            tags: tagId, // Usar la ID del tag, no el Name
+                            userEmail: userData ? userData.email : null,
+                        }));
+                    }
                 } else {
                     toast.error("Failed to fetch recipe tags.");
                 }
@@ -62,9 +83,10 @@ const RecipeBuilder = () => {
                 toast.error("Error fetching tags: " + error.message);
             }
         };
-
+    
         fetchTags();
-    }, []);
+    }, [recipeData]);
+    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
