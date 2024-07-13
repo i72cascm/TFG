@@ -72,7 +72,8 @@ namespace Backend.Controllers
                             RecipeImage = imageDataUrl,
                             Steps = recipe.Steps,
                             Ingredients = recipe.Ingredients,
-                            TagName = recipe.RecipeTag?.TagName
+                            TagName = recipe.RecipeTag?.TagName,
+                            IsPublish = recipe.IsPublish,
                         });
                     }
                 }
@@ -139,7 +140,8 @@ namespace Backend.Controllers
                             RecipeImage = imageDataUrl,
                             Steps = recipe.Steps,
                             Ingredients = recipe.Ingredients,
-                            TagName = recipe.RecipeTag?.TagName
+                            TagName = recipe.RecipeTag?.TagName,
+                            IsPublish = recipe.IsPublish,
                         });
                     }
                 }
@@ -200,7 +202,8 @@ namespace Backend.Controllers
                         RecipeImage = imageDataUrl,
                         Steps = recipe.Steps,
                         Ingredients = recipe.Ingredients,
-                        TagName = recipe.RecipeTag?.TagName
+                        TagName = recipe.RecipeTag?.TagName,
+                        IsPublish = recipe.IsPublish,
                     };
                     return Ok(recipeDto);
                 }
@@ -277,6 +280,31 @@ namespace Backend.Controllers
                 };
 
                 return CreatedAtAction(nameof(GetRecipeById), new { id = recipe.RecipeID }, recipeDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        // Publicar Receta existente
+        [HttpPost("publish/{id}")]
+        public async Task<IActionResult> PublishRecipe(int id)
+        {
+            try
+            {
+                var recipe = await _recipeContext.Recipes
+                    .FirstOrDefaultAsync(r => r.RecipeID == id);
+
+                if (recipe == null)
+                {
+                    return NotFound(new { Message = "Recipe not found." });
+                }
+
+                recipe.IsPublish = true;
+                await _recipeContext.SaveChangesAsync();
+
+                return NoContent();
             }
             catch (Exception ex)
             {

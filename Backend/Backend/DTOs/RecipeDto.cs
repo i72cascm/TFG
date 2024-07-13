@@ -11,5 +11,6 @@
         public required string Steps { get; set; }
         public required string Ingredients { get; set; }
         public string? TagName { get; set; }
+        public bool IsPublish {  get; set; }
     }
 }

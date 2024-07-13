@@ -123,6 +123,38 @@ const useRecipe = () => {
         }
     })
 
+    const postPublishRecipe = async (recipeId) => {
+        try {
+            console.log(recipeId)
+            const response = await fetch(`${urlApi}/api/recipe/publish/${recipeId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+					"Authorization": userToken
+                }
+            });
+
+            if (response.status === 204) {
+                return { success: true };
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Error publishing recipes");
+            }
+        } catch (error) {
+            console.error("Error publishing recipe:", error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    const postPublishRecipeMutation = useMutation({
+        mutationFn: postPublishRecipe,
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['user-recipes', 'recipes']
+            });
+        }
+    })
+
     const deleteRecipe = async (recipeId) => {
         try {
             const response = await fetch(`${urlApi}/api/recipe/${recipeId}`, {
@@ -185,7 +217,7 @@ const useRecipe = () => {
         }
     })
 
-    return { postRecipeMutation, deleteAllRecipesByUserMutation, deleteRecipeMutation, getAllRecipes, getUserRecipes, getRecipeById };
+    return { postRecipeMutation, postPublishRecipeMutation, deleteAllRecipesByUserMutation, deleteRecipeMutation, getAllRecipes, getUserRecipes, getRecipeById };
 };
 
 export default useRecipe;

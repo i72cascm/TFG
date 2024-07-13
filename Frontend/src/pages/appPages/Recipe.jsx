@@ -6,6 +6,7 @@ import useComment from "../../hooks/mainApp/useComment";
 import fondoPizarra from "/fondoPizarra.png";
 import fondoPizarraMirror from "/fondoPizarraMirror.png";
 import Modal from "react-modal";
+import { toast, ToastContainer } from "react-toastify";
 import CommentItem from "../../components/appLayer/CommentItem";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -74,7 +75,8 @@ const Recipe = () => {
     const navigate = useNavigate();
 
     // Hooks
-    const { getRecipeById, deleteRecipeMutation } = useRecipe();
+    const { getRecipeById, postPublishRecipeMutation, deleteRecipeMutation } =
+        useRecipe();
     const {
         getTotalLikes,
         getLikeStatus,
@@ -121,6 +123,18 @@ const Recipe = () => {
         loadRecipe();
     }, [id]);
 
+    // Publicar la receta
+    const handlePublishRecipe = () => {
+        postPublishRecipeMutation.mutate(recipe.id, {
+            onSuccess: () => {
+                navigate(0);
+            },
+            onError: (error) => {
+                toast.error(`Failed to delete recipe: ${error.message}`);
+            },
+        });
+    };
+
     // Postear comentario
     const handlePostComment = (parentCommentId = null) => {
         postCommentMutation.mutate(
@@ -152,7 +166,7 @@ const Recipe = () => {
 
     // Enviar datos de esta receta a la vista de RecipeBuilder para que el usuario pueda modificarla
     const handleCopyRecipe = () => {
-        navigate('/app/recipe-builder', { state: { recipeData: recipe } });
+        navigate("/app/recipe-builder", { state: { recipeData: recipe } });
     };
 
     // Eliminar la receta
@@ -256,6 +270,17 @@ const Recipe = () => {
 
     return (
         <>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
             <div className="flex justify-center mt-2 mb-7">
                 <h1 className="text-sky-600 font-black text-7xl col-span-2 capitalize">
                     {recipe.title}
@@ -380,10 +405,22 @@ const Recipe = () => {
                         ></textarea>
                     </div>
                     <div className="flex justify-around m-5">
-                        <button className="px-4 py-2  text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
-                        onClick={handleCopyRecipe}>
-                            Copy Recipe
-                        </button>
+                        {userData.name === recipe.userName &&
+                        !recipe.isPublish ? (
+                            <button
+                                className="px-4 py-2  text-2xl bg-blue-500 text-white rounded hover:bg-blue-600 font-semibold"
+                                onClick={handlePublishRecipe}
+                            >
+                                Publish Recipe
+                            </button>
+                        ) : (
+                            <button
+                                className="px-4 py-2  text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
+                                onClick={handleCopyRecipe}
+                            >
+                                Copy Recipe
+                            </button>
+                        )}
                         {userData.name === recipe.userName && (
                             <button
                                 onClick={openDeleteRecipeModal}

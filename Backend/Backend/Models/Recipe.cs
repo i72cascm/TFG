@@ -36,6 +36,9 @@ namespace Backend.Modelos
         [ForeignKey("RecipeTag")]
         public int RecipeTagID { get; set; }
 
+        [Required]
+        public bool IsPublish {  get; set; }
+
         public User? User { get; set; }
         public RecipeTag? RecipeTag { get; set; }
 
