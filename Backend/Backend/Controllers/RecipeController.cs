@@ -87,10 +87,10 @@ namespace Backend.Controllers
 
         // Obtener todas las recetas del usuario actual
         [HttpGet("user/{email}")]
-        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email)
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email, int pageParam = 1, int pageSize = 5, bool isPublish = true)
         {
             try
-            {
+            {               
                 // Buscar el ID del usuario por email
                 var user = await _recipeContext.Users.SingleOrDefaultAsync(u => u.Email == email);
                 if (user == null)
@@ -98,11 +98,17 @@ namespace Backend.Controllers
                     return NotFound(new { Message = "User not found." });
                 }
 
+                // Calculo de recetas a omitir dependiendo de la página solicitada
+                int skip = (pageParam - 1) * pageSize;
+
                 // Obtener las recetas del usuario a partir de su ID
                 var recipes = await _recipeContext.Recipes
-                    .Where(r => r.UserID == user.UserID)
+                    .Where(r => r.UserID == user.UserID && r.IsPublish == isPublish)
                     .Include(r => r.User)
                     .Include(r => r.RecipeTag)
+                    .OrderBy(r => r.RecipeID)
+                    .Skip(skip)
+                    .Take(pageSize)
                     .ToListAsync();
 
                 var client = new AmazonS3Client();
@@ -146,7 +152,11 @@ namespace Backend.Controllers
                     }
                 }
 
-                return Ok(recipesDto);
+                return Ok(new
+                {
+                    data = recipesDto,
+                    nextCursor = recipes.Count < pageSize ? (int?)null : pageParam + 1
+                });
             }
             catch (Exception ex)
             {

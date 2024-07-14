@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import RecipeCard from "../../components/appLayer/RecipeCard";
 import useRecipe from "../../hooks/mainApp/useRecipe";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const MyRecipes = () => {
     // Llamada de los métodos en el hook de recetas
@@ -35,15 +35,29 @@ const MyRecipes = () => {
 
     // Al renderizar esta página, llamar al método de obtención de recetas y guardarlas en el array de listas
     const {
-        data: recipeList,
+        data,
         error,
         isLoading,
         isError,
-    } = useQuery({
-        queryKey: ["user-recipes", userData?.email],
-        queryFn: () => getUserRecipes(userData?.email),
-        select: (data) => data?.data || [], // Accede a la propiedad 'data' del objeto y utiliza un array vacío como valor por defecto
+        fetchNextPage,
+        hasNextPage,
+        isFetching,
+        isFetchingNextPage,
+        refetch,
+    } = useInfiniteQuery({
+        queryKey: ["user-recipes", userData?.email, showPublish],
+        queryFn: ({ pageParam = 1 }) =>
+            getUserRecipes(userData?.email, pageParam, showPublish),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage.nextCursor;
+        },
     });
+
+    // Consulta se refresqua cada vez que showPublish cambie
+    useEffect(() => {
+        refetch();
+    }, [showPublish, refetch]);
 
     // Mensaje de cargando recetas
     if (isLoading) {
@@ -65,25 +79,11 @@ const MyRecipes = () => {
             </div>
         );
     }
-
-    // Filtrar recetas según el estado de showPublish
-    const filteredRecipes = recipeList.filter(recipe => recipe.isPublish === showPublish);
-
     return (
         <>
             <div className="flex justify-center mt-6">
                 <button
                     className={`text-2xl px-4 py-1 w-64 rounded-l-xl border-y-2 border-l-2 ${
-                        showPublish
-                            ? "bg-slate-500 text-white"
-                            : "bg-slate-700 text-gray-300"
-                    }`}
-                    onClick={() => setShowPublish(true)}
-                >
-                    Publish
-                </button>
-                <button
-                    className={`text-2xl px-4 py-1 w-64 rounded-r-xl border-y-2 border-r-2 ${
                         !showPublish
                             ? "bg-slate-500 text-white"
                             : "bg-slate-700 text-gray-300"
@@ -92,11 +92,44 @@ const MyRecipes = () => {
                 >
                     Not Publish
                 </button>
+                <button
+                    className={`text-2xl px-4 py-1 w-64 rounded-r-xl border-y-2 border-r-2 ${
+                        showPublish
+                            ? "bg-slate-500 text-white"
+                            : "bg-slate-700 text-gray-300"
+                    }`}
+                    onClick={() => setShowPublish(true)}
+                >
+                    Publish
+                </button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 items-start m-8">
-                {filteredRecipes.map((recipe) => {
-                    return <RecipeCard key={recipe.id} recipe={recipe} />;
-                })}
+                {data.pages.map((group, i) => (
+                    <React.Fragment key={i}>
+                        {group.data.map((recipe) => {
+                            return (
+                                <RecipeCard key={recipe.id} recipe={recipe} />
+                            );
+                        })}
+                    </React.Fragment>
+                ))}
+            </div>
+            <div className="flex justify-center mt-6">
+                {hasNextPage && (
+                    <button
+                        onClick={() => fetchNextPage()}
+                        disabled={!hasNextPage || isFetchingNextPage}
+                        className={`text-2xl px-4 py-1 w-64 mb-4 ${
+                            isFetchingNextPage
+                                ? "bg-slate-700 text-gray-300"
+                                : "bg-slate-500 text-white"
+                        } rounded-lg`}
+                    >
+                        {isFetchingNextPage
+                            ? "Loading more..."
+                            : hasNextPage && "Load More"}
+                    </button>
+                )}
             </div>
         </>
     );
