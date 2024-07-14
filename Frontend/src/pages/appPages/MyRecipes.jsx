@@ -32,6 +32,8 @@ const MyRecipes = () => {
 
     // Estados
     const [showPublish, setShowPublish] = useState(false);
+    const [inputValue, setInputValue] = useState("");
+    const [search, setSearch] = useState("");
 
     // Al renderizar esta página, llamar al método de obtención de recetas y guardarlas en el array de listas
     const {
@@ -41,13 +43,12 @@ const MyRecipes = () => {
         isError,
         fetchNextPage,
         hasNextPage,
-        isFetching,
         isFetchingNextPage,
         refetch,
     } = useInfiniteQuery({
-        queryKey: ["user-recipes", userData?.email, showPublish],
+        queryKey: ["user-recipes", userData?.email, showPublish, search],
         queryFn: ({ pageParam = 1 }) =>
-            getUserRecipes(userData?.email, pageParam, showPublish),
+            getUserRecipes(userData?.email, pageParam, showPublish, search),
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {
             return lastPage.nextCursor;
@@ -58,6 +59,18 @@ const MyRecipes = () => {
     useEffect(() => {
         refetch();
     }, [showPublish, refetch]);
+
+    // Realizar búsqueda por nombre al pulsar el intro
+    const handleKeyDown = (event) => {
+        if (event.key === "Enter") {
+            setSearch(inputValue);
+        }
+    };
+
+    // Función para cambiar valor de la barra de búsqueda
+    const handleChange = (event) => {
+        setInputValue(event.target.value);
+    };
 
     // Mensaje de cargando recetas
     if (isLoading) {
@@ -102,6 +115,16 @@ const MyRecipes = () => {
                 >
                     Publish
                 </button>
+            </div>
+            <div className="flex justify-center mt-4">
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Search by name..."
+                    className="ml-4 px-4 py-1 bg-slate-500 w-96 rounded-xl border-2 border-gray-300 text-2xl text-white placeholder:text-gray-300"
+                />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 items-start m-8">
                 {data.pages.map((group, i) => (

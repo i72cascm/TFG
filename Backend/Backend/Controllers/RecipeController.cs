@@ -87,7 +87,7 @@ namespace Backend.Controllers
 
         // Obtener todas las recetas del usuario actual
         [HttpGet("user/{email}")]
-        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email, int pageParam = 1, int pageSize = 5, bool isPublish = true)
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email, int pageParam = 1, int pageSize = 5, bool isPublish = true, string search = "")
         {
             try
             {               
@@ -101,9 +101,18 @@ namespace Backend.Controllers
                 // Calculo de recetas a omitir dependiendo de la página solicitada
                 int skip = (pageParam - 1) * pageSize;
 
-                // Obtener las recetas del usuario a partir de su ID
-                var recipes = await _recipeContext.Recipes
-                    .Where(r => r.UserID == user.UserID && r.IsPublish == isPublish)
+                // Crear la consulta base de recetas
+                IQueryable<Recipe> baseQuery = _recipeContext.Recipes
+                    .Where(r => r.UserID == user.UserID && r.IsPublish == isPublish);
+
+                // Filtrar por el título de la receta si se proporciona un término de búsqueda
+                if (!string.IsNullOrEmpty(search))
+                {
+                    baseQuery = baseQuery.Where(r => r.Title.Contains(search));
+                }
+
+                // Obtener las recetas del usuario paginadas y ordenadas
+                var recipes = await baseQuery
                     .Include(r => r.User)
                     .Include(r => r.RecipeTag)
                     .OrderBy(r => r.RecipeID)

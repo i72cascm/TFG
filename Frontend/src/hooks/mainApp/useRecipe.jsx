@@ -42,10 +42,10 @@ const useRecipe = () => {
         }
     };
 
-    const getUserRecipes = async (userEmail, pageParam, isPublish) => {
+    const getUserRecipes = async (userEmail, pageParam, isPublish, search) => {
         try {
             const response = await fetch(
-                `${urlApi}/api/recipe/user/${userEmail}?pageParam=${pageParam}&isPublish=${isPublish}`,
+                `${urlApi}/api/recipe/user/${userEmail}?pageParam=${pageParam}&isPublish=${isPublish}&search=${search}`,
                 {
                     method: "GET",
                     headers: {

@@ -29,3 +29,13 @@
 ::-webkit-scrollbar-thumb:active {
     background: hsla(200, 14%, 85%, 0.45);
 }
+
+html {
+    overflow-y: scroll; /* Asegura que la scrollbar vertical siempre esté presente */
+  }
+  
+  body {
+    margin: 0; /* Elimina los márgenes predeterminados */
+    /* Puedes añadir padding-right equivalente al ancho de tu scrollbar si es necesario */
+    padding-right: 10px; /* Ajusta según el ancho de tu scrollbar si cambia */
+  }
