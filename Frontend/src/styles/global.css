@@ -31,11 +31,9 @@
 }
 
 html {
-    overflow-y: scroll; /* Asegura que la scrollbar vertical siempre esté presente */
+    overflow-y: scroll;
   }
   
   body {
-    margin: 0; /* Elimina los márgenes predeterminados */
-    /* Puedes añadir padding-right equivalente al ancho de tu scrollbar si es necesario */
-    padding-right: 10px; /* Ajusta según el ancho de tu scrollbar si cambia */
+    margin: 0;
   }
