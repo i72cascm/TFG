@@ -87,6 +87,10 @@ namespace Backend
                 });
             });
 
+            // Edamam Config
+            builder.Services.Configure<EdamamOptions>(builder.Configuration.GetSection("Edamam"));
+            builder.Services.AddHttpClient<EdamamService>();
+
             var app = builder.Build();
 
             // Use CORS with Policy
