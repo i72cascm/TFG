@@ -1,13 +1,15 @@
-﻿using Backend.Models;
+﻿using Backend.Modelos;
+using Backend.Models;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System;
 using System.Web;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Backend.Services
 {
-    // Edamam Service class
     public class EdamamService
     {
         private readonly HttpClient _httpClient;
@@ -19,7 +21,7 @@ namespace Backend.Services
             _options = options.Value;
         }
 
-        public async Task<string> GetRecipesAsync(string query, List<string> healthLabels = null, List<string> dietLabels = null)
+        public async Task<List<RecipeInfo>> GetRecipesAsync(string query, List<string> healthLabels = null, List<string> dietLabels = null)
         {
             var builder = new UriBuilder("https://api.edamam.com/search");
             var queryParams = HttpUtility.ParseQueryString(string.Empty);
@@ -44,16 +46,29 @@ namespace Backend.Services
                 }
             }
 
-
             builder.Query = queryParams.ToString();
             var requestUrl = builder.ToString();
-
-            Console.WriteLine(requestUrl);
 
             var response = await _httpClient.GetAsync(requestUrl);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var recipeResponse = JsonConvert.DeserializeObject<EdamamRecipe>(responseContent);
+
+            var recipeInfos = new List<RecipeInfo>();
+            foreach (var hit in recipeResponse.Hits)
+            {
+                var recipeInfo = new RecipeInfo
+                {
+                    Label = hit.Recipe.Label,
+                    Image = hit.Recipe.Image,
+                    Url = hit.Recipe.Url
+                };
+                recipeInfos.Add(recipeInfo);
+            }
+
+            return recipeInfos;
         }
     }
 }

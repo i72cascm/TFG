@@ -1,7 +1,9 @@
 ﻿using Backend.Services;
+using Backend.Modelos;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Backend.Controllers
 {
@@ -24,12 +26,15 @@ namespace Backend.Controllers
                 var query = "chocolate";
                 var healthLabels = new List<string> { "tree-nut-free" };
                 var dietLabels = new List<string> { "high-protein", "low-carb" };
-                var recipes = await _edamamService.GetRecipesAsync(query, healthLabels, dietLabels);
+                var recipeInfos = await _edamamService.GetRecipesAsync(query, healthLabels, dietLabels);
 
-                // Escribir los resultados en la consola
-                Console.WriteLine(recipes);
+                // Escribir los nombres de las recetas en la consola
+                foreach (var recipeInfo in recipeInfos)
+                {
+                    Console.WriteLine($"Label: {recipeInfo.Label}, Image: {recipeInfo.Image}, URL: {recipeInfo.Url}");
+                }
 
-                return Ok("Check the console for the API response.");
+                return Ok("Check the console for the recipe details.");
             }
             catch (Exception ex)
             {
