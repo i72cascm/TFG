@@ -28,6 +28,8 @@ const Login = () => {
                     <input
                         id="email_username"
                         type="email_username"
+                        autoCorrect="off"
+                        spellCheck="false"
                         placeholder="Email or Username"
                         className="w-full mt-3 p-3 border rounded-xl bg-gray-50"
                         value={userOrEmail}

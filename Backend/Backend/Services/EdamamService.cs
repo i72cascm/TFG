@@ -8,6 +8,9 @@ using System.Web;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
+#pragma warning disable CS8625 
+#pragma warning disable CS8602 
+
 namespace Backend.Services
 {
     public class EdamamService
@@ -29,6 +32,7 @@ namespace Backend.Services
             queryParams["q"] = query;
             queryParams["app_id"] = _options.AppId;
             queryParams["app_key"] = _options.AppKey;
+
 
             if (healthLabels != null)
             {
@@ -72,3 +76,6 @@ namespace Backend.Services
         }
     }
 }
+
+#pragma warning restore CS8625
+#pragma warning restore CS8602

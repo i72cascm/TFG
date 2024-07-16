@@ -24,14 +24,14 @@ namespace Backend.Controllers
             try
             {
                 var query = "chocolate";
-                var healthLabels = new List<string> { "tree-nut-free" };
+                var healthLabels = new List<string> { "tree-nut-free", "keto-friendly", "shellfish-free", "lupine-free", "wheat-free", "paleo" };
                 var dietLabels = new List<string> { "high-protein", "low-carb" };
                 var recipeInfos = await _edamamService.GetRecipesAsync(query, healthLabels, dietLabels);
 
                 // Escribir los nombres de las recetas en la consola
                 foreach (var recipeInfo in recipeInfos)
                 {
-                    Console.WriteLine($"Label: {recipeInfo.Label}, Image: {recipeInfo.Image}, URL: {recipeInfo.Url}");
+                    Console.WriteLine($"Label: {recipeInfo.Label}");
                 }
 
                 return Ok("Check the console for the recipe details.");

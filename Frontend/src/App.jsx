@@ -15,9 +15,11 @@ import MyRecipes from './pages/appPages/MyRecipes';
 import Recipe from './pages/appPages/Recipe';
 import UserSettings from './pages/appPages/UserSettings';
 import ShoppingLists from './pages/appPages/ShoppingLists';
+import HealthyRecipes from './pages/appPages/HealthyRecipes';
 
 import AuthProvider from 'react-auth-kit';
 import { store } from './utils/store';
+
 
 
 
@@ -42,6 +44,7 @@ function App() {
 							<Route path='/app/recipe/:id' element={<Recipe/>} />
 							<Route path='/app/user-settings' element={<UserSettings/>}/>
 							<Route path='/app/shopping-lists' element={<ShoppingLists/>}/>
+							<Route path='/app/healthy-recipes' element={<HealthyRecipes/>}/>
 						</Route>
 					</Route>
 				</Routes>

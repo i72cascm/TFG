@@ -116,6 +116,8 @@ export default function Sidebar() {
                             <SidebarItem
                                 icon={<Apple size={25} />}
                                 text="Healthy Recipes"
+                                to="/app/healthy-recipes"
+                                active={isActive("/app/healthy-recipes")}
                             />
                             <hr
                                 className="my-3"

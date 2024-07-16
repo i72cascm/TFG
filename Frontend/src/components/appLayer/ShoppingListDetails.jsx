@@ -254,7 +254,7 @@ const ShoppingListDetails = ({ list }) => {
                 <label>Amount</label>
                 <label>Price/Unit</label>
             </div>
-            <div className="overflow-y-auto h-[60vh] mb-4">
+            <div className="overflow-y-auto h-[60vh]">
                 {products.map((product, index) => (
                     <div
                         key={product.productLineID}

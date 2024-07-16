@@ -141,7 +141,7 @@ const ShoppingLists = () => {
                     </h1>
                 </div>
                 <div className="grid grid-cols-[4fr,1fr] gap-4 mx-4">
-                    <div className="mb-4 p-4 rounded-xl border-slate-700 bg-slate-700">
+                    <div className=" p-4 rounded-xl border-slate-700 bg-slate-700">
                         {activeList ? (
                             <ShoppingListDetails list={activeList} />
                         ) : (

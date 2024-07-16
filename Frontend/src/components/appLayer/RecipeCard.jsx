@@ -15,7 +15,7 @@ function RecipeCard({ recipe }) {
     });
 
     return (
-        <div className="rounded-2xl" style={{ backgroundColor: "#00ADB5" }}>
+        <div className="rounded-2xl" style={{ backgroundColor: "#00ADB5", zIndex: 800 }}>
             <Link to={`/app/recipe/${recipe.id}`}>
                 <div className="relative">
                     <img
