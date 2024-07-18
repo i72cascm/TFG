@@ -30,4 +30,10 @@
         public string? Image { get; set; }
         public string? Url { get; set; }
     }
+
+    public class RecipeSearchModel
+    {
+        public required string Query { get; set; }
+        public required List<string> Tags { get; set; }
+    }
 }

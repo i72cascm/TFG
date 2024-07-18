@@ -1,9 +1,6 @@
-﻿using Backend.Services;
-using Backend.Modelos;
+﻿using Backend.Modelos;
+using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace Backend.Controllers
 {
@@ -18,23 +15,28 @@ namespace Backend.Controllers
             _edamamService = edamamService;
         }
 
-        [HttpGet("test")]
-        public async Task<IActionResult> Test()
+        [HttpPost]
+        public async Task<IActionResult> GetHealthyRecipes([FromBody] RecipeSearchModel searchModel)
         {
             try
             {
-                var query = "chocolate";
-                var healthLabels = new List<string> { "tree-nut-free", "keto-friendly", "shellfish-free", "lupine-free", "wheat-free", "paleo" };
-                var dietLabels = new List<string> { "high-protein", "low-carb" };
-                var recipeInfos = await _edamamService.GetRecipesAsync(query, healthLabels, dietLabels);
+                var search = searchModel.Query;
+                var tags = searchModel.Tags;
+                Console.WriteLine("Search Query: " + search);
+                Console.WriteLine("Tags: " + String.Join(", ", tags));
 
-                // Escribir los nombres de las recetas en la consola
-                foreach (var recipeInfo in recipeInfos)
-                {
-                    Console.WriteLine($"Label: {recipeInfo.Label}");
-                }
+                // Posibles etiquetas 
+                var possibleHealthLabels = new List<string> { "alcohol-cocktail", "alcohol-free", "celery-free", "crustacean-free", "dairy-free", "egg-free", "fish-free", "fodmap-free", "gluten-free", "immuno-supportive", "keto-friendly", "kidney-friendly", "low-fat-abs", "low-potassium", "low-sugar", "lupine-free", "mollusk-free", "mustard-free", "no-oil-added", "paleo", "peanut-free", "pescatarian", "pork-free", "red-meat-free", "sesame-free", "shellfish-free", "soy-free", "sugar-conscious", "sulfite-free", "tree-nut-free", "vegan", "vegetarian", "wheat-free" };
+                var possibleDietLabels = new List<string> { "balanced", "high-fiber", "high-protein", "low-carb", "low-fat", "low-sodium" };
 
-                return Ok("Check the console for the recipe details.");
+                // Filtrar etiquetas basadas en los tags del modelo
+                var healthLabels = tags.Where(tag => possibleHealthLabels.Contains(tag)).ToList();
+                var dietLabels = tags.Where(tag => possibleDietLabels.Contains(tag)).ToList();
+
+                // Llamar a la API de Edamam
+                var recipeInfos = await _edamamService.GetRecipesAsync(search, healthLabels, dietLabels);
+         
+                return Ok(recipeInfos);
             }
             catch (Exception ex)
             {
