@@ -10,6 +10,7 @@ import {
     ScrollText,
     LayoutDashboard,
     Settings,
+    Shield
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
@@ -139,6 +140,13 @@ export default function Sidebar() {
                                 text="User Settings"
                                 to="/app/user-settings"
                                 active={isActive("/app/user-settings")}
+                            />
+                            <SidebarItem
+                                icon={<Shield size={25} />}
+                                text="Admin Panel"
+                                to="/app/admin-panel"
+                                active={isActive("/app/admin-panel")}
+                                isAdmin={true}
                             />
                         </ul>
 

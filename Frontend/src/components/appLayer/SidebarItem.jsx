@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { SidebarContext } from "./Sidebar";
 
-export function SidebarItem({ icon, text, active, to, onClick, isLogOut }) {
+export function SidebarItem({ icon, text, active, to, onClick, isLogOut, isAdmin }) {
     const { expanded } = useContext(SidebarContext);
 
     const content = (
@@ -10,6 +10,7 @@ export function SidebarItem({ icon, text, active, to, onClick, isLogOut }) {
             className={`relative flex text-center items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer h-12 transition-colors group ${
                 isLogOut
                     ? "bg-gradient-to-tr from-red-700 to-red-300 text-gray-600"
+                    : isAdmin ? "bg-gradient-to-tr from-yellow-400 to-yellow-100 text-red-600"
                     : active
                     ? "bg-gradient-to-tr from-indigo-400 to-indigo-200 text-indigo-800"
                     : "bg-gray-200 hover:bg-indigo-50 text-gray-600"
