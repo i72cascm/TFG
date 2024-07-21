@@ -49,7 +49,7 @@ const HealthyRecipes = () => {
         } else {
             console.error(result.message);
             setHealthyRecipes([]);
-            setSearchCompleted(true); 
+            setSearchCompleted(true);
         }
     };
 
@@ -112,10 +112,11 @@ const HealthyRecipes = () => {
                                       />
                                   ))
                                 : searchCompleted && (
-                                      <p className="text-white text-xl">
-                                          No recipes found. Try different tags
-                                          or search terms.
-                                      </p>
+                                      <div className="flex justify-center">
+                                          <p className="text-white text-xl">
+                                              No recipes found. Try different tags or search terms.
+                                          </p>
+                                      </div>
                                   )}
                         </div>
                     </div>

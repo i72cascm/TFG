@@ -34,10 +34,56 @@ namespace Backend.Controllers
                 Name = b.Name,
                 LastNames = b.LastNames,
                 UserName = b.UserName,
-                Password = b.Password,
-                BirthDate = b.BirthDate
+                BirthDate = b.BirthDate,
+                Role = b.Role,
             }).ToListAsync();
 
+        // Obtener todos los usuarios de la base de datos paginados
+        [HttpGet("paged")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersPaged(int page = 1, int pageSize = 15)
+        {
+            try
+            {
+                // Calculo total de usuarios en la BD y de páginas
+                var totalUsers = await _userContext.Users.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+
+                // Verificar si la página solicitada está dentro del rango
+                if (page < 1 || page > totalPages)
+                {
+                    return BadRequest(new { Message = $"Page {page} is out of bounds. Please enter a page number between 1 and {totalPages}." });
+                }
+
+                // Calculo total de documentos a omitir dependiendo de la pagina solicitada
+                int skip = (page - 1) * pageSize;
+
+                // Obtener la página de usuarios solicitada
+                var users = await _userContext.Users
+                   .OrderBy(u => u.Email)
+                   .Skip(skip)
+                   .Take(pageSize)
+                   .Select(b => new UserDto
+                   {
+                       ID = b.UserID,
+                       Email = b.Email,
+                       Name = b.Name,
+                       LastNames = b.LastNames,
+                       UserName = b.UserName,
+                       BirthDate = b.BirthDate,
+                       Role = b.Role,
+                   })
+                   .ToListAsync();
+
+                // Retornar la lista de usuarios paginada junto con información de la paginación
+                return Ok(new { Users = users, PageInfo = new { CurrentPage = page, TotalPages = totalPages, PageSize = pageSize, TotalUsers = totalUsers } });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+            
 
         // Obtener un único usuario a partir de su Email
         [HttpGet("{email}")]
