@@ -101,7 +101,8 @@ namespace Backend.Controllers
                 Name = user.Name,
                 LastNames = user.LastNames,
                 UserName = user.UserName,
-                BirthDate = user.BirthDate
+                BirthDate = user.BirthDate,
+                Role = user.Role,
             };
 
             return Ok(userDto);

@@ -2,6 +2,8 @@ import { ChevronFirst, ChevronLast, LogOut, User } from "lucide-react";
 import { createContext, useState } from "react";
 import logo from "/logo.png";
 import { SidebarItem } from "./SidebarItem";
+import useUserSettings from "../../hooks/mainApp/useUserSettings";
+import { useQuery } from "@tanstack/react-query";
 import {
     Apple,
     Home,
@@ -45,6 +47,17 @@ export default function Sidebar() {
     const location = useLocation();
     const signOut = useSignOut();
     const navigate = useNavigate();
+
+    // Hooks
+    const { getUserByEmail } = useUserSettings();
+
+    // Al renderizar esta página, llamar al método de obtención de datos del usuario
+    const { data: userInfo } = useQuery({
+        queryKey: ["user-settings"],
+        queryFn: () => getUserByEmail(userData?.email),
+        keepPreviousData: true,
+        enabled: !!userData?.email,
+    });
 
     const isActive = (path) => location.pathname === path;
 
@@ -141,13 +154,15 @@ export default function Sidebar() {
                                 to="/app/user-settings"
                                 active={isActive("/app/user-settings")}
                             />
-                            <SidebarItem
-                                icon={<Shield size={25} />}
-                                text="Admin Panel"
-                                to="/app/admin-panel"
-                                active={isActive("/app/admin-panel")}
-                                isAdmin={true}
-                            />
+                            {userInfo && userInfo.data.role === 'Admin' && (
+                                <SidebarItem
+                                    icon={<Shield size={25} />}
+                                    text="Admin Panel"
+                                    to="/app/admin-panel"
+                                    active={isActive("/app/admin-panel")}
+                                    isAdmin={true}
+                                />
+                            )}
                         </ul>
 
                         <div className="px-3 mb-3">
