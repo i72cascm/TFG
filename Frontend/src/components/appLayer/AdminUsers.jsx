@@ -74,8 +74,8 @@ const AdminUsers = () => {
         isLoading: loadingPaginatedUsers,
         isPlaceholderData
     } = useQuery({
-        queryKey: ["user-admin", page],
-        queryFn: () => getPagedUsers(page),
+        queryKey: ["user-admin", page, search],
+        queryFn: () => getPagedUsers(page, 15, search),
         keepPreviousData: true,
     });
 
@@ -92,6 +92,7 @@ const AdminUsers = () => {
     // Realizar búsqueda por nombre al pulsar el intro
     const handleKeyDown = (event) => {
         if (event.key === "Enter") {
+            setPage(1); 
             setSearch(inputValue);
         }
     };
@@ -105,7 +106,7 @@ const AdminUsers = () => {
     const handleDeleteAccount = () => {
         deleteUserMutation.mutate(selectedUser, {
             onSuccess: () => {
-                toast.error("User account has been deleted.");
+                setPage(1);
             },
             onError: (error) => {
                 toast.error(

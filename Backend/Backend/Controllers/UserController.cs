@@ -40,16 +40,30 @@ namespace Backend.Controllers
 
         // Obtener todos los usuarios de la base de datos paginados
         [HttpGet("paged")]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersPaged(int page = 1, int pageSize = 15)
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersPaged(int page = 1, int pageSize = 15, string search = "")
         {
             try
             {
+                // Query para la DDBB
+                IQueryable<User> query = _userContext.Users;
+
+                // Filtrar si 'search' no está vacío
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(u => u.Email.Contains(search));
+                }
+
                 // Calculo total de usuarios en la BD y de páginas
-                var totalUsers = await _userContext.Users.CountAsync();
+                var totalUsers = await query.CountAsync();
                 var totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
 
-                // Verificar si la página solicitada está dentro del rango
-                if (page < 1 || page > totalPages)
+                // Verificar si la página solicitada está dentro del rango o si no hay páginas
+                if (totalPages == 0)
+                {
+                    // No hay usuarios que coincidan con el filtro o no hay usuarios en absoluto
+                    return Ok(new { Users = new List<UserDto>(), PageInfo = new { CurrentPage = 0, TotalPages = 0, PageSize = pageSize, TotalUsers = 0 } });
+                }
+                else if (page < 1 || page > totalPages)
                 {
                     return BadRequest(new { Message = $"Page {page} is out of bounds. Please enter a page number between 1 and {totalPages}." });
                 }
@@ -58,7 +72,7 @@ namespace Backend.Controllers
                 int skip = (page - 1) * pageSize;
 
                 // Obtener la página de usuarios solicitada
-                var users = await _userContext.Users
+                var users = await query
                    .OrderBy(u => u.Email)
                    .Skip(skip)
                    .Take(pageSize)
@@ -76,14 +90,12 @@ namespace Backend.Controllers
 
                 // Retornar la lista de usuarios paginada junto con información de la paginación
                 return Ok(new { Users = users, PageInfo = new { CurrentPage = page, TotalPages = totalPages, PageSize = pageSize, TotalUsers = totalUsers } });
-
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
             }
         }
-            
 
         // Obtener un único usuario a partir de su Email
         [HttpGet("{email}")]

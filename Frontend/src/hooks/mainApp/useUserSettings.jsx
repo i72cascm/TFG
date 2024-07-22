@@ -42,10 +42,10 @@ const useUserSettings = () => {
         }
     };
 
-    const getPagedUsers = async (page = 1, pageSize = 15) => {
+    const getPagedUsers = async (page = 1, pageSize = 15, search) => {
         try {
             const response = await fetch(
-                `${urlApi}/api/user/paged?page=${page}&pageSize=${pageSize}`,
+                `${urlApi}/api/user/paged?page=${page}&pageSize=${pageSize}&search=${search}`,
                 {
                     method: "GET",
                     headers: {
@@ -56,7 +56,6 @@ const useUserSettings = () => {
             );
             if (response.status === 200) {
                 const data = await response.json();
-                console.log(data);
                 return response.ok ? { success: true, data } : { success: false, message: data.Message };
             } else {
                 const errorData = await response.json();
