@@ -1,17 +1,61 @@
 import React, { useEffect, useState } from "react";
 import AdminUsers from "../../components/appLayer/AdminUsers";
 import AdminRecipes from "../../components/appLayer/AdminRecipes";
+import useUserSettings from "../../hooks/mainApp/useUserSettings";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 const AdminPanel = () => {
-    // Leer el estado inicial desde localStorage o usar 'AdminUsers' por defecto
-    const [visibleComponent, setVisibleComponent] = useState(
-        localStorage.getItem("visibleComponent") || "AdminUsers"
-    );
+    const getAuthState = () => {
+        const cookieValue = document.cookie
+            .split("; ")
+            .find(row => row.startsWith("_auth_state="))
+            ?.split("=")[1];
 
-    // Guardar el estado en localStorage cada vez que visibleComponent cambie
+        if (!cookieValue) {
+            return null;
+        }
+
+        try {
+            const decodedValue = decodeURIComponent(cookieValue);
+            return JSON.parse(decodedValue);
+        } catch (error) {
+            console.error("Error parsing auth state:", error);
+            return null;
+        }
+    };
+    const userData = getAuthState();
+    const navigate = useNavigate();
+    const { getUserByEmail } = useUserSettings();
+    const [visibleComponent, setVisibleComponent] = useState(localStorage.getItem("visibleComponent") || "AdminUsers");
+
+    // Al renderizar esta página, llamar al método de obtención de datos del usuario
+    const { data: userInfo, isLoading, isError } = useQuery({
+        queryKey: ['user', userData?.email],
+        queryFn: () => getUserByEmail(userData?.email),
+        keepPreviousData: true,
+        enabled: !!userData?.email,
+    });
+
+    useEffect(() => {
+        if (!isLoading && !isError) {
+            if (userInfo.data.role !== "Admin") {
+                navigate('/app/home'); // Redirige a Home si no es admin
+            }
+        }
+    }, [userInfo, isLoading, isError, navigate]);
+
     useEffect(() => {
         localStorage.setItem("visibleComponent", visibleComponent);
     }, [visibleComponent]);
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (isError) {
+        return <div>Error fetching user data</div>;
+    }
 
     return (
         <>
