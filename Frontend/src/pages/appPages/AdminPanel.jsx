@@ -49,14 +49,6 @@ const AdminPanel = () => {
         localStorage.setItem("visibleComponent", visibleComponent);
     }, [visibleComponent]);
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    if (isError) {
-        return <div>Error fetching user data</div>;
-    }
-
     return (
         <>
             <div className="min-w-[1000px] overflow-x-auto">

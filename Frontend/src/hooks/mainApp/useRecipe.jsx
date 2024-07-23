@@ -42,6 +42,32 @@ const useRecipe = () => {
         }
     };
 
+    const getPagedRecipes = async (page = 1, pageSize = 15, search) => {
+        try {
+            const response = await fetch(
+                `${urlApi}/api/recipe/paged?page=${page}&pageSize=${pageSize}&search=${search}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                }
+            );
+            if (response.status === 200) {
+                const data = await response.json();
+                return response.ok ? { success: true, data } : { success: false, message: data.Message };
+            } else {
+                const errorData = await response.json();
+                return { success: false, message: errorData.Message };
+            }
+        } catch (error) {
+            console.error("Error fetching paged recipes:", error);
+            return { success: false, message: error.message };
+        }
+    };
+
+
     const getUserRecipes = async (userEmail, pageParam, isPublish, search) => {
         try {
             const response = await fetch(
@@ -229,6 +255,7 @@ const useRecipe = () => {
         deleteAllRecipesByUserMutation,
         deleteRecipeMutation,
         getAllRecipes,
+        getPagedRecipes,
         getUserRecipes,
         getRecipeById,
     };

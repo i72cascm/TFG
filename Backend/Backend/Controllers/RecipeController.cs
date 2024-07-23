@@ -85,6 +85,68 @@ namespace Backend.Controllers
             }
         }
 
+        // Obtener todas las recetas paginadas
+        [HttpGet("paged")]
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetRecipesPaged(int page = 1, int pageSize = 15, string search = "")
+        {
+            try
+            {
+                // Query para la DDBB
+                IQueryable<Recipe> query = _recipeContext.Recipes
+                    .Include(r => r.User) 
+                    .Include(r => r.RecipeTag);
+
+                // Filtrar si 'search' no está vacío
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(r => r.Title.Contains(search) || r.User!.Email.Contains(search) || r.User.UserName.Contains(search));
+                }
+
+                // Calculo total de recetas en la BD y de páginas
+                var totalRecipes = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalRecipes / (double)pageSize);
+
+                // Verificar si la página solicitada está dentro del rango o si no hay páginas
+                if (totalPages == 0)
+                {
+                    // No hay usuarios que coincidan con el filtro o no hay recetas en absoluto
+                    return Ok(new { Recipes = new List<RecipeDto>(), PageInfo = new { CurrentPage = 0, TotalPages = 0, PageSize = pageSize, TotalRecipes = 0 } });
+                }
+                else if (page < 1 || page > totalPages)
+                {
+                    return BadRequest(new { Message = $"Page {page} is out of bounds. Please enter a page number between 1 and {totalPages}." });
+                }
+
+                // Calculo total de documentos a omitir dependiendo de la pagina solicitada
+                int skip = (page - 1) * pageSize;
+
+                // Obtener la página de recetas solicitada
+                var recipes = await query
+                   .OrderBy(r => r.Title)
+                   .Skip(skip)
+                   .Take(pageSize)
+                   .Select(r => new RecipeDto
+                   {
+                       ID = r.RecipeID,
+                       UserName = r.User!.UserName,
+                       Email = r.User.Email,
+                       Title = r.Title,
+                       PreparationTime = r.PreparationTime,
+                       ServingsNumber = r.ServingsNumber,
+                       TagName = r.RecipeTag != null ? r.RecipeTag.TagName : null,
+                       IsPublish = r.IsPublish
+                   })
+                   .ToListAsync();
+
+                // Retornar la lista de recetas paginada junto con información de la paginación
+                return Ok(new { Recipes = recipes, PageInfo = new { CurrentPage = page, TotalPages = totalPages, PageSize = pageSize, TotalRecipes = totalRecipes } });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
         // Obtener todas las recetas del usuario actual
         [HttpGet("user/{email}")]
         public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email, int pageParam = 1, int pageSize = 5, bool isPublish = true, string search = "")

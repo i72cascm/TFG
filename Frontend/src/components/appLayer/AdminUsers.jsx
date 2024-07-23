@@ -89,7 +89,7 @@ const AdminUsers = () => {
         }
     }, [paginatedUsers]);
 
-    // Realizar búsqueda por nombre al pulsar el intro
+    // Realizar búsqueda por email al pulsar el intro
     const handleKeyDown = (event) => {
         if (event.key === "Enter") {
             setPage(1); 

@@ -37,7 +37,6 @@ const Home = () => {
         isError,
     } = useQuery({
         queryKey: ["recipes", userData?.email],
-        queryFn: getAllRecipes,
         select: (data) => data?.data || [], // Accede a la propiedad 'data' del objeto y utiliza un array vacío como valor por defecto
     });
 
@@ -69,9 +68,7 @@ const Home = () => {
             <Searchbar onClick={handleSearchSubmit} />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 items-start m-8">
-                {recipeList.map((recipe) => {
-                    return <RecipeCard key={recipe.id} recipe={recipe} />;
-                })}
+                
             </div>
         </>
     );
