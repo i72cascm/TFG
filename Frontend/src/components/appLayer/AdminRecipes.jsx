@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Modal from "react-modal";
 import Pagination from "./Pagination";
+import { useNavigate } from "react-router-dom";
+import { urlApi } from "../../constants/endpoint";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 
 // Estilos del modal
@@ -31,6 +33,7 @@ const AdminRecipes = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [inputValue, setInputValue] = useState("");
     const [search, setSearch] = useState("");
+    const navigate = useNavigate();
 
     // Funciones para abrir y cerrar los modales
     const openDeleteRecipeModal = (recipeId) => {
@@ -160,10 +163,30 @@ const AdminRecipes = () => {
                             key={recipe.id}
                             className="text-white flex items-center justify-between border-b border-gray-300 py-2 text-center"
                         >
-                            <span className="flex-1">{recipe.title}</span>
-                            <span className="flex-1">{recipe.userName}</span>
-                            <span className="flex-1">{recipe.email}</span>
+                            <span className="flex-1 overflow-hidden whitespace-nowrap truncate">
+                                {recipe.title}
+                            </span>
+                            <span className="flex-1 overflow-hidden whitespace-nowrap truncate">
+                                {recipe.userName}
+                            </span>
+                            <span className="flex-1 overflow-hidden whitespace-nowrap truncate">
+                                {recipe.email}
+                            </span>
+                            {recipe.isPublish ? (
+                                <span className="flex-1">Yes</span>
+                            ) : (
+                                <span className="flex-1">No</span>
+                            )}
+                            <span className="flex-1 overflow-hidden whitespace-nowrap truncate">
+                                {recipe.tagName}
+                            </span>
                             <div className="flex-1">
+                                <button
+                                    className="bg-blue-500 text-white py-1 px-3 rounded mr-2 hover:bg-blue-600 font-semibold"
+                                    onClick={() => navigate(`/app/recipe/${recipe.id}`)}
+                                >
+                                    See Recipe
+                                </button>
                                 <button
                                     className="bg-red-500 text-white py-1 px-3 rounded mr-2 hover:bg-red-600 font-semibold"
                                     onClick={() =>

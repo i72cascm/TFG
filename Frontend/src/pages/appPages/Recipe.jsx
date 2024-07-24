@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import { toast, ToastContainer } from "react-toastify";
 import CommentItem from "../../components/appLayer/CommentItem";
 import { useQuery } from "@tanstack/react-query";
+import useUserSettings from "../../hooks/mainApp/useUserSettings";
 import { useNavigate } from "react-router-dom";
 import {
     CircleUserRound,
@@ -85,6 +86,15 @@ const Recipe = () => {
     } = useLike();
     const { getComments, postCommentMutation, deleteCommentMutation } =
         useComment();
+    const { getUserByEmail } = useUserSettings();
+
+    // Al renderizar esta página, llamar al método de obtención de datos del usuario
+    const { data: userInfo} = useQuery({
+        queryKey: ['user', userData?.email],
+        queryFn: () => getUserByEmail(userData?.email),
+        keepPreviousData: true,
+        enabled: !!userData?.email,
+    });
 
     // Al renderizar el componente, llamar al método de obtención de like status
     const { data: likeStatus, isLoading: loadLike } = useQuery({
@@ -250,6 +260,7 @@ const Recipe = () => {
                     handlePostComment={handlePostComment}
                     replyToMessage={replyToMessage}
                     setReplyToMessage={setReplyToMessage}
+                    isAdmin={userInfo.data.role}
                 />
                 {comment.children.length > 0 && (
                     <div style={{ marginLeft: "20px" }}>

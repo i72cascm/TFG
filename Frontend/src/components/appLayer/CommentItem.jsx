@@ -9,6 +9,7 @@ const CommentItem = ({
     handlePostComment,
     replyToMessage,
     setReplyToMessage,
+    isAdmin
 }) => {
     return (
         <div
@@ -19,7 +20,7 @@ const CommentItem = ({
             <div className="flex justify-between">
                 <p className="text-gray-400 py-1">{comment.userName}</p>
                 <div className="flex grid-cols-2 gap-3">
-                    {comment.userName === userData.name && (
+                    {(comment.userName === userData.name || isAdmin === "Admin")&& (
                         <button
                             onClick={() =>
                                 handleDeleteComment(comment.recipeCommentID)
