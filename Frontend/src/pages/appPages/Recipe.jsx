@@ -309,7 +309,7 @@ const Recipe = () => {
                     <div className="mt-6 grid grid-cols-2">
                         <div className="flex justify-center items-center relative group">
                             <img
-                                src={recipe.recipeImage}
+                                src={recipe.imageUrl}
                                 alt="Recipe Image"
                                 className="rounded-lg transition duration-300 ease-in-out group-hover:brightness-50"
                                 style={{
@@ -478,7 +478,7 @@ const Recipe = () => {
             >
                 <div className="relative">
                     <img
-                        src={recipe.recipeImage}
+                        src={recipe.imageUrl}
                         alt="Recipe Image"
                         className="rounded-lg"
                         style={{

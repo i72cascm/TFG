@@ -19,7 +19,7 @@ function RecipeCard({ recipe }) {
             <Link to={`/app/recipe/${recipe.id}`}>
                 <div className="relative">
                     <img
-                        src={recipe.recipeImage}
+                        src={recipe.imageUrl}
                         alt="Recipe Image"
                         className="rounded-t-lg w-full h-52 object-cover"
                     />
@@ -58,7 +58,7 @@ function RecipeCard({ recipe }) {
             <div className="flex justify-center mb-5 mt-1">
                 <Link
                     to={`/app/recipe/${recipe.id}`}
-                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-600 border-2 border-blue-300 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 >
                     See Recipe
                 </Link>

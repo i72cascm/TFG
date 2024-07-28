@@ -28,6 +28,9 @@ namespace Backend.Modelos
         public required string RecipeImage { get; set; }
 
         [Required]
+        public required string ImageUrl { get; set; }
+
+        [Required]
         public required string Steps {  get; set; }
 
         [Required]

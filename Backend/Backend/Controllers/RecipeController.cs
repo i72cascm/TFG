@@ -15,6 +15,7 @@ using Backend.Services;
 using Backend.Filters;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Backend.Migrations;
 
 namespace Backend.Controllers
 {
@@ -26,74 +27,15 @@ namespace Backend.Controllers
         private readonly DBContext _recipeContext = recipeContext; // Contexto de la DB
         private readonly IAuthService _authService = authService;
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetAllRecipes()
-        {
-            try
-            {
-                // Obtener todas las recetas
-                var recipes = await _recipeContext.Recipes
-                    .Include(r => r.User)
-                    .Include(r => r.RecipeTag)
-                    .ToListAsync();
-
-                var client = new AmazonS3Client();
-                var bucketName = "i72cascm-recipes-web-app";
-                var recipesDto = new List<RecipeDto>();
-
-                foreach (var recipe in recipes)
-                {
-                    // Obtener la imagen desde S3
-                    var getRequest = new GetObjectRequest
-                    {
-                        BucketName = bucketName,
-                        Key = recipe.RecipeImage
-                    };
-
-                    using (var response = await client.GetObjectAsync(getRequest))
-                    using (var responseStream = response.ResponseStream)
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        responseStream.CopyTo(memoryStream);
-                        byte[] imageBytes = memoryStream.ToArray();
-
-                        // Convertir bytes a base64
-                        string base64Image = Convert.ToBase64String(imageBytes);
-                        string imageDataUrl = $"data:{response.Headers["Content-Type"]};base64,{base64Image}";
-
-                        // Agregar a la lista de DTOs
-                        recipesDto.Add(new RecipeDto
-                        {
-                            ID = recipe.RecipeID,
-                            UserName = recipe.User?.UserName,
-                            Title = recipe.Title,
-                            PreparationTime = recipe.PreparationTime,
-                            ServingsNumber = recipe.ServingsNumber,
-                            RecipeImage = imageDataUrl,
-                            Steps = recipe.Steps,
-                            Ingredients = recipe.Ingredients,
-                            TagName = recipe.RecipeTag?.TagName,
-                            IsPublish = recipe.IsPublish,
-                        });
-                    }
-                }
-                return Ok(recipesDto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
-            }
-        }
-
-        // Obtener todas las recetas paginadas
+        // Obtener todas las recetas paginadas para la tabla Admin
         [HttpGet("paged")]
-        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetRecipesPaged(int page = 1, int pageSize = 15, string search = "")
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetRecipesPagedAdmin(int page = 1, int pageSize = 15, string search = "")
         {
             try
             {
                 // Query para la DDBB
                 IQueryable<Recipe> query = _recipeContext.Recipes
-                    .Include(r => r.User) 
+                    .Include(r => r.User)
                     .Include(r => r.RecipeTag);
 
                 // Filtrar si 'search' no está vacío
@@ -147,9 +89,97 @@ namespace Backend.Controllers
             }
         }
 
+        // Método de búsqueda avanzado para la Home page
+        [HttpGet("paged/home/{email}")]
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetRecipesPagedHome(string email, int pageParam = 1, int pageSize = 15, string inputValue = "", bool sortByLikes = false, int category = 0)
+        {
+            try
+            {
+
+                // Obtener los tags de interes del usuario
+                var user = await _recipeContext.Users
+                    .Include(u => u.UserTags!)
+                    .ThenInclude(ut => ut.RecipeTag)
+                    .SingleOrDefaultAsync(u => u.Email == email);
+
+                if (user == null)
+                {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                // Obtener los IDs de los tags asociados al usuario
+                var userTagIds = user.UserTags?.Select(ut => ut.RecipeTagID).ToArray() ?? Array.Empty<int>();     
+
+                // Continuar con la query base que ya filtra por publicación
+                IQueryable<Recipe> baseQuery = _recipeContext.Recipes
+                    .Where(r => r.IsPublish == true);
+
+                // Filtrar si 'search' no está vacío
+                if (!string.IsNullOrWhiteSpace(inputValue))
+                {
+                    baseQuery = baseQuery.Where(r => r.Title.Contains(inputValue) || r.Ingredients.Contains(inputValue) || r.User!.UserName.Contains(inputValue));
+                }
+
+                // Filtrar por categoría en caso de haber elegido una
+                if (category != 0)
+                {
+                    baseQuery = baseQuery.Where(r => r.RecipeTagID == category);
+                }
+
+                if (userTagIds.Any())
+                {
+                    baseQuery = baseQuery.Select(r => new
+                    {
+                        Recipe = r,
+                        Priority = userTagIds.Contains(r.RecipeTagID) ? 0 : 1
+                    })
+                        .OrderBy(x => x.Priority)
+                        .ThenBy(x => x.Recipe.RecipeID)
+                        .Select(x => x.Recipe);
+                }
+                else
+                {
+                    baseQuery = baseQuery.OrderBy(r => r.RecipeID);
+                }
+
+                // Calculo de recetas a omitir dependiendo de la página solicitada
+                int skip = (pageParam - 1) * pageSize;
+
+                // Obtener la página de recetas solicitada
+                var recipes = await baseQuery
+                    .Include(r => r.User)
+                    .Include(r => r.RecipeTag)
+                    .Select(r => new RecipeDto
+                    {
+                        ID = r.RecipeID,
+                        UserName = r.User!.UserName,
+                        Title = r.Title,
+                        ImageUrl = r.ImageUrl,
+                        PreparationTime = r.PreparationTime,
+                        ServingsNumber = r.ServingsNumber,
+                        TagName = r.RecipeTag!.TagName,
+                        IsPublish = r.IsPublish
+                    })
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    data = recipes,
+                    nextCursor = recipes.Count < pageSize ? (int?)null : pageParam + 1
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
         // Obtener todas las recetas del usuario actual
         [HttpGet("user/{email}")]
-        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email, int pageParam = 1, int pageSize = 5, bool isPublish = true, string search = "")
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email, int pageParam = 1, int pageSize = 10, bool isPublish = true, string search = "")
         {
             try
             {               
@@ -182,45 +212,23 @@ namespace Backend.Controllers
                     .Take(pageSize)
                     .ToListAsync();
 
-                var client = new AmazonS3Client();
-                var bucketName = "i72cascm-recipes-web-app";
                 var recipesDto = new List<RecipeDto>();
 
                 foreach (var recipe in recipes)
-                {
-                    // Obtener la imagen desde S3
-                    var getRequest = new GetObjectRequest
+                {   
+                    recipesDto.Add(new RecipeDto
                     {
-                        BucketName = bucketName,
-                        Key = recipe.RecipeImage
-                    };
-
-                    using (var response = await client.GetObjectAsync(getRequest))
-                    using (var responseStream = response.ResponseStream)
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        responseStream.CopyTo(memoryStream);
-                        byte[] imageBytes = memoryStream.ToArray();
-
-                        // Convertir bytes a base64
-                        string base64Image = Convert.ToBase64String(imageBytes);
-                        string imageDataUrl = $"data:{response.Headers["Content-Type"]};base64,{base64Image}";
-
-                        // Agregar a la lista de DTOs
-                        recipesDto.Add(new RecipeDto
-                        {
-                            ID = recipe.RecipeID,
-                            UserName = user.UserName,
-                            Title = recipe.Title,
-                            PreparationTime = recipe.PreparationTime,
-                            ServingsNumber = recipe.ServingsNumber,
-                            RecipeImage = imageDataUrl,
-                            Steps = recipe.Steps,
-                            Ingredients = recipe.Ingredients,
-                            TagName = recipe.RecipeTag?.TagName,
-                            IsPublish = recipe.IsPublish,
-                        });
-                    }
+                        ID = recipe.RecipeID,
+                        UserName = user.UserName,
+                        Title = recipe.Title,
+                        PreparationTime = recipe.PreparationTime,
+                        ServingsNumber = recipe.ServingsNumber,
+                        ImageUrl = recipe.ImageUrl,
+                        Steps = recipe.Steps,
+                        Ingredients = recipe.Ingredients,
+                        TagName = recipe.RecipeTag?.TagName,
+                        IsPublish = recipe.IsPublish,
+                    });     
                 }
 
                 return Ok(new
@@ -234,7 +242,6 @@ namespace Backend.Controllers
                 return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
             }
         }
-
 
         // Obtener una receta a través de su ID
         [HttpGet("{id}")]
@@ -252,42 +259,21 @@ namespace Backend.Controllers
                     return NotFound();
                 }
 
-                // Obtener imagen desde AWS S3
-                var client = new AmazonS3Client();
-                var bucketName = "i72cascm-recipes-web-app";
-                var recipesDto = new List<RecipeDto>();
-                var getRequest = new GetObjectRequest
+                var recipeDto = new RecipeDto
                 {
-                    BucketName = bucketName,
-                    Key = recipe.RecipeImage
+                    ID = recipe.RecipeID,
+                    UserName = recipe.User?.UserName,
+                    Title = recipe.Title,
+                    PreparationTime = recipe.PreparationTime,
+                    ServingsNumber = recipe.ServingsNumber,
+                    ImageUrl = recipe.ImageUrl,
+                    Steps = recipe.Steps,
+                    Ingredients = recipe.Ingredients,
+                    TagName = recipe.RecipeTag?.TagName,
+                    IsPublish = recipe.IsPublish,
                 };
-
-                using (var response = await client.GetObjectAsync(getRequest))
-                using (var responseStream = response.ResponseStream)
-                using (var memoryStream = new MemoryStream())
-                {
-                    responseStream.CopyTo(memoryStream);
-                    byte[] imageBytes = memoryStream.ToArray();
-
-                    // Convertir bytes a base64
-                    string base64Image = Convert.ToBase64String(imageBytes);
-                    string imageDataUrl = $"data:{response.Headers["Content-Type"]};base64,{base64Image}";
-
-                    var recipeDto = new RecipeDto
-                    {
-                        ID = recipe.RecipeID,
-                        UserName = recipe.User?.UserName,
-                        Title = recipe.Title,
-                        PreparationTime = recipe.PreparationTime,
-                        ServingsNumber = recipe.ServingsNumber,
-                        RecipeImage = imageDataUrl,
-                        Steps = recipe.Steps,
-                        Ingredients = recipe.Ingredients,
-                        TagName = recipe.RecipeTag?.TagName,
-                        IsPublish = recipe.IsPublish,
-                    };
-                    return Ok(recipeDto);
-                }
+                return Ok(recipeDto);
+                
 
             }
             catch (Exception ex)
@@ -334,6 +320,9 @@ namespace Backend.Controllers
                 };
                 await client.PutObjectAsync(putRequest);
 
+                // Generar la URL de la imagen
+                var imageUrl = $"https://{bucketName}.s3.eu-west-3.amazonaws.com/{imageFileName}";
+
                 var recipe = new Recipe
                 {
                     UserID = user.UserID,
@@ -341,6 +330,7 @@ namespace Backend.Controllers
                     PreparationTime = recipeInsertDto.PreparationTime,
                     ServingsNumber = recipeInsertDto.ServingsNumber,
                     RecipeImage = imageFileName,
+                    ImageUrl = imageUrl,
                     Steps = recipeInsertDto.Steps,
                     Ingredients = recipeInsertDto.Ingredients,
                     RecipeTagID = recipeInsertDto.RecipeTagID
@@ -354,7 +344,7 @@ namespace Backend.Controllers
                     Title = recipeInsertDto.Title,
                     PreparationTime = recipeInsertDto.PreparationTime,
                     ServingsNumber = recipeInsertDto.ServingsNumber,
-                    RecipeImage = imageFileName,
+                    ImageUrl = imageFileName,
                     Steps = recipeInsertDto.Steps,
                     Ingredients = recipeInsertDto.Ingredients,
                     TagName = recipe.RecipeTag?.TagName
@@ -440,7 +430,6 @@ namespace Backend.Controllers
                 return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
             }
         }
-
 
         // Eliminar todas las recetas de un usuario dado su email
         [HttpDelete("user/{email}")]

@@ -1,12 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import Searchbar from "../../components/appLayer/Searchbar";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import RecipeCard from "../../components/appLayer/RecipeCard";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 const Home = () => {
-    // Llamada de los métodos en el hook de recetas
-    const { getAllRecipes } = useRecipe();
-    
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
         const cookieValue = document.cookie
@@ -29,19 +27,52 @@ const Home = () => {
         }
     };
     const userData = getAuthState();
+
+    // Estados
+    const [inputValue, setInputValue] = useState("");
+    const [sortByLikes, setSortByLikes] = useState(false);
+    const [category, setCategory] = useState(0);
+
+    // Manejadores para los cambios de estado
+    const handleSortByLikesChange = (event) => {
+        setSortByLikes(event.target.checked);
+    };
+
+    const handleCategoryChange = (event) => {
+        setCategory(event.target.value);
+    };
+
+    // Llamada de los métodos en el hook de recetas
+    const { getPagedRecipesHome } = useRecipe();
+
     // Al renderizar esta página, llamar al método de obtención de recetas y guardarlas en el array de listas
     const {
-        data: recipeList,
+        data,
         error,
         isLoading,
         isError,
-    } = useQuery({
-        queryKey: ["recipes", userData?.email],
-        select: (data) => data?.data || [], // Accede a la propiedad 'data' del objeto y utiliza un array vacío como valor por defecto
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch,
+    } = useInfiniteQuery({
+        queryKey: ["user-recipes", userData?.email],
+        queryFn: ({ pageParam = 1 }) =>
+            getPagedRecipesHome(
+                userData?.email,
+                pageParam,
+                inputValue,
+                sortByLikes,
+                category
+            ),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage.nextCursor;
+        },
     });
 
-    const handleSearchSubmit = () => {
-        console.log("Searching...");
+    const handleSubmitSearch = () => {
+        refetch();
     };
 
     // Mensaje de cargando recetas
@@ -58,17 +89,52 @@ const Home = () => {
         console.error("Failed to fetch recipes:", error.message);
         return (
             <div className="flex justify-center mt-6">
-                <h1 className="text-3xl text-stone-300">Failed to load recipes... </h1>
+                <h1 className="text-3xl text-stone-300">
+                    Failed to load recipes...{" "}
+                </h1>
             </div>
         );
     }
 
     return (
         <>
-            <Searchbar onClick={handleSearchSubmit} />
+            <Searchbar
+                inputValue={inputValue}
+                onInputChange={(e) => setInputValue(e.target.value)}
+                sortByLikes={sortByLikes}
+                onSortByLikesChange={handleSortByLikesChange}
+                category={category}
+                onCategoryChange={handleCategoryChange}
+                handleSubmitSearch={handleSubmitSearch}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 items-start m-8">
-                
+                {data.pages.map((group, i) => (
+                    <React.Fragment key={i}>
+                        {group.data.map((recipe) => {
+                            return (
+                                <RecipeCard key={recipe.id} recipe={recipe} />
+                            );
+                        })}
+                    </React.Fragment>
+                ))}
+            </div>
+            <div className="flex justify-center mt-6">
+                {hasNextPage && (
+                    <button
+                        onClick={() => fetchNextPage()}
+                        disabled={!hasNextPage || isFetchingNextPage}
+                        className={`text-2xl px-4 py-1 w-64 mb-4 ${
+                            isFetchingNextPage
+                                ? "bg-slate-700 text-gray-300"
+                                : "bg-slate-500 text-white"
+                        } rounded-lg`}
+                    >
+                        {isFetchingNextPage
+                            ? "Loading more..."
+                            : hasNextPage && "Load More"}
+                    </button>
+                )}
             </div>
         </>
     );

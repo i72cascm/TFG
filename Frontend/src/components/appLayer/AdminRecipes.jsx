@@ -46,7 +46,7 @@ const AdminRecipes = () => {
     };
 
     // Hook
-    const { getPagedRecipes, deleteRecipeMutation } = useRecipe();
+    const { getPagedRecipesAdmin, deleteRecipeMutation } = useRecipe();
 
     // Query para obtener las recetas
     const {
@@ -55,7 +55,7 @@ const AdminRecipes = () => {
         isPlaceholderData,
     } = useQuery({
         queryKey: ["user-recipes", "recipes", page, search],
-        queryFn: () => getPagedRecipes(page, 15, search),
+        queryFn: () => getPagedRecipesAdmin(page, 15, search),
         keepPreviousData: true,
     });
 

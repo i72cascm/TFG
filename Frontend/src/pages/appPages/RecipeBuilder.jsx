@@ -372,7 +372,7 @@ const RecipeBuilder = () => {
 
                             <button
                                 onClick={handleButtonClick}
-                                className=" mt-5 ml-40 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                className=" mt-5 ml-40 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 border-2 border-blue-300"
                             >
                                 Select an Image
                             </button>
@@ -432,7 +432,7 @@ const RecipeBuilder = () => {
                         <div className="mt-6 flex flex-col items-center">
                             <button
                                 type="submit"
-                                className="w-3/5 px-4 p-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-2xl font-semibold"
+                                className="w-3/5 px-4 p-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 border-2 border-blue-300 text-2xl font-semibold"
                                 disabled={postRecipeMutation.isPending}
                             >
                                 {postRecipeMutation.isPending

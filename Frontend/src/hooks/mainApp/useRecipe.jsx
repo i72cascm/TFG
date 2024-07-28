@@ -30,7 +30,6 @@ const useRecipe = () => {
 
             if (response.status === 200) {
                 const data = await response.json();
-                console.log(data);
                 return { success: true, data };
             } else if (response.status === 400 || response.status === 500) {
                 const errorData = await response.json();
@@ -42,7 +41,7 @@ const useRecipe = () => {
         }
     };
 
-    const getPagedRecipes = async (page = 1, pageSize = 15, search) => {
+    const getPagedRecipesAdmin = async (page = 1, pageSize = 15, search) => {
         try {
             const response = await fetch(
                 `${urlApi}/api/recipe/paged?page=${page}&pageSize=${pageSize}&search=${search}`,
@@ -67,6 +66,32 @@ const useRecipe = () => {
         }
     };
 
+    const getPagedRecipesHome = async (userEmail, pageParam, inputValue, sortByLikes, category) => {
+        try {
+            console.log("input:", inputValue)
+            const response = await fetch(
+                `${urlApi}/api/recipe/paged/home/${userEmail}?pageParam=${pageParam}&inputValue=${inputValue}&sortByLikes=${sortByLikes}&category=${category}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                }
+            );
+            if (response.status === 200) {
+                const json = await response.json();
+                console.log(json)
+                return json;
+            } else {
+                const errorData = await response.json();
+                return { success: false, message: errorData.Message };
+            }
+        } catch (error) {
+            console.error("Error fetching paged recipes:", error);
+            return { success: false, message: error.message };
+        }
+    };
 
     const getUserRecipes = async (userEmail, pageParam, isPublish, search) => {
         try {
@@ -106,7 +131,7 @@ const useRecipe = () => {
 
             if (response.status === 200) {
                 const data = await response.json();
-                console.log(data);
+                console.log(data)
                 return { success: true, data };
             } else if (response.status === 400 || response.status === 500) {
                 const errorData = await response.json();
@@ -255,7 +280,8 @@ const useRecipe = () => {
         deleteAllRecipesByUserMutation,
         deleteRecipeMutation,
         getAllRecipes,
-        getPagedRecipes,
+        getPagedRecipesAdmin,
+        getPagedRecipesHome,
         getUserRecipes,
         getRecipeById,
     };

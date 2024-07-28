@@ -48,7 +48,7 @@ namespace Backend.Services
             </html>";
 
             var sender = "recipeapptfgi72cascm@gmail.com";
-            var pw = "tefu nrui cljm ccyf";
+            var pw = "twbd kfcf nhao cffd";
 
             var client = new SmtpClient("smtp.gmail.com", 587)
             {
@@ -109,7 +109,7 @@ namespace Backend.Services
             </html>";
 
             var sender = "recipeapptfgi72cascm@gmail.com";
-            var pw = "tefu nrui cljm ccyf";
+            var pw = "twbd kfcf nhao cffd";
 
             var client = new SmtpClient("smtp.gmail.com", 587)
             {
