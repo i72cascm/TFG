@@ -32,6 +32,7 @@ const Home = () => {
     const [inputValue, setInputValue] = useState("");
     const [sortByLikes, setSortByLikes] = useState(false);
     const [category, setCategory] = useState(0);
+    const [maxTime, setMaxTime] = useState(0);
 
     // Manejadores para los cambios de estado
     const handleSortByLikesChange = (event) => {
@@ -53,6 +54,7 @@ const Home = () => {
         isError,
         fetchNextPage,
         hasNextPage,
+        isFetching,
         isFetchingNextPage,
         refetch,
     } = useInfiniteQuery({
@@ -63,16 +65,21 @@ const Home = () => {
                 pageParam,
                 inputValue,
                 sortByLikes,
-                category
+                category,
+                maxTime
             ),
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {
             return lastPage.nextCursor;
         },
+        keepPreviousData: false, 
+        refetchOnWindowFocus: false, 
     });
 
     const handleSubmitSearch = () => {
-        refetch();
+        refetch({
+            refetchPage: (page, index, allPages) => index === 0 
+          });
     };
 
     // Mensaje de cargando recetas
@@ -105,7 +112,10 @@ const Home = () => {
                 onSortByLikesChange={handleSortByLikesChange}
                 category={category}
                 onCategoryChange={handleCategoryChange}
+                maxTime={maxTime}
+                setMaxTime={setMaxTime}
                 handleSubmitSearch={handleSubmitSearch}
+                isFetching={isFetching}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 items-start m-8">

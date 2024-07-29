@@ -66,11 +66,10 @@ const useRecipe = () => {
         }
     };
 
-    const getPagedRecipesHome = async (userEmail, pageParam, inputValue, sortByLikes, category) => {
+    const getPagedRecipesHome = async (userEmail, pageParam, inputValue, sortByLikes, category, maxTime) => {
         try {
-            console.log("input:", inputValue)
             const response = await fetch(
-                `${urlApi}/api/recipe/paged/home/${userEmail}?pageParam=${pageParam}&inputValue=${inputValue}&sortByLikes=${sortByLikes}&category=${category}`,
+                `${urlApi}/api/recipe/paged/home/${userEmail}?pageParam=${pageParam}&inputValue=${inputValue}&sortByLikes=${sortByLikes}&category=${category}&maxTime=${maxTime}`,
                 {
                     method: "GET",
                     headers: {

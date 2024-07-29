@@ -23,10 +23,10 @@ const HealthyRecipeCard = ({recipe}) => {
                 />
             </div>
             <div className="mt-3 font-medium text-center overflow-hidden text-ellipsis whitespace-nowrap px-4">
-                <p className="mt-3 font-medium text-2xl">{truncateLabel(label, 25)}</p>
+                <p className="mt-3 font-medium text-2xl">{truncateLabel(label, 20)}</p>
             </div>
             <div className="flex justify-center mb-5 mt-3">
-                <a href={url} target="_blank" rel="noopener noreferrer" className="capitalize inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <a href={url} target="_blank" rel="noopener noreferrer" className="capitalize inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 border-2 border-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                     see blog entry
                 </a>
             </div>

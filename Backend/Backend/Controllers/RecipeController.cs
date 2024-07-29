@@ -91,8 +91,9 @@ namespace Backend.Controllers
 
         // Método de búsqueda avanzado para la Home page
         [HttpGet("paged/home/{email}")]
-        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetRecipesPagedHome(string email, int pageParam = 1, int pageSize = 15, string inputValue = "", bool sortByLikes = false, int category = 0)
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetRecipesPagedHome(string email, int pageParam = 1, int pageSize = 15, bool sortByLikes = false, string inputValue = "", int category = 0, int maxTime = 0)
         {
+
             try
             {
 
@@ -126,7 +127,13 @@ namespace Backend.Controllers
                     baseQuery = baseQuery.Where(r => r.RecipeTagID == category);
                 }
 
-                if (userTagIds.Any())
+                // Restricción de tiempo máximo
+                if (maxTime > 0)
+                {
+                    baseQuery = baseQuery.Where(r => r.PreparationTime <= maxTime);
+                }
+
+                if (userTagIds.Any() && category == 0)
                 {
                     baseQuery = baseQuery.Select(r => new
                     {
@@ -140,6 +147,14 @@ namespace Backend.Controllers
                 else
                 {
                     baseQuery = baseQuery.OrderBy(r => r.RecipeID);
+                }
+
+                if (sortByLikes)
+                {
+                    baseQuery = baseQuery
+                        .GroupJoin(_recipeContext.RecipeLikes, r => r.RecipeID, rl => rl.RecipeID, (r, rl) => new { Recipe = r, Likes = rl.Count() })
+                        .OrderByDescending(x => x.Likes)
+                        .Select(x => x.Recipe);
                 }
 
                 // Calculo de recetas a omitir dependiendo de la página solicitada

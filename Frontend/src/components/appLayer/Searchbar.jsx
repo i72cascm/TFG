@@ -9,7 +9,10 @@ const Searchbar = ({
     onSortByLikesChange,
     category,
     onCategoryChange,
-    handleSubmitSearch
+    maxTime,
+    setMaxTime,
+    handleSubmitSearch,
+    isFetching,
 }) => {
     // Estados
     const [tags, setTags] = useState([]);
@@ -37,7 +40,7 @@ const Searchbar = ({
 
     return (
         <div
-            className="flex flex-col justify-center items-center bg-white p-4"
+            className="flex flex-col items-center bg-white p-4"
             style={{
                 width: "100%",
                 maxWidth: "4xl",
@@ -48,7 +51,7 @@ const Searchbar = ({
                 backgroundRepeat: "no-repeat",
             }}
         >
-            <div className="w-full max-w-4xl mb-4 p-1">
+            <div className="w-full mb-4 p-1">
                 <div className="flex justify-center">
                     <input
                         type="text"
@@ -60,15 +63,20 @@ const Searchbar = ({
                     <button
                         type="submit"
                         onClick={handleSubmitSearch}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-r-xl border-2 border-blue-300 hover:bg-blue-800 focus:outline-none"
+                        disabled={isFetching}
+                        className={`px-4 py-2 rounded-r-xl border-2 border-blue-300 focus:outline-none ${
+                            isFetching
+                                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                : "bg-blue-600 text-white hover:bg-blue-800"
+                        }`}
                     >
                         Search
                     </button>
                 </div>
             </div>
-            <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-lg ">
-                <div className="bg-slate-500 rounded-xl border-2 border-gray-300 text-white">
-                    <label className="flex items-center space-x-2 rounded-md px-2 py-2 ">
+            <div className="flex flex-col gap-14 sm:flex-row justify-center w-full text-center">
+                <div className="flex items-center justify-center bg-slate-500 rounded-xl border-2 border-gray-300 text-white w-48">
+                    <label className="space-x-2 rounded-md px-2 py-2 ">
                         <input
                             type="checkbox"
                             checked={sortByLikes}
@@ -80,13 +88,33 @@ const Searchbar = ({
                         </span>
                     </label>
                 </div>
-                <div className="bg-slate-500 rounded-xl border-2 border-gray-300">
+                <div className="flex items-center justify-center bg-slate-500 rounded-xl border-2 border-gray-300 text-white w-48">
+                    <label className=" space-x-2 rounded-md px-2 py-2">
+                        <input
+                            type="number"
+                            min="0"
+                            max="9999"
+                            value={maxTime}
+                            onChange={(e) =>
+                                setMaxTime(
+                                    Math.max(
+                                        0,
+                                        Math.min(9999, Number(e.target.value))
+                                    )
+                                )
+                            }
+                            className="form-checkbox cursor-pointer w-16 text-black text-center font-medium"
+                        />
+                        <span className="font-semibold">Max. Time</span>
+                    </label>
+                </div>
+                <div className="bg-slate-500 rounded-xl border-2 border-gray-300 w-48">
                     <select
                         value={category}
                         onChange={onCategoryChange}
                         className="bg-slate-500 font-semibold rounded-xl px-2 py-2 focus:outline-none cursor-pointer text-white text-center"
                     >
-                        <option value="">Select Type of recipe</option>
+                        <option value={0}>Select Type of recipe</option>
                         {tags.map((tag) => (
                             <option
                                 key={tag.recipeTagID}
