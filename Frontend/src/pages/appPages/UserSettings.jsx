@@ -152,9 +152,9 @@ const UserSettings = () => {
         setTag2("");
         setTag3("");
         if (dataTags && dataTags.success && dataTags.data.length > 0) {
-            setTag1(dataTags.data[0].recipeTagID || "");
-            setTag2(dataTags.data[1]?.recipeTagID || "");
-            setTag3(dataTags.data[2]?.recipeTagID || "");
+            setTag1((dataTags.data[0].recipeTagID || "").toString());
+            setTag2((dataTags.data[1]?.recipeTagID || "").toString());
+            setTag3((dataTags.data[2]?.recipeTagID || "").toString());
         }
     }, [dataTags]);
 
@@ -301,6 +301,7 @@ const UserSettings = () => {
 
         // Crear un Set para eliminar duplicados y comparar su tamaño con el array original
         const uniqueTags = new Set(selectedTags);
+        console.log(uniqueTags)
 
         if (uniqueTags.size !== selectedTags.length) {
             toast.error("You cannot select duplicate recipe types.");
