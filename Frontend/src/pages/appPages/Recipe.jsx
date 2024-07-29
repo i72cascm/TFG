@@ -33,9 +33,11 @@ const customStyles = {
         maxHeight: "90%",
         padding: 0,
         overflow: "hidden",
+        zIndex: 1000,
     },
     overlay: {
         backgroundColor: "rgba(0, 0, 0, 0.75)",
+        zIndex: 999
     },
 };
 
