@@ -52,6 +52,9 @@ namespace Backend
             // Email Service
             builder.Services.AddTransient<IEmailService, EmailService>();
 
+            // Edamam Service
+            builder.Services.AddHttpClient<IEdamamService, EdamamSearchService>();
+
             // Add Validators
             builder.Services.AddScoped<IValidator<UserInsertDto>, UserInsertValidator>();
 
@@ -89,7 +92,7 @@ namespace Backend
 
             // Edamam Config
             builder.Services.Configure<EdamamOptions>(builder.Configuration.GetSection("Edamam"));
-            builder.Services.AddHttpClient<EdamamService>();
+            builder.Services.AddHttpClient<EdamamSearchService>();
 
             var app = builder.Build();
 

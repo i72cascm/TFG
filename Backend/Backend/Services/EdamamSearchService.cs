@@ -13,12 +13,12 @@ using System.Collections.Generic;
 
 namespace Backend.Services
 {
-    public class EdamamService
+    public class EdamamSearchService : IEdamamService
     {
         private readonly HttpClient _httpClient;
         private readonly EdamamOptions _options;
 
-        public EdamamService(HttpClient httpClient, IOptions<EdamamOptions> options)
+        public EdamamSearchService(HttpClient httpClient, IOptions<EdamamOptions> options)
         {
             _httpClient = httpClient;
             _options = options.Value;

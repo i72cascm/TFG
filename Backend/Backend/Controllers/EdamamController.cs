@@ -8,9 +8,9 @@ namespace Backend.Controllers
     [Route("api/[controller]")]
     public class EdamamController : ControllerBase
     {
-        private readonly EdamamService _edamamService;
+        private readonly IEdamamService _edamamService;
 
-        public EdamamController(EdamamService edamamService)
+        public EdamamController(IEdamamService edamamService)
         {
             _edamamService = edamamService;
         }
@@ -22,8 +22,6 @@ namespace Backend.Controllers
             {
                 var search = searchModel.Query;
                 var tags = searchModel.Tags;
-                Console.WriteLine("Search Query: " + search);
-                Console.WriteLine("Tags: " + String.Join(", ", tags));
 
                 // Posibles etiquetas 
                 var possibleHealthLabels = new List<string> { "alcohol-cocktail", "alcohol-free", "celery-free", "crustacean-free", "dairy-free", "egg-free", "fish-free", "fodmap-free", "gluten-free", "immuno-supportive", "keto-friendly", "kidney-friendly", "low-fat-abs", "low-potassium", "low-sugar", "lupine-free", "mollusk-free", "mustard-free", "no-oil-added", "paleo", "peanut-free", "pescatarian", "pork-free", "red-meat-free", "sesame-free", "shellfish-free", "soy-free", "sugar-conscious", "sulfite-free", "tree-nut-free", "vegan", "vegetarian", "wheat-free" };
