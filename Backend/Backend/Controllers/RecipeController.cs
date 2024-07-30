@@ -22,10 +22,11 @@ namespace Backend.Controllers
     [ServiceFilter(typeof(ValidateTokenAttribute))]
     [Route("api/[controller]")]
     [ApiController]
-    public class RecipeController(DBContext recipeContext, IAuthService authService) : Controller
+    public class RecipeController(DBContext recipeContext, IAuthService authService, IEdamamNutritionService edamamNutritionService) : Controller
     {
         private readonly DBContext _recipeContext = recipeContext; // Contexto de la DB
         private readonly IAuthService _authService = authService;
+        private readonly IEdamamNutritionService _edamamNutritionService = edamamNutritionService;
 
         // Obtener todas las recetas paginadas para la tabla Admin
         [HttpGet("paged")]
@@ -307,6 +308,25 @@ namespace Backend.Controllers
                 if (user == null)
                 {
                     return BadRequest(new { Message = "User does not exist." });
+                }
+
+                var ingredientsList = recipeInsertDto.Ingredients.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(ingr => ingr.Trim())
+                    .ToList();
+
+                // Obtener información nutricional
+                var nutritionInfo = await _edamamNutritionService.GetNutritionInfoAsync(ingredientsList);
+                if (nutritionInfo != null)
+                {
+                    // Imprimir los valores nutricionales por consola
+                    Console.WriteLine($"Calories: {nutritionInfo.Calories}");
+                    Console.WriteLine($"Fat: {nutritionInfo.TotalNutrients.Fat.Quantity} {nutritionInfo.TotalNutrients.Fat.Unit}");
+                    Console.WriteLine($"Protein: {nutritionInfo.TotalNutrients.Protein.Quantity} {nutritionInfo.TotalNutrients.Protein.Unit}");
+                    Console.WriteLine($"Carbohydrates: {nutritionInfo.TotalNutrients.Carbohydrate.Quantity} {nutritionInfo.TotalNutrients.Carbohydrate.Unit}");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to get nutrition information.");
                 }
 
                 var client = new AmazonS3Client();

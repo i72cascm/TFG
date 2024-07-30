@@ -1,4 +1,5 @@
 ﻿using Backend.Modelos;
+using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +9,14 @@ namespace Backend.Controllers
     [Route("api/[controller]")]
     public class EdamamController : ControllerBase
     {
-        private readonly IEdamamService _edamamService;
+        private readonly IEdamamRecipeService _edamamRecipeService;
+        private readonly IEdamamNutritionService _edamamNutritionService;
 
-        public EdamamController(IEdamamService edamamService)
+        public EdamamController(IEdamamRecipeService edamamRecipeService, IEdamamNutritionService edamamNutritionService)
         {
-            _edamamService = edamamService;
+            _edamamRecipeService = edamamRecipeService;
+            _edamamNutritionService = edamamNutritionService;
+            
         }
 
         [HttpPost]
@@ -32,7 +36,7 @@ namespace Backend.Controllers
                 var dietLabels = tags.Where(tag => possibleDietLabels.Contains(tag)).ToList();
 
                 // Llamar a la API de Edamam
-                var recipeInfos = await _edamamService.GetRecipesAsync(search, healthLabels, dietLabels);
+                var recipeInfos = await _edamamRecipeService.GetRecipesAsync(search, healthLabels, dietLabels);
          
                 return Ok(recipeInfos);
             }
@@ -41,6 +45,32 @@ namespace Backend.Controllers
                 // Escribir el error en la consola
                 Console.WriteLine(ex.Message);
                 return StatusCode(500, "An error occurred while fetching recipes.");
+            }
+        }
+
+        [HttpPost("nutrition")]
+        public async Task<IActionResult> GetNutritionInfo([FromBody] IngredientsRequest ingredientsRequest)
+        {
+            try
+            {
+                if (ingredientsRequest == null || !ingredientsRequest.Ingredients.Any())
+                {
+                    return BadRequest("No ingredients provided.");
+                }
+
+                var nutritionInfo = await _edamamNutritionService.GetNutritionInfoAsync(ingredientsRequest.Ingredients);
+
+                if (nutritionInfo == null)
+                {
+                    return NotFound("Nutrition information could not be found for the provided ingredients.");
+                }
+
+                return Ok(nutritionInfo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred while fetching nutrition information.");
             }
         }
     }

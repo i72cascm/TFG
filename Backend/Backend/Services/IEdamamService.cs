@@ -1,16 +1,20 @@
 ﻿using Backend.Modelos;
-using Microsoft.AspNetCore.Mvc;
-
-#pragma warning disable CS8625 
-#pragma warning disable CS8602 
+using Backend.Models;
 
 namespace Backend.Services
 {
-    public interface IEdamamService
+
+    #pragma warning disable CS8625
+
+    public interface IEdamamRecipeService
     {
         Task<List<RecipeInfo>> GetRecipesAsync(string query, List<string> healthLabels = null, List<string> dietLabels = null);
     }
-}
 
-#pragma warning restore CS8625
-#pragma warning restore CS8602
+    public interface IEdamamNutritionService
+    {
+        Task<NutritionInfo> GetNutritionInfoAsync(List<string> ingredients);
+    }
+
+    #pragma warning restore CS8625
+}

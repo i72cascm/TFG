@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Backend.Services
 {
-    public class EdamamSearchService : IEdamamService
+    public class EdamamSearchService : IEdamamRecipeService
     {
         private readonly HttpClient _httpClient;
         private readonly EdamamOptions _options;

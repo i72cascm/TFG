@@ -36,6 +36,14 @@ namespace Backend.Modelos
         [Required]
         public required string Ingredients { get; set; }
 
+        public float Calories { get; set; }
+
+        public float Fat { get; set; }
+
+        public float Protein { get; set; }
+
+        public float Carbohydrate { get; set; }
+
         [ForeignKey("RecipeTag")]
         public int RecipeTagID { get; set; }
 
