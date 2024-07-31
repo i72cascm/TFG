@@ -152,10 +152,9 @@ const useRecipe = () => {
                 },
                 body: JSON.stringify(recipeData),
             });
-
             if (response.status === 201) {
                 return { success: true };
-            } else if (response.status === 400 || response.status === 500) {
+            } else {
                 const errorData = await response.json();
                 return { success: false, message: errorData.Message };
             }
@@ -171,7 +170,7 @@ const useRecipe = () => {
             queryClient.invalidateQueries({
                 queryKey: ["user-recipes", "recipes"],
             });
-        },
+        }
     });
 
     const postPublishRecipe = async (recipeId) => {

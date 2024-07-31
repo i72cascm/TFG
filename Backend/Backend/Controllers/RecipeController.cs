@@ -287,6 +287,10 @@ namespace Backend.Controllers
                     Ingredients = recipe.Ingredients,
                     TagName = recipe.RecipeTag?.TagName,
                     IsPublish = recipe.IsPublish,
+                    Calories = recipe.Calories,
+                    Fat = recipe.Fat,
+                    Protein = recipe.Protein,
+                    Carbohydrate = recipe.Carbohydrate
                 };
                 return Ok(recipeDto);
                 
@@ -310,25 +314,16 @@ namespace Backend.Controllers
                     return BadRequest(new { Message = "User does not exist." });
                 }
 
-                var ingredientsList = recipeInsertDto.Ingredients.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(ingr => ingr.Trim())
-                    .ToList();
+                // Procesar la entrada de ingredientes para manejar ambos formatos
+                var ingredientsList = recipeInsertDto.Ingredients
+                                    .Split(new[] { ',', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(ingredient => ingredient.Trim())
+                                    .ToList();
 
                 // Obtener información nutricional
                 var nutritionInfo = await _edamamNutritionService.GetNutritionInfoAsync(ingredientsList);
-                if (nutritionInfo != null)
-                {
-                    // Imprimir los valores nutricionales por consola
-                    Console.WriteLine($"Calories: {nutritionInfo.Calories}");
-                    Console.WriteLine($"Fat: {nutritionInfo.TotalNutrients.Fat.Quantity} {nutritionInfo.TotalNutrients.Fat.Unit}");
-                    Console.WriteLine($"Protein: {nutritionInfo.TotalNutrients.Protein.Quantity} {nutritionInfo.TotalNutrients.Protein.Unit}");
-                    Console.WriteLine($"Carbohydrates: {nutritionInfo.TotalNutrients.Carbohydrate.Quantity} {nutritionInfo.TotalNutrients.Carbohydrate.Unit}");
-                }
-                else
-                {
-                    Console.WriteLine("Failed to get nutrition information.");
-                }
 
+                // Datos S3 AWS
                 var client = new AmazonS3Client();
                 var bucketName = "i72cascm-recipes-web-app";
                 var bucketExists = await Amazon.S3.Util.AmazonS3Util.DoesS3BucketExistV2Async(client, bucketName);
@@ -368,7 +363,12 @@ namespace Backend.Controllers
                     ImageUrl = imageUrl,
                     Steps = recipeInsertDto.Steps,
                     Ingredients = recipeInsertDto.Ingredients,
-                    RecipeTagID = recipeInsertDto.RecipeTagID
+                    RecipeTagID = recipeInsertDto.RecipeTagID,
+                    Calories = nutritionInfo?.Calories ?? 0,  
+                    Carbohydrate = nutritionInfo?.TotalNutrients?.Carbohydrate?.Quantity ?? 0, 
+                    Fat = nutritionInfo?.TotalNutrients?.Fat?.Quantity ?? 0,  
+                    Protein = nutritionInfo?.TotalNutrients?.Protein?.Quantity ?? 0
+
                 };
 
                 _recipeContext.Recipes.Add(recipe);

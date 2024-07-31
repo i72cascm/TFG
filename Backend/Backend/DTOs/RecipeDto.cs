@@ -13,5 +13,9 @@
         public string? Ingredients { get; set; }
         public string? TagName { get; set; }
         public bool IsPublish {  get; set; }
+        public float Calories { get; set; }
+        public float Fat { get; set; }
+        public float Protein { get; set; }
+        public float Carbohydrate { get; set; }
     }
 }

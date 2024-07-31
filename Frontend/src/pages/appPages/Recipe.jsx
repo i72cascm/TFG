@@ -11,6 +11,7 @@ import CommentItem from "../../components/appLayer/CommentItem";
 import { useQuery } from "@tanstack/react-query";
 import useUserSettings from "../../hooks/mainApp/useUserSettings";
 import { useNavigate } from "react-router-dom";
+import { PieChart } from "react-minimal-pie-chart";
 import {
     CircleUserRound,
     Clock,
@@ -37,7 +38,7 @@ const customStyles = {
     },
     overlay: {
         backgroundColor: "rgba(0, 0, 0, 0.75)",
-        zIndex: 999
+        zIndex: 999,
     },
 };
 
@@ -73,6 +74,9 @@ const Recipe = () => {
     const [replyToMessage, setReplyToMessage] = useState("");
     const [organizedComments, setOrganizedComments] = useState([]);
     const [modalDeleteRecipe, setModalDeleteRecipe] = useState(false);
+    const [fatPercent, setFatPercent] = useState(0);
+    const [proteinPercent, setProteinPercent] = useState(0);
+    const [carbohydratePercent, setCarbohydratePercent] = useState(0);
     const openDeleteRecipeModal = () => setModalDeleteRecipe(true);
     const closeDeleteRecipeModal = () => setModalDeleteRecipe(false);
     const navigate = useNavigate();
@@ -91,8 +95,8 @@ const Recipe = () => {
     const { getUserByEmail } = useUserSettings();
 
     // Al renderizar esta página, llamar al método de obtención de datos del usuario
-    const { data: userInfo} = useQuery({
-        queryKey: ['user', userData?.email],
+    const { data: userInfo } = useQuery({
+        queryKey: ["user", userData?.email],
         queryFn: () => getUserByEmail(userData?.email),
         keepPreviousData: true,
         enabled: !!userData?.email,
@@ -250,6 +254,20 @@ const Recipe = () => {
         return rootComments;
     };
 
+    // Obtener porcentaje de cada valor nutricional para
+    useEffect(() => {
+        if (recipe) {
+            let totalWeight = recipe.carbohydrate + recipe.protein + recipe.fat;
+            let carbohydratePercent = (recipe.carbohydrate / totalWeight) * 100;
+            let proteinPercent = (recipe.protein / totalWeight) * 100;
+            let fatPercent = (recipe.fat / totalWeight) * 100;
+
+            setFatPercent(fatPercent);
+            setProteinPercent(proteinPercent);
+            setCarbohydratePercent(carbohydratePercent);
+        }
+    }, [recipe]);
+
     const renderComments = (comments) => {
         return comments.map((comment) => (
             <div key={comment.recipeCommentID}>
@@ -283,241 +301,329 @@ const Recipe = () => {
 
     return (
         <>
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            />
-            <div className="flex justify-center mt-2 mb-7">
-                <h1 className="text-sky-600 font-black text-7xl col-span-2 capitalize">
-                    {recipe.title}
-                </h1>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-4 mx-4">
-                <div
-                    className="mb-4 p-4 rounded-xl border-slate-700 bg-slate-700"
-                    style={{
-                        backgroundImage: `url(${fondoPizarra})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                    }}
-                >
-                    <div className="mt-6 grid grid-cols-2">
-                        <div className="flex justify-center items-center relative group">
-                            <img
-                                src={recipe.imageUrl}
-                                alt="Recipe Image"
-                                className="rounded-lg transition duration-300 ease-in-out group-hover:brightness-50"
-                                style={{
-                                    width: "300px",
-                                    height: "300px",
-                                    objectFit: "cover",
-                                }}
-                            />
-                            <div
-                                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out"
-                                onClick={() => setModalIsOpen(true)}
-                            >
-                                <Fullscreen size={40} className="text-white" />
+            <div className="min-w-[1000px] overflow-x-auto">
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
+                <div className="flex justify-center mt-2 mb-7">
+                    <h1 className="text-sky-600 font-black text-7xl col-span-2 capitalize">
+                        {recipe.title}
+                    </h1>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-4 mx-4">
+                    <div
+                        className="mb-4 p-4 rounded-xl border-slate-700 bg-slate-700"
+                        style={{
+                            backgroundImage: `url(${fondoPizarra})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                        }}
+                    >
+                        <div className="mt-6 grid grid-cols-2">
+                            <div className="flex justify-center items-center relative group">
+                                <img
+                                    src={recipe.imageUrl}
+                                    alt="Recipe Image"
+                                    className="rounded-lg transition duration-300 ease-in-out group-hover:brightness-50"
+                                    style={{
+                                        width: "300px",
+                                        height: "300px",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                                <div
+                                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out"
+                                    onClick={() => setModalIsOpen(true)}
+                                >
+                                    <Fullscreen
+                                        size={40}
+                                        className="text-white"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <div
-                            className="flex items-center text-white p-4 rounded-lg"
-                            style={{
-                                height: "300px",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                            }}
-                        >
                             <div
-                                className="grid grid-cols-2 gap-4 items-center text-center"
+                                className="flex items-center text-white p-4 rounded-lg"
+                                style={{
+                                    height: "300px",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <div
+                                    className="grid grid-cols-2 gap-4 items-center text-center"
+                                    style={{ width: "100%" }}
+                                >
+                                    <div className="flex flex-col items-center">
+                                        <Clock size={25} className="mb-3" />
+                                        <p className="font-semibold text-xl mb-3">
+                                            {recipe.preparationTime} minutes
+                                        </p>
+                                    </div>
+                                    <div className="font-semibold flex flex-col items-center">
+                                        <Users size={25} className="mb-3" />
+                                        <p className="text-xl mb-3">
+                                            {recipe.servingsNumber} servings
+                                        </p>
+                                    </div>
+                                    <div className="font-semibold flex flex-col items-center">
+                                        <Tag size={25} className="mb-3" />
+                                        <p className="text-xl mb-3">
+                                            {recipe.tagName}
+                                        </p>
+                                    </div>
+                                    <div className="font-semibold flex flex-col items-center">
+                                        <button onClick={handleIsLiked}>
+                                            {likeStatus ? (
+                                                <Heart
+                                                    size={25}
+                                                    color="red"
+                                                    fill="red"
+                                                    className="mb-3"
+                                                />
+                                            ) : (
+                                                <Heart
+                                                    size={25}
+                                                    className="mb-3"
+                                                />
+                                            )}
+                                        </button>
+                                        <p className="text-xl mb-3">
+                                            {totalLikes} Likes
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-center mt-4">
+                                    <CircleUserRound
+                                        size={25}
+                                        className="mb-3"
+                                    />
+                                    <p className="font-semibold text-xl mb-3">
+                                        {recipe.userName}
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                className="grid grid-cols-2 items-center mt-20 text-center h-4/6"
                                 style={{ width: "100%" }}
                             >
-                                <div className="flex flex-col items-center">
-                                    <Clock size={25} className="mb-3" />
-                                    <p className="font-semibold text-xl mb-3">
-                                        {recipe.preparationTime} minutes
+                                <div>
+                                    <p className="font-semibold text-xl mb-3 text-white">
+                                        Calories:
+                                    </p>
+                                    <p className="font-semibold text-xl mb-3 text-white">
+                                        {recipe.calories} Kcal
                                     </p>
                                 </div>
-                                <div className="font-semibold flex flex-col items-center">
-                                    <Users size={25} className="mb-3" />
-                                    <p className="text-xl mb-3">
-                                        {recipe.servingsNumber} servings
+                                <div>
+                                    <p className="font-semibold text-xl mb-3" style={{color: '#ecac4c'}}>
+                                        Fat:
+                                    </p>
+                                    <p className="font-semibold text-xl mb-3" style={{color: '#ecac4c'}}>
+                                        {recipe.fat} g
                                     </p>
                                 </div>
-                                <div className="font-semibold flex flex-col items-center">
-                                    <Tag size={25} className="mb-3" />
-                                    <p className="text-xl mb-3">
-                                        {recipe.tagName}
+                                <div>
+                                    <p className="font-semibold text-xl mb-3" style={{color: '#dd4f4a'}}>
+                                        Protein:
+                                    </p>
+                                    <p className="font-semibold text-xl mb-3" style={{color: '#dd4f4a'}}>
+                                        {recipe.protein} g
                                     </p>
                                 </div>
-                                <div className="font-semibold flex flex-col items-center">
-                                    <button onClick={handleIsLiked}>
-                                        {likeStatus ? (
-                                            <Heart
-                                                size={25}
-                                                color="red"
-                                                fill="red"
-                                                className="mb-3"
-                                            />
-                                        ) : (
-                                            <Heart size={25} className="mb-3" />
-                                        )}
-                                    </button>
-                                    <p className="text-xl mb-3">
-                                        {totalLikes} Likes
+                                <div>
+                                    <p className="font-semibold text-xl mb-3" style={{color: '#f3ea66'}}>
+                                        Carbohydrate:
+                                    </p>
+                                    <p className="font-semibold text-xl mb-3" style={{color: '#f3ea66'}}>
+                                        {recipe.carbohydrate} g
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-center mt-4">
-                                <CircleUserRound size={25} className="mb-3" />
-                                <p className="font-semibold text-xl mb-3">
-                                    {recipe.userName}
-                                </p>
+                            <div>
+                                <PieChart
+                                    radius={35}
+                                    lineWidth={65}
+                                    animate={true}
+                                    animationDuration={1400}
+                                    animationEasing="ease-out"
+                                    data={[
+                                        {
+                                            title: "Fat",
+                                            value: fatPercent,
+                                            color: "#ecac4c",
+                                        },
+                                        {
+                                            title: "Protein",
+                                            value: proteinPercent,
+                                            color: "#dd4f4a",
+                                        },
+                                        {
+                                            title: "Carbohydrate",
+                                            value: carbohydratePercent,
+                                            color: "#f3ea66",
+                                        },
+                                    ]}
+                                    label={({ dataEntry }) =>
+                                        `${Math.round(dataEntry.percentage)}%`
+                                    }
+                                    labelStyle={{
+                                        fontSize: "7px",
+                                        fontFamily: "sans-serif",
+                                        fontWeight: 'bold',
+                                        fill: "#000000", 
+                                        
+                                    }}
+                                    labelPosition={65}
+                                    
+                                />
                             </div>
                         </div>
                     </div>
-                </div>
-                <div
-                    className="bg-slate-700 mb-4 p-4 rounded-xl border-slate-700"
-                    style={{
-                        backgroundImage: `url(${fondoPizarraMirror})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                    }}
-                >
-                    <div className="mt-2 flex flex-col items-center">
-                        <label className="font-semibold text-3xl capitalize text-white mb-3">
-                            Ingredients
-                        </label>
-                        <textarea
-                            name="ingredients"
-                            value={recipe.ingredients}
-                            readOnly
-                            className="resize-none mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                            rows="5"
-                        ></textarea>
-                    </div>
-                    <div className="mt-6 flex flex-col items-center">
-                        <label className="font-semibold text-3xl capitalize text-white my-3">
-                            Steps
-                        </label>
-                        <textarea
-                            name="steps"
-                            value={recipe.steps}
-                            readOnly
-                            className="resize-none mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                            rows="13"
-                        ></textarea>
-                    </div>
-                    <div className="flex justify-around m-5">
-                        {userData.name === recipe.userName &&
-                        !recipe.isPublish ? (
-                            <button
-                                className="px-4 py-2  text-2xl bg-blue-500 text-white rounded hover:bg-blue-600 font-semibold"
-                                onClick={handlePublishRecipe}
-                            >
-                                Publish Recipe
-                            </button>
-                        ) : (
-                            <button
-                                className="px-4 py-2  text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
-                                onClick={handleCopyRecipe}
-                            >
-                                Copy Recipe
-                            </button>
-                        )}
-                        {userData.name === recipe.userName && (
-                            <button
-                                onClick={openDeleteRecipeModal}
-                                className="px-4 py-2 text-2xl bg-red-500 text-white rounded hover:bg-red-600 font-semibold"
-                            >
-                                Delete Recipe
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-slate-700 mx-4 px-4 rounded-t-xl pb-4">
-                <h2 className="text-4xl font-bold text-white mb-2 pt-2">
-                    Comments Section
-                </h2>
-                <textarea
-                    placeholder="What are your thougths?"
-                    className="resize-none rounded-md border-[2px] border-zinc-400 p-4 w-full text-slate-800 overflow-auto text-xl"
-                    spellCheck="false"
-                    autoCorrect="false"
-                    value={comment}
-                    rows="2"
-                    onChange={(e) => setComment(e.target.value)}
-                />
-                <div className="flex justify-end">
-                    <button
-                        className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-xl"
-                        onClick={() => handlePostComment(null)}
-                    >
-                        Post Comment
-                    </button>
-                </div>
-
-                <div className="pb-2"></div>
-                {renderComments(organizedComments)}
-            </div>
-            {/* Modal para ampliar la imagen de la receta */}
-            <Modal
-                isOpen={modalIsOpen}
-                onRequestClose={() => setModalIsOpen(false)}
-                style={customStyles}
-                contentLabel="Recipe Image Modal"
-            >
-                <div className="relative">
-                    <img
-                        src={recipe.imageUrl}
-                        alt="Recipe Image"
-                        className="rounded-lg"
+                    <div
+                        className="bg-slate-700 mb-4 p-4 rounded-xl border-slate-700"
                         style={{
-                            width: "100%",
-                            height: "auto",
-                            objectFit: "contain",
+                            backgroundImage: `url(${fondoPizarraMirror})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
                         }}
-                    />
-                </div>
-            </Modal>
-            <Modal
-                isOpen={modalDeleteRecipe}
-                onRequestClose={closeDeleteRecipeModal}
-                style={customStyles}
-                contentLabel="Delete Recipe Modal"
-            >
-                <div className="bg-red-100 p-5">
-                    <h2 className="text-center font-bold text-2xl">Warning</h2>
-                    <p className="mt-3 font-medium">
-                        Are you sure you want to delete this recipe?
-                    </p>
-                    <div className="flex justify-center gap-24 mt-4">
-                        <button
-                            onClick={closeDeleteRecipeModal}
-                            className="px-4 py-2 text-white rounded font-semibold bg-gray-500 hover:bg-gray-600"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleDeleteRecipe}
-                            className="px-4 py-2 text-white rounded font-semibold bg-red-500 hover:bg-red-600"
-                        >
-                            Delete
-                        </button>
+                    >
+                        <div className="mt-2 flex flex-col items-center">
+                            <label className="font-semibold text-3xl capitalize text-white mb-3">
+                                Ingredients
+                            </label>
+                            <textarea
+                                name="ingredients"
+                                value={recipe.ingredients}
+                                readOnly
+                                className="resize-none mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                rows="5"
+                            ></textarea>
+                        </div>
+                        <div className="mt-6 flex flex-col items-center">
+                            <label className="font-semibold text-3xl capitalize text-white my-3">
+                                Steps
+                            </label>
+                            <textarea
+                                name="steps"
+                                value={recipe.steps}
+                                readOnly
+                                className="resize-none mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                rows="11"
+                            ></textarea>
+                        </div>
+                        <div className="flex justify-around m-5">
+                            {userData.name === recipe.userName &&
+                            !recipe.isPublish ? (
+                                <button
+                                    className="px-4 py-2  text-2xl bg-blue-500 text-white rounded hover:bg-blue-600 font-semibold"
+                                    onClick={handlePublishRecipe}
+                                >
+                                    Publish Recipe
+                                </button>
+                            ) : (
+                                <button
+                                    className="px-4 py-2  text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
+                                    onClick={handleCopyRecipe}
+                                >
+                                    Copy Recipe
+                                </button>
+                            )}
+                            {userData.name === recipe.userName && (
+                                <button
+                                    onClick={openDeleteRecipeModal}
+                                    className="px-4 py-2 text-2xl bg-red-500 text-white rounded hover:bg-red-600 font-semibold"
+                                >
+                                    Delete Recipe
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </Modal>
+
+                <div className="bg-slate-700 mx-4 px-4 rounded-t-xl pb-4">
+                    <h2 className="text-4xl font-bold text-white mb-2 pt-2">
+                        Comments Section
+                    </h2>
+                    <textarea
+                        placeholder="What are your thougths?"
+                        className="resize-none rounded-md border-[2px] border-zinc-400 p-4 w-full text-slate-800 overflow-auto text-xl"
+                        spellCheck="false"
+                        autoCorrect="false"
+                        value={comment}
+                        rows="2"
+                        onChange={(e) => setComment(e.target.value)}
+                    />
+                    <div className="flex justify-end">
+                        <button
+                            className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-xl"
+                            onClick={() => handlePostComment(null)}
+                        >
+                            Post Comment
+                        </button>
+                    </div>
+
+                    <div className="pb-2"></div>
+                    {renderComments(organizedComments)}
+                </div>
+                {/* Modal para ampliar la imagen de la receta */}
+                <Modal
+                    isOpen={modalIsOpen}
+                    onRequestClose={() => setModalIsOpen(false)}
+                    style={customStyles}
+                    contentLabel="Recipe Image Modal"
+                >
+                    <div className="relative">
+                        <img
+                            src={recipe.imageUrl}
+                            alt="Recipe Image"
+                            className="rounded-lg"
+                            style={{
+                                width: "100%",
+                                height: "auto",
+                                objectFit: "contain",
+                            }}
+                        />
+                    </div>
+                </Modal>
+                <Modal
+                    isOpen={modalDeleteRecipe}
+                    onRequestClose={closeDeleteRecipeModal}
+                    style={customStyles}
+                    contentLabel="Delete Recipe Modal"
+                >
+                    <div className="bg-red-100 p-5">
+                        <h2 className="text-center font-bold text-2xl">
+                            Warning
+                        </h2>
+                        <p className="mt-3 font-medium">
+                            Are you sure you want to delete this recipe?
+                        </p>
+                        <div className="flex justify-center gap-24 mt-4">
+                            <button
+                                onClick={closeDeleteRecipeModal}
+                                className="px-4 py-2 text-white rounded font-semibold bg-gray-500 hover:bg-gray-600"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteRecipe}
+                                className="px-4 py-2 text-white rounded font-semibold bg-red-500 hover:bg-red-600"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            </div>
         </>
     );
 };

@@ -47,31 +47,5 @@ namespace Backend.Controllers
                 return StatusCode(500, "An error occurred while fetching recipes.");
             }
         }
-
-        [HttpPost("nutrition")]
-        public async Task<IActionResult> GetNutritionInfo([FromBody] IngredientsRequest ingredientsRequest)
-        {
-            try
-            {
-                if (ingredientsRequest == null || !ingredientsRequest.Ingredients.Any())
-                {
-                    return BadRequest("No ingredients provided.");
-                }
-
-                var nutritionInfo = await _edamamNutritionService.GetNutritionInfoAsync(ingredientsRequest.Ingredients);
-
-                if (nutritionInfo == null)
-                {
-                    return NotFound("Nutrition information could not be found for the provided ingredients.");
-                }
-
-                return Ok(nutritionInfo);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return StatusCode(500, "An error occurred while fetching nutrition information.");
-            }
-        }
     }
 }

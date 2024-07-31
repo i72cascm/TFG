@@ -168,23 +168,25 @@ const RecipeBuilder = () => {
                 RecipeTagID: formData.tags,
             };
             postRecipeMutation.mutate(recipeData, {
-                onSuccess: () => {
-                    toast.success("Recipe submitted successfully!");
-                    setFormData({
-                        title: "",
-                        preparationTime: "",
-                        servings: "",
-                        image: null,
-                        steps: "",
-                        ingredients: "",
-                        tags: 0,
-                        userEmail: userData ? userData.email : null,
-                    });
+                onSuccess: (data) => {
+                    if (data.success) {
+                        toast.success("Recipe submitted successfully!");
+                        setFormData({
+                            title: "",
+                            preparationTime: "",
+                            servings: "",
+                            image: null,
+                            steps: "",
+                            ingredients: "",
+                            tags: 0,
+                            userEmail: userData ? userData.email : null,
+                        });
+                    } else {
+                        toast.error(`An error occurred while submitting the recipe. Please check all the fields and ensure that the ingredients are correct.`);
+                    }
                 },
-                onError: () => {
-                    toast.error(
-                        `An error occurred while submitting the recipe: ${result.message}`
-                    );
+                onError: (error) => {
+                    toast.error(`An error occurred while submitting the recipe: ${error.message}`);
                 },
             });
         }
