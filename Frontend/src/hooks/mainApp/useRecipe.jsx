@@ -153,7 +153,9 @@ const useRecipe = () => {
                 body: JSON.stringify(recipeData),
             });
             if (response.status === 201) {
-                return { success: true };
+                const data = await response.json();
+                console.log(data)
+                return { success: true, data };
             } else {
                 const errorData = await response.json();
                 return { success: false, message: errorData.Message };

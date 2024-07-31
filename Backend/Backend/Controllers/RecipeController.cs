@@ -376,6 +376,7 @@ namespace Backend.Controllers
 
                 var recipeDto = new RecipeDto
                 {
+                    ID = recipe.RecipeID,
                     Title = recipeInsertDto.Title,
                     PreparationTime = recipeInsertDto.PreparationTime,
                     ServingsNumber = recipeInsertDto.ServingsNumber,

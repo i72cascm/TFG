@@ -6,11 +6,15 @@ import tableCreateRecipe from "/tableCreateRecipe.png";
 import tableCreateRecipe2 from "/tableCreateRecipe2.png";
 import useRecipeTag from "../../hooks/mainApp/useRecipeTag";
 import { useLocation } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const RecipeBuilder = () => {
     // Llamada de los métodos en el hook de recetas
     const { postRecipeMutation } = useRecipe();
     const { getAllRecipeTags } = useRecipeTag();
+
+    // Navigate
+    const navigate = useNavigate();
 
     // Estados usados en caso de estar copiando otra receta
     const location = useLocation();
@@ -181,6 +185,7 @@ const RecipeBuilder = () => {
                             tags: 0,
                             userEmail: userData ? userData.email : null,
                         });
+                        navigate(`/app/recipe/${data.data.id}`);
                     } else {
                         toast.error(`An error occurred while submitting the recipe. Please check all the fields and ensure that the ingredients are correct.`);
                     }
