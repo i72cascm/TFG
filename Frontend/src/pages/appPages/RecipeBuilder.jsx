@@ -1,12 +1,14 @@
-import { useState, useEffect ,useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import tableCreateRecipe from "/tableCreateRecipe.png";
 import tableCreateRecipe2 from "/tableCreateRecipe2.png";
 import useRecipeTag from "../../hooks/mainApp/useRecipeTag";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { Tooltip } from "@chakra-ui/react";
+import { InfoIcon } from "lucide-react";
 
 const RecipeBuilder = () => {
     // Llamada de los métodos en el hook de recetas
@@ -62,13 +64,16 @@ const RecipeBuilder = () => {
         const fetchTags = async () => {
             try {
                 const tagData = await getAllRecipeTags();
-                if (tagData.success) { 
+                if (tagData.success) {
                     setTags(tagData.data);
-                    if (recipeData) { // IMPORTANTE: En el caso de que esta vista se haya cargado al intentar copiar una receta existente, cargar los valores de la receta original en esta vista
-                        const tag = tagData.data.find(t => t.tagName === recipeData.tagName);
+                    if (recipeData) {
+                        // IMPORTANTE: En el caso de que esta vista se haya cargado al intentar copiar una receta existente, cargar los valores de la receta original en esta vista
+                        const tag = tagData.data.find(
+                            (t) => t.tagName === recipeData.tagName
+                        );
                         const tagId = tag ? tag.recipeTagID : 0;
-    
-                        setFormData(prev => ({
+
+                        setFormData((prev) => ({
                             ...prev,
                             title: recipeData.title,
                             preparationTime: recipeData.preparationTime,
@@ -87,10 +92,9 @@ const RecipeBuilder = () => {
                 toast.error("Error fetching tags: " + error.message);
             }
         };
-    
+
         fetchTags();
     }, [recipeData]);
-    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -187,11 +191,15 @@ const RecipeBuilder = () => {
                         });
                         navigate(`/app/recipe/${data.data.id}`);
                     } else {
-                        toast.error(`An error occurred while submitting the recipe. Please check all the fields and ensure that the ingredients are correct.`);
+                        toast.error(
+                            `An error occurred while submitting the recipe. Please check all the fields and ensure that the ingredients are correct.`
+                        );
                     }
                 },
                 onError: (error) => {
-                    toast.error(`An error occurred while submitting the recipe: ${error.message}`);
+                    toast.error(
+                        `An error occurred while submitting the recipe: ${error.message}`
+                    );
                 },
             });
         }
@@ -394,18 +402,52 @@ const RecipeBuilder = () => {
                         }}
                     >
                         <div className="mt-3 flex flex-col items-center">
-                            <label
-                                className="text-slate-800 font-black text-xl capitalize"
-                                style={{
-                                    backgroundColor:
-                                        "rgba(255, 255, 255, 0.692)",
-                                    padding: "5px 10px",
-                                    borderRadius: "8px",
-                                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                                }}
-                            >
-                                Ingredients
-                            </label>
+                            <div className="flex items-center pl-9">
+                                <label
+                                    className="text-slate-800 font-black text-xl capitalize"
+                                    style={{
+                                        backgroundColor:
+                                            "rgba(255, 255, 255, 0.692)",
+                                        padding: "5px 10px",
+                                        borderRadius: "8px",
+                                        boxShadow:
+                                            "0 2px 4px rgba(0, 0, 0, 0.1)",
+                                    }}
+                                >
+                                    Ingredients
+                                </label>
+                                <Tooltip
+                                    label={
+                                        <>
+                                            Enter an ingredient list for what
+                                            you are cooking, like "1 cup rice,
+                                            10 oz chickpeas", etc.
+                                            <br />
+                                            Introduce each ingredient on a new
+                                            line or separated both by a comma
+                                            and a space.
+                                        </>
+                                    }
+                                    placement="right"
+                                    hasArrow
+                                    bg="#64748b"
+                                    color="white"
+                                    borderRadius="10px"
+                                    p={5}
+                                >
+                                    <span
+                                        style={{
+                                            cursor: "help",
+                                            marginLeft: "5px",
+                                        }}
+                                    >
+                                        <InfoIcon
+                                            size={30}
+                                            style={{ color: "#00ADB5" }}
+                                        />
+                                    </span>
+                                </Tooltip>
+                            </div>
                             <textarea
                                 name="ingredients"
                                 value={formData.ingredients}
