@@ -1,0 +1,29 @@
+.rbc-toolbar button {
+    background-color: #00ADB5; 
+    color: white; 
+    border: none; 
+    padding: 10px; 
+    border-radius: 5px; 
+    margin: 0 5px; 
+}
+
+.rbc-toolbar button:hover {
+    background-color: #007b82; 
+    color: white; 
+}
+
+/* Estilo del calendario */
+.rbc-calendar {
+    border-radius: 12px; 
+    overflow: hidden; 
+}
+
+/* Estilos para las líneas horarias */
+.rbc-timeslot-group {
+    border-bottom: 2px solid #334155; 
+}
+
+/* Estilos para las líneas que dividen los días */
+.rbc-time-slot {
+    border-right: 2px solid #334155; 
+}
