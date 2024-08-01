@@ -15,6 +15,7 @@ import MyRecipes from './pages/appPages/MyRecipes';
 import Recipe from './pages/appPages/Recipe';
 import UserSettings from './pages/appPages/UserSettings';
 import ShoppingLists from './pages/appPages/ShoppingLists';
+import WeeklyPlanner from './pages/appPages/WeeklyPlanner';
 import HealthyRecipes from './pages/appPages/HealthyRecipes';
 import AdminPanel from './pages/appPages/AdminPanel';
 
@@ -42,10 +43,11 @@ function App() {
 							<Route path='/app/home' element = {<Home/>}/>
 							<Route path='/app/recipe-builder' element = {<RecipeBuilder/>}/>
 							<Route path='/app/my-recipes' element = {<MyRecipes/>}/>
-							<Route path='/app/recipe/:id' element={<Recipe/>} />
-							<Route path='/app/user-settings' element={<UserSettings/>}/>
+							<Route path='/app/recipe/:id' element={<Recipe/>} />				
 							<Route path='/app/shopping-lists' element={<ShoppingLists/>}/>
+							<Route path='/app/weekly-planner' element={<WeeklyPlanner/>}/>
 							<Route path='/app/healthy-recipes' element={<HealthyRecipes/>}/>
+							<Route path='/app/user-settings' element={<UserSettings/>}/>
 							<Route path='/app/admin-panel' element={<AdminPanel/>}/>
 						</Route>
 					</Route>

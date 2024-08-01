@@ -43,7 +43,7 @@ const useLogin = () => {
             signIn({
                 auth: {
                     token: result.token,
-                    expiresIn: 3600,
+                    expiresIn: 10800,
                     type: 'Bearer',
                 },
                 userState: {

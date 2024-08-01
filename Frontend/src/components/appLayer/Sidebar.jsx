@@ -126,6 +126,8 @@ export default function Sidebar() {
                             <SidebarItem
                                 icon={<LayoutDashboard size={25} />}
                                 text="Weekly Planner"
+                                to="/app/weekly-planner"
+                                active={isActive("/app/weekly-planner")}
                             />
                             <SidebarItem
                                 icon={<Apple size={25} />}
