@@ -1,21 +1,48 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useEffect, useState, useCallback } from "react";
 import { Calendar, Views, momentLocalizer } from "react-big-calendar";
 import * as dates from "../../utils/dates";
-import events from "../../utils/events";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../../utils/toolBar.css";
 import moment from "moment";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+import useWeeklyPlanner from "../../hooks/mainApp/useWeeklyPlanner";
+import { useQuery } from "@tanstack/react-query";
 
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
 
 const WeeklyPlanner = () => {
+    const getAuthState = () => {
+        // Obtener el valor de la cookie por su nombre
+        const cookieValue = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("_auth_state="))
+            ?.split("=")[1];
+
+        if (!cookieValue) {
+            return null;
+        }
+
+        // Decodificar el valor URL-encoded de la cookie y parsearlo como JSON
+        try {
+            const decodedValue = decodeURIComponent(cookieValue);
+            const authState = JSON.parse(decodedValue);
+            return authState;
+        } catch (error) {
+            console.error("Error parsing auth state:", error);
+            return null;
+        }
+    };
+    const userData = getAuthState();
+
     // Estados
     const [selectedDate, setSelectedDate] = useState(null);
-    const [myEvents, setMyEvents] = useState(events);
+    const [myEvents, setMyEvents] = useState([]);
     const [draggedEvent, setDraggedEvent] = useState(null);
+
+    // Hooks
+    const { getAllEvents } = useWeeklyPlanner();
 
     const { components, defaultDate, max, views } = useMemo(
         () => ({
@@ -25,6 +52,19 @@ const WeeklyPlanner = () => {
         }),
         [selectedDate]
     );
+
+    // Obtener todos los eventos
+    const { data: weeklyPlannerEvents, isLoading: loadWeeklyPlannerEvents } = useQuery({
+        queryKey: ["user-shopping-lists"],
+        queryFn: getAllEvents,
+        keepPreviousData: true,
+        enabled: !!userData?.email,
+    });
+
+    // Obtener los eventos del usuario
+    useEffect(() => {
+        setMyEvents(weeklyPlannerEvents);
+    }, [weeklyPlannerEvents]);
 
     // Selección de un día y obtención de las recetas en dicho día
     const handleDaySelect = (slotInfo) => {
@@ -36,7 +76,7 @@ const WeeklyPlanner = () => {
             moment(event.start).isSame(slotInfo.start, "day")
         );
         // Obtener los recipeId de los eventos del día seleccionado
-        const recipeIds = eventsOnSelectedDay.map((event) => event.recipeId);
+        const recipeIds = eventsOnSelectedDay.map((event) => event.recipeID);
         // Mostrar los recipeId en la consola
         console.log("Recipe IDs on selected day:", recipeIds);
     };
@@ -45,7 +85,7 @@ const WeeklyPlanner = () => {
     const handleEventDrop = ({ event, start, end }) => {
         if (moment(start).isSame(end, "day")) {
             const updatedEvents = myEvents.map((evt) => {
-                if (evt.id === event.id) {
+                if (evt.eventID === event.eventID) {
                     return { ...evt, start, end };
                 }
                 return evt;
@@ -63,7 +103,7 @@ const WeeklyPlanner = () => {
     const handleEventResize = ({ event, start, end }) => {
         if (moment(start).isSame(end, "day")) {
             const updatedEvents = myEvents.map((evt) => {
-                if (evt.id === event.id) {
+                if (evt.eventID === event.eventID) {
                     return { ...evt, start, end };
                 }
                 return evt;
@@ -97,6 +137,17 @@ const WeeklyPlanner = () => {
             };
         }
     };
+
+    // Mensaje de cargando datos de eventos
+    if (loadWeeklyPlannerEvents) {
+        return (
+            <div className="flex justify-center mt-6">
+                <h1 className="text-3xl text-stone-300">
+                    Loading Calendar...{" "}
+                </h1>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -145,9 +196,9 @@ const WeeklyPlanner = () => {
                                     className="text-center py-1 bg-slate-500 rounded-md border-2 border-gray-300 text-xl text-white placeholder:text-gray-300"
                                 />
                                 <div className="flex flex-wrap gap-2">
-                                    {events.map((event) => (
+                                    {weeklyPlannerEvents.map((event) => (
                                         <div
-                                            key={event.id}
+                                            key={event.eventID}
                                             draggable
                                             onDragStart={() =>
                                                 handleDragStart(event)
