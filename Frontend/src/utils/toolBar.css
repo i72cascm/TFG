@@ -14,8 +14,8 @@
 
 /* Estilo del calendario */
 .rbc-calendar {
-    border-radius: 12px; 
     overflow: hidden; 
+    color: white;
 }
 
 /* Estilos para las líneas horarias */

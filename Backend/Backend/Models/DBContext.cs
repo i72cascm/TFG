@@ -16,7 +16,7 @@ namespace Backend.Models
         public DbSet<ProductLine> ProductLines { get; set; }
         public DbSet<RecipeLike> RecipeLikes { get; set; }
         public DbSet<RecipeComment> RecipeComments { get; set; }
-
+        public DbSet<WeeklyPlannerEvent> WeeklyPlannerEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -104,6 +104,20 @@ namespace Backend.Models
                 .HasOne<Recipe>()  
                 .WithMany()        
                 .HasForeignKey(rc => rc.RecipeID)  
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configuración para la relación uno a muchos entre User y WeeklyPlannerEvent
+            modelBuilder.Entity<WeeklyPlannerEvent>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(wpe => wpe.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configuración para la relación uno a muchos entre Recipe y WeeklyPlannerEvent
+            modelBuilder.Entity<WeeklyPlannerEvent>()
+                .HasOne<Recipe>()
+                .WithMany()
+                .HasForeignKey(wpe => wpe.RecipeID)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

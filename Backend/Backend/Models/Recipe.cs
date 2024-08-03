@@ -9,7 +9,6 @@ namespace Backend.Modelos
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
         public int RecipeID { get; set; }
 
         [ForeignKey("User")]
