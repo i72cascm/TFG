@@ -198,7 +198,7 @@ namespace Backend.Controllers
         public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipes(string email, int pageParam = 1, int pageSize = 10, bool isPublish = true, string search = "")
         {
             try
-            {               
+            {
                 // Buscar el ID del usuario por email
                 var user = await _recipeContext.Users.SingleOrDefaultAsync(u => u.Email == email);
                 if (user == null)
@@ -231,7 +231,7 @@ namespace Backend.Controllers
                 var recipesDto = new List<RecipeDto>();
 
                 foreach (var recipe in recipes)
-                {   
+                {
                     recipesDto.Add(new RecipeDto
                     {
                         ID = recipe.RecipeID,
@@ -244,7 +244,7 @@ namespace Backend.Controllers
                         Ingredients = recipe.Ingredients,
                         TagName = recipe.RecipeTag?.TagName,
                         IsPublish = recipe.IsPublish,
-                    });     
+                    });
                 }
 
                 return Ok(new
@@ -252,6 +252,59 @@ namespace Backend.Controllers
                     data = recipesDto,
                     nextCursor = recipes.Count < pageSize ? (int?)null : pageParam + 1
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        // Obtener todas las recetas del usuario actual (weeklyPlanner)
+        [HttpGet("user/planner/{email}")]
+        public async Task<ActionResult<IEnumerable<RecipeDto>>> GetUserRecipesWeeklyPlanner(string email, string search = "")
+        {
+            try
+            {
+                // Buscar el ID del usuario por email
+                var user = await _recipeContext.Users.SingleOrDefaultAsync(u => u.Email == email);
+                if (user == null)
+                {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                // Si el término de búsqueda está vacío, no devolver nada
+                if (string.IsNullOrEmpty(search))
+                {
+                    return Ok(new List<RecipeDto>());
+                }
+
+                // Crear la consulta base de recetas
+                IQueryable<Recipe> baseQuery = _recipeContext.Recipes
+                    .Where(r => r.UserID == user.UserID);
+
+                // Filtrar por el título de la receta si se proporciona un término de búsqueda        
+                baseQuery = baseQuery.Where(r => r.Title.Contains(search));
+
+                // Obtener todas las recetas del usuario y ordenarlas
+                var recipes = await baseQuery
+                    .Include(r => r.User)
+                    .Include(r => r.RecipeTag)
+                    .OrderBy(r => r.RecipeID)
+                    .ToListAsync();
+
+                var recipesDto = new List<RecipeDto>();
+
+                foreach (var recipe in recipes)
+                {
+                    recipesDto.Add(new RecipeDto
+                    {
+                        ID = recipe.RecipeID,
+                        UserName = user.UserName,
+                        Title = recipe.Title,
+                    });
+                }
+
+                return Ok(recipesDto);
             }
             catch (Exception ex)
             {

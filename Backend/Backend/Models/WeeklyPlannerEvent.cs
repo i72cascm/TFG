@@ -7,8 +7,8 @@ namespace Backend.Models
     public class WeeklyPlannerEvent
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int EventID { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public required string EventID { get; set; }
 
         [ForeignKey("User")]
         public int UserID { get; set; } 

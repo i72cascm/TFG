@@ -57,7 +57,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("{email}")]
-        public async Task<ActionResult<ShoppingList>> UpdateUserTags(string email, [FromBody] ShoppingListInsertDto request)
+        public async Task<ActionResult<ShoppingList>> CreateShoppingList(string email, [FromBody] ShoppingListInsertDto request)
         {
             // Buscar al usuario por email
             var user = await _shoppingListContext.Users

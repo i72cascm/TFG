@@ -293,11 +293,8 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.WeeklyPlannerEvent", b =>
                 {
-                    b.Property<int>("EventID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventID"));
+                    b.Property<string>("EventID")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("End")
                         .HasColumnType("datetime2");

@@ -118,6 +118,33 @@ const useRecipe = () => {
         }
     };
 
+    const getUserRecipesWeeklyPlanner = async (userEmail, search) => {
+        try {
+            const response = await fetch(
+                `${urlApi}/api/recipe/user/planner/${userEmail}?search=${search}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                const json = await response.json();
+                console.log(json)
+                return json;
+            } else if (response.status === 400 || response.status === 500) {
+                const errorData = await response.json();
+                return { success: false, message: errorData.Message };
+            }
+        } catch (error) {
+            console.error("Error fetching recipe by id:", error);
+            return { success: false, message: error.message };
+        }
+    };
+
     const getRecipeById = async (id) => {
         try {
             const response = await fetch(`${urlApi}/api/recipe/${id}`, {
@@ -284,6 +311,7 @@ const useRecipe = () => {
         getPagedRecipesHome,
         getUserRecipes,
         getRecipeById,
+        getUserRecipesWeeklyPlanner
     };
 };
 

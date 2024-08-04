@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20240803150448_WeeklyPlanner")]
-    partial class WeeklyPlanner
+    [Migration("20240804194511_EventIDString")]
+    partial class EventIDString
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -296,11 +296,8 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.WeeklyPlannerEvent", b =>
                 {
-                    b.Property<int>("EventID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventID"));
+                    b.Property<string>("EventID")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("End")
                         .HasColumnType("datetime2");

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class WeeklyPlanner : Migration
+    public partial class EventIDString : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,7 @@ namespace Backend.Migrations
                 name: "WeeklyPlannerEvents",
                 columns: table => new
                 {
-                    EventID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EventID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     UserID = table.Column<int>(type: "int", nullable: false),
                     RecipeID = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
