@@ -27,3 +27,12 @@
 .rbc-time-slot {
     border-right: 2px solid #334155; 
 }
+
+/* Quitar barra allDay*/
+.rbc-allday-cell {
+    display: none !important;
+}
+
+.rbc-row-content {
+    margin-top: 0 !important; 
+}

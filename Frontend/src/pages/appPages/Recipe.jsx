@@ -441,7 +441,7 @@ const Recipe = () => {
                                 </div>
                                 <div>
                                     <p className="font-semibold text-xl mb-3" style={{color: '#f3ea66'}}>
-                                        Carbohydrate:
+                                        Carbohydrates:
                                     </p>
                                     <p className="font-semibold text-xl mb-3" style={{color: '#f3ea66'}}>
                                         {recipe.carbohydrate} g

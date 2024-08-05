@@ -508,6 +508,12 @@ namespace Backend.Controllers
                         .ToListAsync();
                     _recipeContext.RecipeComments.RemoveRange(recipeComments);
 
+                // Eliminar los eventos asociados a la receta
+                var recipeEvents = await _recipeContext.WeeklyPlannerEvents
+                    .Where(wpe => wpe.RecipeID == recipe.RecipeID)
+                    .ToListAsync();
+                _recipeContext.WeeklyPlannerEvents.RemoveRange(recipeEvents);
+
                 // Eliminar la receta de la base de datos
                 _recipeContext.Recipes.Remove(recipe);
                 await _recipeContext.SaveChangesAsync();
@@ -559,6 +565,12 @@ namespace Backend.Controllers
                         .Where(rc => rc.RecipeID == recipe.RecipeID)
                         .ToListAsync();
                     _recipeContext.RecipeComments.RemoveRange(recipeComments);
+
+                    // Eliminar los eventos asociados a la receta
+                    var recipeEvents = await _recipeContext.WeeklyPlannerEvents
+                        .Where(wpe => wpe.RecipeID == recipe.RecipeID)
+                        .ToListAsync();
+                    _recipeContext.WeeklyPlannerEvents.RemoveRange(recipeEvents);
 
                     // Eliminar imagen asociada en el bucket de AWS S3
                     var deleteRequest = new DeleteObjectRequest

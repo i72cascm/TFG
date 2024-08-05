@@ -64,8 +64,8 @@ namespace Backend.Controllers
                     UserID = user.UserID,
                     RecipeID = eventDto.RecipeID,
                     Title = eventDto.Title,
-                    Start = eventDto.Start,
-                    End = eventDto.End,
+                    Start = eventDto.Start.AddHours(2), // UTC + 2
+                    End = eventDto.End.AddHours(2),
                     EventID = eventDto.EventID
                 };
                 _weeklyPlannerContext.WeeklyPlannerEvents.Add(eventItem);
