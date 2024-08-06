@@ -61,9 +61,18 @@ const WeeklyPlanner = () => {
     const [draggedEvent, setDraggedEvent] = useState(null);
     const [search, setSearch] = useState("");
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [totalCalories, setTotalCalories] = useState(0);
+    const [totalFat, setTotalFat] = useState(0);
+    const [totalProtein, setTotalProtein] = useState(0);
+    const [totalCarbohydrates, setTotalCarbohydrates] = useState(0);
+    const [fatPercent, setFatPercent] = useState(0);
+    const [proteinPercent, setProteinPercent] = useState(0);
+    const [carbohydratePercent, setCarbohydratePercent] = useState(0);
+    const [showPieChart, setShowPieChart] = useState(false);
 
     // Hooks
-    const { getAllEvents, postSaveCalendar } = useWeeklyPlanner();
+    const { getUserEvents, postSaveCalendar, getNutritionSummary } =
+        useWeeklyPlanner();
     const { getUserRecipesWeeklyPlanner } = useRecipe();
 
     const { components, defaultDate, max, views } = useMemo(
@@ -95,7 +104,7 @@ const WeeklyPlanner = () => {
     // Recetas del usuario filtradas por nombre
     const { data: userEvents, isLoading: loadUserEvents } = useQuery({
         queryKey: [],
-        queryFn: getAllEvents,
+        queryFn: () => getUserEvents(userData?.email),
         keepPreviousData: true,
         enabled: !!userData?.email,
     });
@@ -110,7 +119,7 @@ const WeeklyPlanner = () => {
     }, [userEvents]);
 
     // Selección de un día y obtención de las recetas en dicho día
-    const handleDaySelect = (slotInfo) => {
+    const handleDaySelect = async (slotInfo) => {
         console.log("Selected date:", slotInfo.start.toLocaleDateString());
         // Establecer la fecha seleccionada
         setSelectedDate(slotInfo.start);
@@ -122,6 +131,31 @@ const WeeklyPlanner = () => {
         const recipeIds = eventsOnSelectedDay.map((event) => event.recipeID);
         // Mostrar los recipeId en la consola
         console.log("Recipe IDs on selected day:", recipeIds);
+        const nutritionSumary = await getNutritionSummary(recipeIds);
+        console.log(nutritionSumary);
+        let totalWeight =
+            nutritionSumary.totalCarbohydrate +
+            nutritionSumary.totalProtein +
+            nutritionSumary.totalFat;
+        let carbohydratePercent =
+            (nutritionSumary.totalCarbohydrate / totalWeight) * 100;
+            console.log(carbohydratePercent)
+        let proteinPercent = (nutritionSumary.totalProtein / totalWeight) * 100;
+        let fatPercent = (nutritionSumary.totalFat / totalWeight) * 100;
+        if(isNaN(carbohydratePercent) || isNaN(proteinPercent) || isNaN(fatPercent)) {
+            console.log("entro")
+            setShowPieChart(false)
+        }else{
+            console.log("entro2")
+            setShowPieChart(true);
+        }
+        setTotalCalories(nutritionSumary.totalCalories);
+        setTotalFat(nutritionSumary.totalFat);
+        setTotalCarbohydrates(nutritionSumary.totalCarbohydrate);
+        setTotalProtein(nutritionSumary.totalProtein);
+        setFatPercent(fatPercent);
+        setProteinPercent(proteinPercent);
+        setCarbohydratePercent(carbohydratePercent);
     };
 
     // Drag and Drop
@@ -292,7 +326,7 @@ const WeeklyPlanner = () => {
             <>
                 <ToastContainer
                     position="top-right"
-                    autoClose={5000}
+                    autoClose={2000}
                     hideProgressBar={false}
                     newestOnTop={false}
                     closeOnClick
@@ -309,9 +343,7 @@ const WeeklyPlanner = () => {
                         </h1>
                     </div>
                     <div className="grid grid-cols-[4fr,1fr] gap-4 mx-4">
-                        <div
-                            className="flex rounded-xl border-slate-700 bg-slate-700 flex-col"
-                        >
+                        <div className="flex rounded-xl border-slate-700 bg-slate-700 flex-col">
                             <div className="rounded-xl border-slate-700 flex flex-col h-full">
                                 <div className="flex-grow p-3">
                                     <DnDCalendar
@@ -365,7 +397,7 @@ const WeeklyPlanner = () => {
                                                     Calories:
                                                 </p>
                                                 <p className="font-semibold text-xl mb-3 text-white">
-                                                    3 Kcal
+                                                    {totalCalories} Kcal
                                                 </p>
                                             </div>
                                             <div>
@@ -379,7 +411,7 @@ const WeeklyPlanner = () => {
                                                     className="font-semibold text-xl mb-3"
                                                     style={{ color: "#ecac4c" }}
                                                 >
-                                                    3 g
+                                                    {totalFat} g
                                                 </p>
                                             </div>
                                             <div>
@@ -393,7 +425,7 @@ const WeeklyPlanner = () => {
                                                     className="font-semibold text-xl mb-3"
                                                     style={{ color: "#dd4f4a" }}
                                                 >
-                                                    3 g
+                                                    {totalProtein} g
                                                 </p>
                                             </div>
                                             <div>
@@ -407,47 +439,49 @@ const WeeklyPlanner = () => {
                                                     className="font-semibold text-xl mb-3"
                                                     style={{ color: "#f3ea66" }}
                                                 >
-                                                    3 g
+                                                    {totalCarbohydrates} g
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center mt-4 ml-16 justify-center h-3/5 w-3/5">
-                                            <PieChart
-                                            radius={50}
-                                            center={[50, 50]}
-                                            viewBoxSize={[100,100]}
-                                            lineWidth={65}
-                                            animate={true}
-                                            animationDuration={1400}
-                                            animationEasing="ease-out"
-                                            data={[
-                                                {
-                                                    title: "Fat",
-                                                    value: 1,
-                                                    color: "#ecac4c",
-                                                },
-                                                {
-                                                    title: "Protein",
-                                                    value: 2,
-                                                    color: "#dd4f4a",
-                                                },
-                                                {
-                                                    title: "Carbohydrate",
-                                                    value: 3,
-                                                    color: "#f3ea66",
-                                                },
-                                            ]}
-                                            label={({ dataEntry }) =>
-                                                `${Math.round(dataEntry.percentage)}%`
-                                            }
-                                            labelStyle={{
-                                                fontSize: "9px",
-                                                fontFamily: "sans-serif",
-                                                fontWeight: 'bold',
-                                                fill: "#000000", 
-                                                
-                                            }}
-                                            labelPosition={65}/>
+                                            {showPieChart ? (
+                                                <PieChart
+                                                    radius={50}
+                                                    lineWidth={65}
+                                                    data={[
+                                                        {
+                                                            title: "Fat",
+                                                            value: fatPercent,
+                                                            color: "#ecac4c",
+                                                        },
+                                                        {
+                                                            title: "Protein",
+                                                            value: proteinPercent,
+                                                            color: "#dd4f4a",
+                                                        },
+                                                        {
+                                                            title: "Carbohydrate",
+                                                            value: carbohydratePercent,
+                                                            color: "#f3ea66",
+                                                        },
+                                                    ]}
+                                                    label={({ dataEntry }) =>
+                                                        `${Math.round(
+                                                            dataEntry.percentage
+                                                        )}%`
+                                                    }
+                                                    labelStyle={{
+                                                        fontSize: "9px",
+                                                        fontFamily:
+                                                            "sans-serif",
+                                                        fontWeight: "bold",
+                                                        fill: "#000000",
+                                                    }}
+                                                    labelPosition={65}
+                                                />
+                                            ) : (
+                                                ""
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -463,7 +497,7 @@ const WeeklyPlanner = () => {
                                     placeholder="Your Recipes..."
                                     className="text-center py-1 bg-slate-500 rounded-md border-2 border-gray-300 text-xl text-white placeholder:text-gray-300"
                                 />
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-col gap-2 mt-4 text-center font font-semibold">
                                     {Array.isArray(foundRecipes) &&
                                         foundRecipes.map((event) => (
                                             <div

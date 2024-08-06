@@ -22,17 +22,27 @@ namespace Backend.Controllers
             _authService = authService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<WeeklyPlannerEvent>>> GetAllEvents()
+        [HttpGet("{email}")]
+        public async Task<ActionResult<IEnumerable<WeeklyPlannerEvent>>> GetUserEvents(string email)
         {
             try
             {
-                var events = await _weeklyPlannerContext.WeeklyPlannerEvents.ToListAsync();
+                var user = await _weeklyPlannerContext.Users
+                        .FirstOrDefaultAsync(u => u.Email == email);
+
+                if (user == null)
+                {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                // Obtener eventos del usuario
+                var events = await _weeklyPlannerContext.WeeklyPlannerEvents
+                                 .Where(e => e.UserID == user.UserID)
+                                 .ToListAsync();
                 return Ok(events);
             }
             catch (Exception ex)
             {
-                // Aquí se maneja cualquier error que pueda ocurrir durante la consulta a la base de datos
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
@@ -74,5 +84,59 @@ namespace Backend.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("sumNutrition")]
+        public async Task<ActionResult<NutritionSummaryDto>> GetNutritionSummary([FromQuery] int[] recipeIds)
+        {
+            try
+            {
+                if (recipeIds == null || recipeIds.Length == 0)
+                {
+                    var emptyNutritionSummary = new NutritionSummaryDto
+                    {
+                        TotalCalories = 0,
+                        TotalFat = 0,
+                        TotalProtein = 0,
+                        TotalCarbohydrate = 0
+                    };
+
+                    return Ok(emptyNutritionSummary);
+                }
+
+                float totalCalories = 0;
+                float totalFat = 0;
+                float totalProtein = 0;
+                float totalCarbohydrate = 0;
+
+                foreach (var recipeId in recipeIds)
+                {
+                    var recipe = await _weeklyPlannerContext.Recipes
+                                    .FirstOrDefaultAsync(r => r.RecipeID == recipeId);
+
+                    if (recipe != null)
+                    {
+                        totalCalories += recipe.Calories;
+                        totalFat += recipe.Fat;
+                        totalProtein += recipe.Protein;
+                        totalCarbohydrate += recipe.Carbohydrate;
+                    }
+                }
+
+                var nutritionSummary = new NutritionSummaryDto
+                {
+                    TotalCalories = totalCalories,
+                    TotalFat = totalFat,
+                    TotalProtein = totalProtein,
+                    TotalCarbohydrate = totalCarbohydrate
+                };
+
+                return Ok(nutritionSummary);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
     }
 }
+

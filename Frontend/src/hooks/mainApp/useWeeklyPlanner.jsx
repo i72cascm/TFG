@@ -18,15 +18,20 @@ const useWeeklyPlanner = () => {
     };
     const userToken = getAuthState();
 
-    const getAllEvents = async () => {
+    const getUserEvents = async (email) => {
+        console.log("Soy:");
+        console.log(email);
         try {
-            const response = await fetch(`${urlApi}/api/weeklyplanner`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: userToken,
-                },
-            });
+            const response = await fetch(
+                `${urlApi}/api/weeklyplanner/${email}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                }
+            );
 
             if (response.status === 200) {
                 const data = await response.json();
@@ -37,6 +42,7 @@ const useWeeklyPlanner = () => {
                     start: new Date(event.start),
                     end: new Date(event.end),
                 }));
+                console.log(eventsWithDateObjects);
                 return eventsWithDateObjects;
             } else {
                 const errorData = await response.json();
@@ -67,14 +73,14 @@ const useWeeklyPlanner = () => {
                             RecipeID: event.recipeID,
                             Title: event.title,
                             Start: event.start,
-                            End: event.end
+                            End: event.end,
                         }))
                     ),
                 }
             );
 
             if (response.status === 204) {
-                return { success: true};
+                return { success: true };
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.message || "Error saving calendar");
@@ -94,7 +100,38 @@ const useWeeklyPlanner = () => {
         },
     });
 
-    return { getAllEvents, postSaveCalendar };
+    const getNutritionSummary = async (recipeIds) => {
+        try {
+            const queryString = new URLSearchParams();
+            recipeIds.forEach((id) => queryString.append("recipeIds", id));
+
+            const response = await fetch(
+                `${urlApi}/api/weeklyplanner/sumNutrition?${queryString.toString()}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                const data = await response.json();
+                return data;
+            } else {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.message || "Error getting nutrition summary"
+                );
+            }
+        } catch (error) {
+            console.error("Error getting nutrition summary:", error);
+            throw new Error(error.message);
+        }
+    };
+
+    return { getNutritionSummary, getUserEvents, postSaveCalendar };
 };
 
 export default useWeeklyPlanner;
