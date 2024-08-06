@@ -12,7 +12,6 @@ import useWeeklyPlanner from "../../hooks/mainApp/useWeeklyPlanner";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
-import fondoPizarra from "/fondoPizarra.png";
 import { PieChart } from "react-minimal-pie-chart";
 
 moment.locale("es");

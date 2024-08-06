@@ -163,46 +163,53 @@ const RecipeBuilder = () => {
 
         if (emptyField) {
             toast.error("Please fill in all fields.");
-        } else {
-            // Construye el objeto de datos para la solicitud POST
-            const recipeData = {
-                UserEmail: formData.userEmail,
-                Title: formData.title,
-                PreparationTime: parseInt(formData.preparationTime),
-                ServingsNumber: parseInt(formData.servings),
-                RecipeImage: formData.image,
-                Steps: formData.steps,
-                Ingredients: formData.ingredients,
-                RecipeTagID: formData.tags,
-            };
-            postRecipeMutation.mutate(recipeData, {
-                onSuccess: (data) => {
-                    if (data.success) {
-                        toast.success("Recipe submitted successfully!");
-                        setFormData({
-                            title: "",
-                            preparationTime: "",
-                            servings: "",
-                            image: null,
-                            steps: "",
-                            ingredients: "",
-                            tags: 0,
-                            userEmail: userData ? userData.email : null,
-                        });
-                        navigate(`/app/recipe/${data.data.id}`);
-                    } else {
-                        toast.error(
-                            `An error occurred while submitting the recipe. Please check all the fields and ensure that the ingredients are correct.`
-                        );
-                    }
-                },
-                onError: (error) => {
-                    toast.error(
-                        `An error occurred while submitting the recipe: ${error.message}`
-                    );
-                },
-            });
+            return;
         }
+
+        // Verificar la longitud del título
+        if (formData.title.length > 27) {
+            toast.error("The title must not exceed 25 characters.");
+            return;
+        }
+
+        // Construye el objeto de datos para la solicitud POST
+        const recipeData = {
+            UserEmail: formData.userEmail,
+            Title: formData.title,
+            PreparationTime: parseInt(formData.preparationTime),
+            ServingsNumber: parseInt(formData.servings),
+            RecipeImage: formData.image,
+            Steps: formData.steps,
+            Ingredients: formData.ingredients,
+            RecipeTagID: formData.tags,
+        };
+        postRecipeMutation.mutate(recipeData, {
+            onSuccess: (data) => {
+                if (data.success) {
+                    toast.success("Recipe submitted successfully!");
+                    setFormData({
+                        title: "",
+                        preparationTime: "",
+                        servings: "",
+                        image: null,
+                        steps: "",
+                        ingredients: "",
+                        tags: 0,
+                        userEmail: userData ? userData.email : null,
+                    });
+                    navigate(`/app/recipe/${data.data.id}`);
+                } else {
+                    toast.error(
+                        `An error occurred while submitting the recipe. Please check all the fields and ensure that the ingredients are correct.`
+                    );
+                }
+            },
+            onError: (error) => {
+                toast.error(
+                    `An error occurred while submitting the recipe: ${error.message}`
+                );
+            },
+        });
     };
 
     return (
