@@ -1,15 +1,31 @@
 .rbc-toolbar button {
-    background-color: #00ADB5; 
+    background-color: #3b82f6; 
     color: white; 
     border: none; 
     padding: 10px; 
-    border-radius: 5px; 
-    margin: 0 5px; 
+    border-radius: 4px; 
+    margin: 0 4px; 
 }
 
 .rbc-toolbar button:hover {
-    background-color: #007b82; 
+    background-color: #316ecf; 
     color: white; 
+}
+.rbc-toolbar button:active {
+  background-color: #2563eb !important;
+  color: white;
+}
+
+.rbc-toolbar-label {
+  font-size: 25px; /* Ajusta este valor según necesites */
+  font-weight: bold; /* Hace la fuente más gruesa */
+  margin-bottom: 3px;
+}
+
+.rbc-label {
+  font-weight: 500; /* Hace la fuente más gruesa */
+  font-size: 15px; /* Ajusta este valor según necesites para cambiar el tamaño */
+  color: black; /* Asegura que el color del texto sea el deseado */
 }
 
 /* Estilo del calendario */
@@ -18,14 +34,23 @@
     color: white;
 }
 
+.rbc-time-header-gutter {
+  background-color: #bd9644; /* Cambia este valor al color que prefieras */
+}
+
+.rbc-toolbar button:focus {
+  background-color: #3b82f6; /* Vuelve al color de hover */
+  color: white;
+}
+
 /* Estilos para las líneas horarias */
 .rbc-timeslot-group {
-    border-bottom: 2px solid #334155; 
+    border-bottom: 1px solid #334155; 
 }
 
 /* Estilos para las líneas que dividen los días */
 .rbc-time-slot {
-    border-right: 2px solid #334155; 
+    border-right: 1px solid #ffffff; 
 }
 
 /* Quitar barra allDay*/
@@ -36,3 +61,104 @@
 .rbc-row-content {
     margin-top: 0 !important; 
 }
+
+/* Estilo para los números de las horas en el encabezado y las ranuras de tiempo */
+.rbc-timeslot-group {
+    color: black; /* Cambia este color según tus necesidades */
+}
+
+/* Estilos para las líneas que dividen los días y las ranuras de tiempo */
+.rbc-time-slot, .rbc-timeslot-group {
+    border-color: black !important;
+}
+
+/* Líneas que dividen columnas */
+.rbc-day-slot .rbc-time-slot {
+    border-right: 1px solid black !important;
+}
+
+/* Líneas que dividen filas */
+.rbc-timeslot-group {
+    border-bottom: 1px solid black !important;
+}
+
+/* Días de la semana en cabecera */
+.rbc-header,
+.rbc-date-cell {
+    background: #c4983b;
+    color: black !important; /* Asegura que se aplique con !important si es necesario */
+}
+
+.rbc-time-slot:not(.rbc-today) {
+    background-color: #eed295;
+  }
+  
+/* Eventos */  
+.rbc-event,
+.rbc-background-event {
+  z-index: 2;
+  padding-left: 8px !important;
+  border: none !important;
+  color: black;
+  background-color: #c98c70;
+}
+
+.rbc-event-label {
+  display: none !important;
+}
+
+.rbc-events-container {
+  width: 100% !important;
+}
+
+/*
+.rbc-header {
+  color: white;
+  font-size: 14px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px !important;
+  background: #17405d;
+}
+
+.rbc-allday-cell {
+  display: none;
+}
+
+.rbc-time-header-cell .rbc-today {
+  background-color: #04aa6d !important;
+}
+
+.rbc-time-slot {
+  color: #74a4c3;
+  z-index: 1;
+}
+
+.rbc-time-slot:not(.rbc-today .rbc-time-slot) {
+  background-color: #eff4f7;
+}
+
+//Event Styles
+.rbc-event,
+.rbc-background-event {
+  z-index: 2;
+  padding: 0px !important;
+  border: none !important;
+}
+
+.rbc-event-label {
+  display: none !important;
+}
+
+.rbc-events-container {
+  width: 100% !important;
+}
+
+//Timeslots Customization
+.rbc-day-slot .rbc-time-slot:after {
+  content: "";
+  width: 100%;
+  border-top: 1px solid #fbb3ec;
+  display: block;
+}*/

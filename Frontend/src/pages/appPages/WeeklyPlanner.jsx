@@ -13,6 +13,7 @@ import useRecipe from "../../hooks/mainApp/useRecipe";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { PieChart } from "react-minimal-pie-chart";
+import fondoPizarra from "/fondoPizarra.png";
 
 moment.locale("es");
 moment.updateLocale("es", {
@@ -138,14 +139,18 @@ const WeeklyPlanner = () => {
             nutritionSumary.totalFat;
         let carbohydratePercent =
             (nutritionSumary.totalCarbohydrate / totalWeight) * 100;
-            console.log(carbohydratePercent)
+        console.log(carbohydratePercent);
         let proteinPercent = (nutritionSumary.totalProtein / totalWeight) * 100;
         let fatPercent = (nutritionSumary.totalFat / totalWeight) * 100;
-        if(isNaN(carbohydratePercent) || isNaN(proteinPercent) || isNaN(fatPercent)) {
-            console.log("entro")
-            setShowPieChart(false)
-        }else{
-            console.log("entro2")
+        if (
+            isNaN(carbohydratePercent) ||
+            isNaN(proteinPercent) ||
+            isNaN(fatPercent)
+        ) {
+            console.log("entro");
+            setShowPieChart(false);
+        } else {
+            console.log("entro2");
             setShowPieChart(true);
         }
         setTotalCalories(nutritionSumary.totalCalories);
@@ -343,7 +348,15 @@ const WeeklyPlanner = () => {
                     </div>
                     <div className="grid grid-cols-[4fr,1fr] gap-4 mx-4">
                         <div className="flex rounded-xl border-slate-700 bg-slate-700 flex-col">
-                            <div className="rounded-xl border-slate-700 flex flex-col h-full">
+                            <div
+                                className="rounded-xl border-slate-700 flex flex-col h-full 
+                            "
+                                style={{
+                                    backgroundImage: `url(${fondoPizarra})`,
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                }}
+                            >
                                 <div className="flex-grow p-3">
                                     <DnDCalendar
                                         onSelectEvent={handleSelectEvent}
@@ -371,8 +384,8 @@ const WeeklyPlanner = () => {
                                         dayPropGetter={dayPropGetter}
                                     />
                                 </div>
-                                <div className="h-1/3 p-4 rounded-b-xl grid grid-cols-[4fr,5fr] gap-4">
-                                    <div className="flex justify-around items-center">
+                                <div className="h-1/3 p-4 rounded-b-xl grid grid-cols-[4fr,5fr] gap-4 bg-slate-00">
+                                    <div className="flex justify-around items-center ">
                                         <button
                                             className="mb-7 px-4 py-2 h-1/4 text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
                                             onClick={handleSaveChanges}
