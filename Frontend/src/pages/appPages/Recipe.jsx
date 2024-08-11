@@ -428,7 +428,7 @@ const Recipe = () => {
                                         Fat:
                                     </p>
                                     <p className="font-semibold text-xl mb-3" style={{color: '#ecac4c'}}>
-                                        {recipe.fat} g
+                                        {recipe.fat.toFixed(2)} g
                                     </p>
                                 </div>
                                 <div>
@@ -436,7 +436,7 @@ const Recipe = () => {
                                         Protein:
                                     </p>
                                     <p className="font-semibold text-xl mb-3" style={{color: '#dd4f4a'}}>
-                                        {recipe.protein} g
+                                        {recipe.protein.toFixed(2)} g
                                     </p>
                                 </div>
                                 <div>
@@ -444,7 +444,7 @@ const Recipe = () => {
                                         Carbohydrates:
                                     </p>
                                     <p className="font-semibold text-xl mb-3" style={{color: '#f3ea66'}}>
-                                        {recipe.carbohydrate} g
+                                        {recipe.carbohydrate.toFixed(2)} g
                                     </p>
                                 </div>
                             </div>

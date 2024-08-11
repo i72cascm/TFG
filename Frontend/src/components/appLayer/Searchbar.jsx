@@ -55,7 +55,7 @@ const Searchbar = ({
                 <div className="flex justify-center">
                     <input
                         type="text"
-                        placeholder="Search by name..."
+                        placeholder="Search..."
                         className="px-4 py-1 bg-slate-500 w-96 rounded-l-xl border-2 border-gray-300 text-2xl text-white placeholder:text-gray-200"
                         value={inputValue}
                         onChange={onInputChange}

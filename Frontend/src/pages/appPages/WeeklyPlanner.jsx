@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { PieChart } from "react-minimal-pie-chart";
 import fondoPizarra from "/fondoPizarra.png";
+import { Link } from "react-router-dom";
 
 moment.locale("es");
 moment.updateLocale("es", {
@@ -385,15 +386,17 @@ const WeeklyPlanner = () => {
                                     />
                                 </div>
                                 <div className="h-1/3 p-4 rounded-b-xl grid grid-cols-[4fr,5fr] gap-4 bg-slate-00">
-                                    <div className="flex justify-around items-center ">
+                                    <div className="flex flex-wrap justify-around items-center">
                                         <button
                                             className="mb-7 px-4 py-2 h-1/4 text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
+                                            style={{ minWidth: '120px', maxWidth: '200px' }}
                                             onClick={handleSaveChanges}
                                         >
                                             Save Changes
                                         </button>
                                         <button
-                                            className="mb-7 px-4 py-2 h-1/4 text-2xl bg-red-500 text-white rounded hover:bg-red-600 font-semibold"
+                                            className="mb-7 px-4 py-2 h-1/4 text-xl sm:text-2xl bg-red-500 text-white rounded hover:bg-red-600 font-semibold break-words"
+                                            style={{ minWidth: '120px', maxWidth: '200px' }}
                                             onClick={handleClearCalendar}
                                         >
                                             Clear Calendar
@@ -423,7 +426,7 @@ const WeeklyPlanner = () => {
                                                     className="font-semibold text-xl mb-3"
                                                     style={{ color: "#ecac4c" }}
                                                 >
-                                                    {totalFat} g
+                                                    {totalFat.toFixed(2)} g
                                                 </p>
                                             </div>
                                             <div>
@@ -437,7 +440,7 @@ const WeeklyPlanner = () => {
                                                     className="font-semibold text-xl mb-3"
                                                     style={{ color: "#dd4f4a" }}
                                                 >
-                                                    {totalProtein} g
+                                                    {totalProtein.toFixed(2)} g
                                                 </p>
                                             </div>
                                             <div>
@@ -451,7 +454,7 @@ const WeeklyPlanner = () => {
                                                     className="font-semibold text-xl mb-3"
                                                     style={{ color: "#f3ea66" }}
                                                 >
-                                                    {totalCarbohydrates} g
+                                                    {totalCarbohydrates.toFixed(2)} g
                                                 </p>
                                             </div>
                                         </div>
@@ -518,9 +521,22 @@ const WeeklyPlanner = () => {
                                                 onDragStart={() =>
                                                     handleDragStart(event)
                                                 }
-                                                className="p-2 bg-gray-200 rounded cursor-pointer"
+                                                className="p-2 rounded cursor-pointer"
+                                                style={{
+                                                    backgroundColor: "#c98c70",
+                                                }}
                                             >
-                                                {event.title}
+                                                <div>{event.title}</div>
+                                                <div>
+                                                    <Link
+                                                        to={`/app/recipe/${event.id}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center mt-2 mb-1 px-2 py-1 text-sm font-medium text-center text-white bg-blue-600 border-2 border-blue-300 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                                    >
+                                                        See Recipe
+                                                    </Link>
+                                                </div>
                                             </div>
                                         ))}
                                 </div>
