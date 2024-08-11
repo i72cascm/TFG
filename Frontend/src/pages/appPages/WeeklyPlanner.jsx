@@ -389,14 +389,20 @@ const WeeklyPlanner = () => {
                                     <div className="flex flex-wrap justify-around items-center">
                                         <button
                                             className="mb-7 px-4 py-2 h-1/4 text-2xl bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
-                                            style={{ minWidth: '120px', maxWidth: '200px' }}
+                                            style={{
+                                                minWidth: "120px",
+                                                maxWidth: "200px",
+                                            }}
                                             onClick={handleSaveChanges}
                                         >
                                             Save Changes
                                         </button>
                                         <button
                                             className="mb-7 px-4 py-2 h-1/4 text-xl sm:text-2xl bg-red-500 text-white rounded hover:bg-red-600 font-semibold break-words"
-                                            style={{ minWidth: '120px', maxWidth: '200px' }}
+                                            style={{
+                                                minWidth: "120px",
+                                                maxWidth: "200px",
+                                            }}
                                             onClick={handleClearCalendar}
                                         >
                                             Clear Calendar
@@ -454,7 +460,10 @@ const WeeklyPlanner = () => {
                                                     className="font-semibold text-xl mb-3"
                                                     style={{ color: "#f3ea66" }}
                                                 >
-                                                    {totalCarbohydrates.toFixed(2)} g
+                                                    {totalCarbohydrates.toFixed(
+                                                        2
+                                                    )}{" "}
+                                                    g
                                                 </p>
                                             </div>
                                         </div>
@@ -507,6 +516,9 @@ const WeeklyPlanner = () => {
                                 <input
                                     type="text"
                                     value={search}
+                                    autoComplete="off"
+                                    autoCorrect="off"
+                                    spellCheck="false"
                                     onChange={handleChange}
                                     onKeyDown={handleKeyDown}
                                     placeholder="Your Recipes..."
