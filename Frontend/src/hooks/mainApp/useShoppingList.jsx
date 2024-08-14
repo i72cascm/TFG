@@ -144,7 +144,7 @@ const useShoppingList = () => {
                     "Content-Type": "application/json",
                     "Authorization": userToken
                 },
-                body: JSON.stringify({ ProductName: "-", Amount: 0, Price: 0 })
+                body: JSON.stringify({ ProductName: "-", Amount: 1, Price: 0 })
             });
     
             if (response.status === 200) {

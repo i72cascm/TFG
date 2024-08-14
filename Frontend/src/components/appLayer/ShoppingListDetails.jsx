@@ -113,14 +113,17 @@ const ShoppingListDetails = ({ list }) => {
     const handleProductChange = (productLineID, field, value) => {
         if (field === "amount") {
             if (value === "") {
-                updateProduct(productLineID, field, 0);
+                updateProduct(productLineID, field, 1);
             } else {
                 // Convierte el valor a número para eliminar ceros a la izquierda
                 const newValue = parseInt(value, 10);
+                if (newValue === 0){
+                    newValue = 1;
+                }
                 if (!isNaN(newValue)) {
                     updateProduct(productLineID, field, newValue);
                 } else {
-                    updateProduct(productLineID, field, 0); // Si el resultado es NaN, establece el valor a 0
+                    updateProduct(productLineID, field, 1); // Si el resultado es NaN, establece el valor a 1
                 }
             }
         } else if (field === "price") {
@@ -185,10 +188,7 @@ const ShoppingListDetails = ({ list }) => {
             (p) => p.productLineID === productLineID
         );
         if (productToUpdate) {
-            const productName =
-                productToUpdate.productName.trim() === ""
-                    ? "-"
-                    : productToUpdate.productName; // Necesario para que no de error el back al mandar una cadena vacia
+            const productName = productToUpdate.productName.trim() === "" ? "-" : productToUpdate.productName; // Necesario para que no de error el back al mandar una cadena vacia
             putProductLineMutation.mutate(
                 {
                     productLineID: productLineID,
@@ -299,7 +299,7 @@ const ShoppingListDetails = ({ list }) => {
                         />
                         <input
                             type="text"
-                            value={product.price}
+                            value={product.price === "0.00€" ? "-" : product.price}
                             className="bg-transparent text-center border-none text-white outline-none ml-4"
                             onChange={(e) =>
                                 handleProductChange(
