@@ -280,7 +280,7 @@ namespace Backend.Controllers
 
                 // Crear la consulta base de recetas
                 IQueryable<Recipe> baseQuery = _recipeContext.Recipes
-                    .Where(r => r.UserID == user.UserID);
+                    .Where(r => (r.UserID == user.UserID) || (r.UserID != user.UserID && r.IsPublish));
 
                 // Filtrar por el título de la receta si se proporciona un término de búsqueda        
                 baseQuery = baseQuery.Where(r => r.Title.Contains(search));
@@ -299,7 +299,7 @@ namespace Backend.Controllers
                     recipesDto.Add(new RecipeDto
                     {
                         ID = recipe.RecipeID,
-                        UserName = user.UserName,
+                        UserName = recipe.User!.UserName,
                         Title = recipe.Title,
                     });
                 }

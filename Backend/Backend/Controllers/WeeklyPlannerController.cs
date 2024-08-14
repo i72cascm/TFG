@@ -48,7 +48,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("{email}")]
-        public async Task<ActionResult<ShoppingList>> CreateShoppingList(string email, [FromBody] List<WeeklyPlannerInsertDto> events)
+        public async Task<ActionResult<ShoppingList>> PostEvent(string email, [FromBody] List<WeeklyPlannerInsertDto> events)
         {
             // Buscar al usuario por email
             var user = await _weeklyPlannerContext.Users
