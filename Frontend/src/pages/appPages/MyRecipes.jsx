@@ -110,7 +110,7 @@ const MyRecipes = () => {
                             }`}
                             onClick={() => setShowPublish(false)}
                         >
-                            Not Publish
+                            Not Published
                         </button>
                         <button
                             className={`text-2xl px-4 py-1 w-64 rounded-r-xl border-y-2 border-r-2 ${
@@ -120,7 +120,7 @@ const MyRecipes = () => {
                             }`}
                             onClick={() => setShowPublish(true)}
                         >
-                            Publish
+                            Published
                         </button>
                     </div>
                     <div>
