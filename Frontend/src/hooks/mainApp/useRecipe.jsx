@@ -241,8 +241,6 @@ const useRecipe = () => {
 
     const putApproveRecipe = async (recipeData, id) => {
         try {
-            console.log(id)
-            console.log(recipeData)
             const response = await fetch(`${urlApi}/api/recipe/${id}`, {
                 method: "PUT",
                 headers: {
