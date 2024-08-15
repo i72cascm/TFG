@@ -5,23 +5,34 @@ import useRecipe from "../../hooks/mainApp/useRecipe";
 import tableCreateRecipe from "/tableCreateRecipe.png";
 import tableCreateRecipe2 from "/tableCreateRecipe2.png";
 import useRecipeTag from "../../hooks/mainApp/useRecipeTag";
-import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "@chakra-ui/react";
+import Modal from "react-modal";
 import { InfoIcon } from "lucide-react";
+import { useParams } from "react-router-dom";
+
+// Estilo del modal
+const customStyles = {
+    content: {
+        top: "50%",
+        left: "50%",
+        right: "auto",
+        bottom: "auto",
+        marginRight: "-50%",
+        transform: "translate(-50%, -50%)",
+        maxWidth: "90%",
+        maxHeight: "90%",
+        padding: 0,
+        overflow: "hidden",
+        zIndex: 1000,
+    },
+    overlay: {
+        backgroundColor: "rgba(0, 0, 0, 0.75)",
+        zIndex: 999,
+    },
+};
 
 const RecipeBuilder = () => {
-    // Llamada de los métodos en el hook de recetas
-    const { postRecipeMutation } = useRecipe();
-    const { getAllRecipeTags } = useRecipeTag();
-
-    // Navigate
-    const navigate = useNavigate();
-
-    // Estados usados en caso de estar copiando otra receta
-    const location = useLocation();
-    const recipeData = location.state?.recipeData;
-
     const getAuthState = () => {
         // Obtener el valor de la cookie por su nombre
         const cookieValue = document.cookie
@@ -45,7 +56,18 @@ const RecipeBuilder = () => {
     };
     const userData = getAuthState();
 
+    // Hooks
+    const { putApproveRecipeMutation, getRecipeById, deleteRecipeMutation } =
+        useRecipe();
+    const { getAllRecipeTags } = useRecipeTag();
+
+    // Estados
+    const navigate = useNavigate();
+    const { id } = useParams();
     const [tags, setTags] = useState([]);
+    const [modalDeleteRecipe, setModalDeleteRecipe] = useState(false);
+    const openDeleteRecipeModal = () => setModalDeleteRecipe(true);
+    const closeDeleteRecipeModal = () => setModalDeleteRecipe(false);
     const [formData, setFormData] = useState({
         title: "",
         preparationTime: "",
@@ -66,25 +88,6 @@ const RecipeBuilder = () => {
                 const tagData = await getAllRecipeTags();
                 if (tagData.success) {
                     setTags(tagData.data);
-                    if (recipeData) {
-                        // IMPORTANTE: En el caso de que esta vista se haya cargado al intentar copiar una receta existente, cargar los valores de la receta original en esta vista
-                        const tag = tagData.data.find(
-                            (t) => t.tagName === recipeData.tagName
-                        );
-                        const tagId = tag ? tag.recipeTagID : 0;
-
-                        setFormData((prev) => ({
-                            ...prev,
-                            title: recipeData.title,
-                            preparationTime: recipeData.preparationTime,
-                            servings: recipeData.servingsNumber,
-                            image: recipeData.recipeImage,
-                            steps: recipeData.steps,
-                            ingredients: recipeData.ingredients,
-                            tags: tagId, // Usar la ID del tag, no el Name
-                            userEmail: userData ? userData.email : null,
-                        }));
-                    }
                 } else {
                     toast.error("Failed to fetch recipe tags.");
                 }
@@ -94,58 +97,35 @@ const RecipeBuilder = () => {
         };
 
         fetchTags();
-    }, [recipeData]);
+    }, []);
+
+    // Al renderizar la vista, realizar la búsqueda de la receta por su ID
+    useEffect(() => {
+        const loadRecipe = async () => {
+            const result = await getRecipeById(id);
+            if (result.success) {
+                const recipeData = result.data;
+                setFormData({
+                    title: recipeData.title,
+                    preparationTime: recipeData.preparationTime.toString(),
+                    servings: recipeData.servingsNumber.toString(),
+                    image: recipeData.imageUrl,
+                    steps: recipeData.steps,
+                    ingredients: recipeData.ingredients,
+                    tags: recipeData.tagId,
+                    userEmail: recipeData.email,
+                });
+            } else {
+                console.error("Failed to fetch recipe by id: ", result.message);
+            }
+        };
+
+        loadRecipe();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (
-            file &&
-            (file.type === "image/png" ||
-                file.type === "image/jpeg" ||
-                file.type === "image/jpg")
-        ) {
-            updateImage(file);
-        } else {
-            toast.error("Please upload a PNG, JPEG or JPG image.");
-        }
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        if (
-            file &&
-            (file.type === "image/png" ||
-                file.type === "image/jpeg" ||
-                file.type === "image/jpg")
-        ) {
-            updateImage(file);
-        }
-    };
-
-    const updateImage = (file) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setFormData((prev) => ({
-                ...prev,
-                image: reader.result,
-            }));
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const handleButtonClick = (e) => {
-        e.preventDefault();
-        fileInputRef.current.click();
     };
 
     const handleSubmit = async (e) => {
@@ -172,6 +152,8 @@ const RecipeBuilder = () => {
             return;
         }
 
+        console.log(formData);
+
         // Construye el objeto de datos para la solicitud POST
         const recipeData = {
             UserEmail: formData.userEmail,
@@ -183,21 +165,10 @@ const RecipeBuilder = () => {
             Ingredients: formData.ingredients,
             RecipeTagID: formData.tags,
         };
-        postRecipeMutation.mutate(recipeData, {
+        putApproveRecipeMutation.mutate({ recipeData: recipeData, id: id }, {
             onSuccess: (data) => {
                 if (data.success) {
-                    toast.success("Recipe submitted successfully!");
-                    setFormData({
-                        title: "",
-                        preparationTime: "",
-                        servings: "",
-                        image: null,
-                        steps: "",
-                        ingredients: "",
-                        tags: 0,
-                        userEmail: userData ? userData.email : null,
-                    });
-                    navigate(`/app/recipe/${data.data.id}`);
+                    navigate("/app/admin-panel");
                 } else {
                     toast.error(
                         `An error occurred while submitting the recipe. Please check all the fields and ensure that the ingredients are correct.`
@@ -208,6 +179,18 @@ const RecipeBuilder = () => {
                 toast.error(
                     `An error occurred while submitting the recipe: ${error.message}`
                 );
+            },
+        });
+    };
+
+    // Eliminar la receta
+    const handleDeleteRecipe = () => {
+        deleteRecipeMutation.mutate(id, {
+            onSuccess: () => {
+                navigate("/app/admin-panel");
+            },
+            onError: (error) => {
+                toast.error(`Failed to delete recipe: ${error.message}`);
             },
         });
     };
@@ -227,16 +210,12 @@ const RecipeBuilder = () => {
             />
             <div className="flex justify-center mt-2 mb-7">
                 <h1 className="text-sky-600 font-black text-7xl col-span-2 capitalize">
-                    Create your own{" "}
+                    Review and approve{" "}
                     <span style={{ color: "#00ADB5" }}>recipe</span>
                 </h1>
             </div>
 
-            <form
-                onSubmit={handleSubmit}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-            >
+            <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-4 mx-4">
                     <div
                         className="mb-4 p-4 rounded-xl border-slate-700 bg-slate-700"
@@ -262,9 +241,9 @@ const RecipeBuilder = () => {
                             <input
                                 name="title"
                                 type="text"
+                                autoComplete="off"
                                 autoCorrect="off"
                                 spellCheck="false"
-                                autoComplete="off"
                                 maxLength={50}
                                 value={formData.title}
                                 onChange={handleChange}
@@ -357,10 +336,10 @@ const RecipeBuilder = () => {
                         <div className="mt-2 flex flex-col items-center">
                             <input
                                 name="image"
+                                readOnly
                                 type="file"
                                 accept=".png, .jpg, .jpeg"
                                 ref={fileInputRef}
-                                onChange={handleImageChange}
                                 style={{ display: "none" }} // Ocultar input default
                             />
 
@@ -393,13 +372,6 @@ const RecipeBuilder = () => {
                                     </span>
                                 </div>
                             )}
-
-                            <button
-                                onClick={handleButtonClick}
-                                className=" mt-5 ml-40 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 border-2 border-blue-300"
-                            >
-                                Select an Image
-                            </button>
                         </div>
                     </div>
                     <div
@@ -459,9 +431,9 @@ const RecipeBuilder = () => {
                             </div>
                             <textarea
                                 name="ingredients"
-                                value={formData.ingredients}
                                 autoCorrect="off"
                                 spellCheck="false"
+                                value={formData.ingredients}
                                 onChange={handleChange}
                                 className="resize-none mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                 rows="5"
@@ -482,29 +454,65 @@ const RecipeBuilder = () => {
                             </label>
                             <textarea
                                 name="steps"
-                                value={formData.steps}
                                 autoCorrect="off"
                                 spellCheck="false"
+                                value={formData.steps}
                                 onChange={handleChange}
                                 className="resize-none mt-2 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                 rows="13"
                             ></textarea>
                         </div>
 
-                        <div className="mt-6 flex flex-col items-center">
+                        <div className="mt-6 flex grid-cols-2 justify-around items-center">
+                            <button
+                                type="button"
+                                onClick={openDeleteRecipeModal}
+                                className="w-2/5 px-4 p-4 bg-red-500 text-white rounded-md hover:bg-red-600 border-2 border-blue-300 text-2xl font-semibold"
+                            >
+                                Delete Recipe
+                            </button>
                             <button
                                 type="submit"
-                                className="w-3/5 px-4 p-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 border-2 border-blue-300 text-2xl font-semibold"
-                                disabled={postRecipeMutation.isPending}
+                                className="w-2/5 px-4 p-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 border-2 border-blue-300 text-2xl font-semibold"
+                                disabled={putApproveRecipeMutation.isPending}
                             >
-                                {postRecipeMutation.isPending
+                                {putApproveRecipeMutation.isPending
                                     ? "Submitting..."
-                                    : "Create Recipe"}
+                                    : "Approve Recipe"}
                             </button>
                         </div>
                     </div>
                 </div>
             </form>
+            <Modal
+                    isOpen={modalDeleteRecipe}
+                    onRequestClose={closeDeleteRecipeModal}
+                    style={customStyles}
+                    contentLabel="Delete Recipe Modal"
+                >
+                    <div className="bg-red-100 p-5">
+                        <h2 className="text-center font-bold text-2xl">
+                            Warning
+                        </h2>
+                        <p className="mt-3 font-medium">
+                            Are you sure you want to delete this recipe?
+                        </p>
+                        <div className="flex justify-center gap-24 mt-4">
+                            <button
+                                onClick={closeDeleteRecipeModal}
+                                className="px-4 py-2 text-white rounded font-semibold bg-gray-500 hover:bg-gray-600"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteRecipe}
+                                className="px-4 py-2 text-white rounded font-semibold bg-red-500 hover:bg-red-600"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
         </>
     );
 };

@@ -11,8 +11,10 @@
         public string? ImageUrl { get; set; }
         public string? Steps { get; set; }
         public string? Ingredients { get; set; }
+        public int? TagId { get; set; }
         public string? TagName { get; set; }
         public bool IsPublish {  get; set; }
+        public bool Pending { get; set; }
         public float Calories { get; set; }
         public float Fat { get; set; }
         public float Protein { get; set; }

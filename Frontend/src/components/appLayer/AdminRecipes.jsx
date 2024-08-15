@@ -5,6 +5,7 @@ import Pagination from "./Pagination";
 import { useNavigate } from "react-router-dom";
 import { urlApi } from "../../constants/endpoint";
 import useRecipe from "../../hooks/mainApp/useRecipe";
+import { Link } from "react-router-dom";
 
 // Estilos del modal
 const customStyles = {
@@ -181,20 +182,35 @@ const AdminRecipes = () => {
                                 {recipe.tagName}
                             </span>
                             <div className="flex-1">
-                                <button
-                                    className="bg-blue-500 text-white py-1 px-3 rounded mr-2 hover:bg-blue-600 font-semibold"
-                                    onClick={() => navigate(`/app/recipe/${recipe.id}`)}
-                                >
-                                    See Recipe
-                                </button>
-                                <button
-                                    className="bg-red-500 text-white py-1 px-3 rounded mr-2 hover:bg-red-600 font-semibold"
-                                    onClick={() =>
-                                        openDeleteRecipeModal(recipe.id)
-                                    }
-                                >
-                                    Delete
-                                </button>
+                                {recipe.pending ? (
+                                    <Link
+                                        to={`/app/admin-approval/${recipe.id}`}
+                                        className="bg-green-500 text-white py-1 px-5 rounded mr-2 hover:bg-green-600 font-semibold"
+                                    >
+                                        Pending Approval...
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <button
+                                            className="bg-blue-500 text-white py-1 px-3 rounded mr-2 hover:bg-blue-600 font-semibold"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/app/recipe/${recipe.id}`
+                                                )
+                                            }
+                                        >
+                                            See Recipe
+                                        </button>
+                                        <button
+                                            className="bg-red-500 text-white py-1 px-3 rounded mr-2 hover:bg-red-600 font-semibold"
+                                            onClick={() =>
+                                                openDeleteRecipeModal(recipe.id)
+                                            }
+                                        >
+                                            Delete
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </li>
                     ))}

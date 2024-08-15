@@ -51,7 +51,7 @@ const AdminPanel = () => {
 
     return (
         <>
-            <div className="min-w-[1000px] overflow-x-auto">
+            <div className="min-w-[1200px] overflow-x-auto">
                 <div className="flex justify-center mt-4 mb-4">
                     <button
                         className={`text-2xl px-4 py-1 w-64 rounded-l-xl border-y-2 border-l-2 ${

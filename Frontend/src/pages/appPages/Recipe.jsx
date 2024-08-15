@@ -82,8 +82,11 @@ const Recipe = () => {
     const navigate = useNavigate();
 
     // Hooks
-    const { getRecipeById, postPublishRecipeMutation, deleteRecipeMutation } =
-        useRecipe();
+    const {
+        getRecipeById,
+        postPublishRequestRecipeMutation,
+        deleteRecipeMutation,
+    } = useRecipe();
     const {
         getTotalLikes,
         getLikeStatus,
@@ -141,7 +144,7 @@ const Recipe = () => {
 
     // Publicar la receta
     const handlePublishRecipe = () => {
-        postPublishRecipeMutation.mutate(recipe.id, {
+        postPublishRequestRecipeMutation.mutate(recipe.id, {
             onSuccess: () => {
                 navigate(0);
             },
@@ -424,26 +427,44 @@ const Recipe = () => {
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-xl mb-3" style={{color: '#ecac4c'}}>
+                                    <p
+                                        className="font-semibold text-xl mb-3"
+                                        style={{ color: "#ecac4c" }}
+                                    >
                                         Fat:
                                     </p>
-                                    <p className="font-semibold text-xl mb-3" style={{color: '#ecac4c'}}>
+                                    <p
+                                        className="font-semibold text-xl mb-3"
+                                        style={{ color: "#ecac4c" }}
+                                    >
                                         {recipe.fat.toFixed(2)} g
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-xl mb-3" style={{color: '#dd4f4a'}}>
+                                    <p
+                                        className="font-semibold text-xl mb-3"
+                                        style={{ color: "#dd4f4a" }}
+                                    >
                                         Protein:
                                     </p>
-                                    <p className="font-semibold text-xl mb-3" style={{color: '#dd4f4a'}}>
+                                    <p
+                                        className="font-semibold text-xl mb-3"
+                                        style={{ color: "#dd4f4a" }}
+                                    >
                                         {recipe.protein.toFixed(2)} g
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-xl mb-3" style={{color: '#f3ea66'}}>
+                                    <p
+                                        className="font-semibold text-xl mb-3"
+                                        style={{ color: "#f3ea66" }}
+                                    >
                                         Carbohydrates:
                                     </p>
-                                    <p className="font-semibold text-xl mb-3" style={{color: '#f3ea66'}}>
+                                    <p
+                                        className="font-semibold text-xl mb-3"
+                                        style={{ color: "#f3ea66" }}
+                                    >
                                         {recipe.carbohydrate.toFixed(2)} g
                                     </p>
                                 </div>
@@ -478,12 +499,10 @@ const Recipe = () => {
                                     labelStyle={{
                                         fontSize: "7px",
                                         fontFamily: "sans-serif",
-                                        fontWeight: 'bold',
-                                        fill: "#000000", 
-                                        
+                                        fontWeight: "bold",
+                                        fill: "#000000",
                                     }}
                                     labelPosition={65}
-                                    
                                 />
                             </div>
                         </div>
@@ -524,10 +543,17 @@ const Recipe = () => {
                             {userData.name === recipe.userName &&
                             !recipe.isPublish ? (
                                 <button
-                                    className="px-4 py-2  text-2xl bg-blue-500 text-white rounded hover:bg-blue-600 font-semibold"
+                                    className={`px-4 py-2 text-2xl text-white rounded font-semibold ${
+                                        recipe.pending
+                                            ? "bg-gray-500"
+                                            : "bg-blue-500 hover:bg-blue-600"
+                                    }`}
                                     onClick={handlePublishRecipe}
+                                    disabled={recipe.pending}
                                 >
-                                    Publish Recipe
+                                    {recipe.pending
+                                        ? "Pending Approval"
+                                        : "Publish Recipe"}
                                 </button>
                             ) : (
                                 <button

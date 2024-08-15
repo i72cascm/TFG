@@ -202,11 +202,11 @@ const useRecipe = () => {
         }
     });
 
-    const postPublishRecipe = async (recipeId) => {
+    const postPublishRequestRecipe = async (recipeId) => {
         try {
             console.log(recipeId);
             const response = await fetch(
-                `${urlApi}/api/recipe/publish/${recipeId}`,
+                `${urlApi}/api/recipe/publishRequest/${recipeId}`,
                 {
                     method: "POST",
                     headers: {
@@ -221,22 +221,56 @@ const useRecipe = () => {
             } else {
                 const errorData = await response.json();
                 throw new Error(
-                    errorData.message || "Error publishing recipes"
+                    errorData.message || "Error pending recipes"
                 );
             }
         } catch (error) {
-            console.error("Error publishing recipe:", error);
+            console.error("Error pending recipe:", error);
             return { success: false, message: error.message };
         }
     };
 
-    const postPublishRecipeMutation = useMutation({
-        mutationFn: postPublishRecipe,
+    const postPublishRequestRecipeMutation = useMutation({
+        mutationFn: postPublishRequestRecipe,
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["user-recipes", "recipes"],
             });
         },
+    });
+
+    const putApproveRecipe = async (recipeData, id) => {
+        try {
+            console.log(id)
+            console.log(recipeData)
+            const response = await fetch(`${urlApi}/api/recipe/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: userToken,
+                },
+                body: JSON.stringify(recipeData),
+            });
+            if (response.status === 200) {
+                const data = await response.json();
+                return { success: true, data };
+            } else {
+                const errorData = await response.json();
+                return { success: false, message: errorData.Message };
+            }
+        } catch (error) {
+            console.error("Error submitting recipe:", error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    const putApproveRecipeMutation = useMutation({
+        mutationFn: ({ recipeData, id }) => putApproveRecipe(recipeData, id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["user-recipes", "recipes"],
+            });
+        }
     });
 
     const deleteRecipe = async (recipeId) => {
@@ -303,7 +337,8 @@ const useRecipe = () => {
 
     return {
         postRecipeMutation,
-        postPublishRecipeMutation,
+        postPublishRequestRecipeMutation,
+        putApproveRecipeMutation,
         deleteAllRecipesByUserMutation,
         deleteRecipeMutation,
         getAllRecipes,

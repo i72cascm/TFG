@@ -18,12 +18,10 @@ import ShoppingLists from './pages/appPages/ShoppingLists';
 import WeeklyPlanner from './pages/appPages/WeeklyPlanner';
 import HealthyRecipes from './pages/appPages/HealthyRecipes';
 import AdminPanel from './pages/appPages/AdminPanel';
+import AdminApproval from './pages/appPages/AdminApproval';
 
 import AuthProvider from 'react-auth-kit';
 import { store } from './utils/store';
-
-
-
 
 function App() {
 	return (
@@ -49,6 +47,7 @@ function App() {
 							<Route path='/app/healthy-recipes' element={<HealthyRecipes/>}/>
 							<Route path='/app/user-settings' element={<UserSettings/>}/>
 							<Route path='/app/admin-panel' element={<AdminPanel/>}/>
+							<Route path='/app/admin-approval/:id' element={<AdminApproval/>}/>
 						</Route>
 					</Route>
 				</Routes>

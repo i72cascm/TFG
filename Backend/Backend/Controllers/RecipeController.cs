@@ -77,7 +77,8 @@ namespace Backend.Controllers
                        PreparationTime = r.PreparationTime,
                        ServingsNumber = r.ServingsNumber,
                        TagName = r.RecipeTag != null ? r.RecipeTag.TagName : null,
-                       IsPublish = r.IsPublish
+                       IsPublish = r.IsPublish,
+                       Pending = r.Pending,
                    })
                    .ToListAsync();
 
@@ -332,14 +333,17 @@ namespace Backend.Controllers
                 {
                     ID = recipe.RecipeID,
                     UserName = recipe.User?.UserName,
+                    Email = recipe.User!.Email,
                     Title = recipe.Title,
                     PreparationTime = recipe.PreparationTime,
                     ServingsNumber = recipe.ServingsNumber,
                     ImageUrl = recipe.ImageUrl,
                     Steps = recipe.Steps,
                     Ingredients = recipe.Ingredients,
+                    TagId = recipe.RecipeTagID,
                     TagName = recipe.RecipeTag?.TagName,
                     IsPublish = recipe.IsPublish,
+                    Pending = recipe.Pending,
                     Calories = recipe.Calories,
                     Fat = recipe.Fat,
                     Protein = recipe.Protein,
@@ -447,9 +451,9 @@ namespace Backend.Controllers
             }
         }
 
-        // Publicar Receta existente
-        [HttpPost("publish/{id}")]
-        public async Task<IActionResult> PublishRecipe(int id)
+        // Usuario hace request a administradores de publicar la receta
+        [HttpPost("publishRequest/{id}")]
+        public async Task<IActionResult> PublishRequest(int id)
         {
             try
             {
@@ -461,10 +465,58 @@ namespace Backend.Controllers
                     return NotFound(new { Message = "Recipe not found." });
                 }
 
-                recipe.IsPublish = true;
+                recipe.Pending = true;
                 await _recipeContext.SaveChangesAsync();
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
+            }
+        }
+
+        // Método de los Administradores para corregir y aprobar publicación de una receta en pendiente
+        [HttpPut("{id}")]
+        public async Task<ActionResult<RecipeInsertDto>> Publish(int id, RecipeInsertDto recipeInsertDto)
+        {
+            try
+            {
+                var recipe = await _recipeContext.Recipes.FirstOrDefaultAsync(r => r.RecipeID == id);
+                if (recipe == null)
+                {
+                    return NotFound(new { Message = "Recipe not found" });
+                }
+
+                // Procesar la entrada de ingredientes para manejar ambos formatos
+                var ingredientsList = recipeInsertDto.Ingredients
+                                    .Split(new[] { ',', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(ingredient => ingredient.Trim())
+                                    .ToList();
+
+                // Obtener información nutricional
+                var nutritionInfo = await _edamamNutritionService.GetNutritionInfoAsync(ingredientsList);
+
+                // Actualiza solo los campos permitidos por el administrador 
+                recipe.Title = recipeInsertDto.Title;
+                recipe.PreparationTime = recipeInsertDto.PreparationTime;
+                recipe.ServingsNumber = recipeInsertDto.ServingsNumber;
+                recipe.Steps = recipeInsertDto.Steps;
+                recipe.Ingredients = recipeInsertDto.Ingredients;
+                recipe.RecipeTagID = recipeInsertDto.RecipeTagID;
+                recipe.Calories = nutritionInfo?.Calories ?? 0;
+                recipe.Carbohydrate = nutritionInfo?.TotalNutrients?.Carbohydrate?.Quantity ?? 0;
+                recipe.Fat = nutritionInfo?.TotalNutrients?.Fat?.Quantity ?? 0;
+                recipe.Protein = nutritionInfo?.TotalNutrients?.Protein?.Quantity ?? 0;
+
+                // La receta queda publicada, por tanto ya no esta pendiente de aprobación
+                recipe.Pending = false;
+                recipe.IsPublish = true;
+
+
+                await _recipeContext.SaveChangesAsync();
+
+                return Ok(recipe);
             }
             catch (Exception ex)
             {

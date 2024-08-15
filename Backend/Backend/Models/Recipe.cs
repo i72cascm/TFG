@@ -49,6 +49,9 @@ namespace Backend.Modelos
         [Required]
         public bool IsPublish {  get; set; }
 
+        [Required]
+        public bool Pending { get; set; }
+
         public User? User { get; set; }
         public RecipeTag? RecipeTag { get; set; }
 
