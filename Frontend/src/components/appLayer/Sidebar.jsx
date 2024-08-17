@@ -70,7 +70,7 @@ export default function Sidebar() {
     return (
         <aside className="h-screen">
             <nav
-                className="h-full flex flex-col border-r-2 border-black bg-slate-700"
+                className="h-full flex flex-col border-r-2 border-black bg-slate-700 overflow-y-auto"
                 
             >
                 <div className="p-4 pb-2 flex justify-between items-center">
