@@ -1,5 +1,5 @@
 import { urlApi } from "../../constants/endpoint";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const useShoppingList = () => {
     const queryClient = useQueryClient();
@@ -17,50 +17,60 @@ const useShoppingList = () => {
         return token;
     };
     const userToken = getAuthState();
-    
+
     ///////////////////////////////////////////////////////////////////////////////
     /////////////////////////// SHOPPING LISTS ////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
-    
+
     const getShoppingListsByUser = async (email) => {
         try {
-            const response = await fetch(`${urlApi}/api/shoppinglist/${email}`, {
-                method: 'GET',
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": userToken
-                },
-            });
-    
+            const response = await fetch(
+                `${urlApi}/api/shoppinglist/${email}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                }
+            );
+
             if (response.status === 200) {
                 const data = await response.json();
                 return { success: true, data };
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Error getting shopping lists");
+                throw new Error(
+                    errorData.message || "Error getting shopping lists"
+                );
             }
         } catch (error) {
             console.error("Error getting shopping lists:", error);
             throw new Error(error.message);
         }
-    }
+    };
 
     const postNewList = async (email, listName) => {
         try {
-            const response = await fetch(`${urlApi}/api/shoppinglist/${email}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": userToken
-                },
-                body: JSON.stringify({ NameList: listName }),
-            });
-    
+            const response = await fetch(
+                `${urlApi}/api/shoppinglist/${email}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                    body: JSON.stringify({ NameList: listName }),
+                }
+            );
+
             if (response.status === 200) {
                 return { success: true };
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Error adding new shopping list");
+                throw new Error(
+                    errorData.message || "Error adding new shopping list"
+                );
             }
         } catch (error) {
             console.error("Error adding new shopping list:", error);
@@ -72,10 +82,10 @@ const useShoppingList = () => {
         mutationFn: ({ email, listName }) => postNewList(email, listName),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['user-shopping-lists']
+                queryKey: ["user-shopping-lists"],
             });
-        }
-    })
+        },
+    });
 
     const deleteList = async (id) => {
         try {
@@ -83,31 +93,32 @@ const useShoppingList = () => {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": userToken
-                }
+                    Authorization: userToken,
+                },
             });
-    
+
             if (response.status === 200) {
                 return { success: true };
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Error deleting shopping list");
+                throw new Error(
+                    errorData.message || "Error deleting shopping list"
+                );
             }
         } catch (error) {
             console.error("Error deleting shopping list:", error);
             throw new Error(error.message);
         }
     };
-    
 
     const deleteListMutation = useMutation({
         mutationFn: deleteList,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['user-shopping-lists']
+                queryKey: ["user-shopping-lists"],
             });
-        }
-    })
+        },
+    });
 
     ///////////////////////////////////////////////////////////////////////////////
     /////////////////////////// PRODUCT LINES /////////////////////////////////////
@@ -115,43 +126,57 @@ const useShoppingList = () => {
 
     const getProductLinesById = async (id) => {
         try {
-            const response = await fetch(`${urlApi}/api/shoppinglist/productLines/${id}`, {
-                method: 'GET',
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": userToken
-                },
-            });
-    
+            const response = await fetch(
+                `${urlApi}/api/shoppinglist/productLines/${id}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                }
+            );
+
             if (response.status === 200) {
                 const data = await response.json();
                 return { success: true, data };
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Error getting product lines");
+                throw new Error(
+                    errorData.message || "Error getting product lines"
+                );
             }
         } catch (error) {
             console.error("Error getting product lines:", error);
             throw new Error(error.message);
         }
-    }
+    };
 
     const postProductLine = async (id) => {
         try {
-            const response = await fetch(`${urlApi}/api/shoppinglist/productLines/${id}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": userToken
-                },
-                body: JSON.stringify({ ProductName: "-", Amount: 1, Price: 0 })
-            });
-    
+            const response = await fetch(
+                `${urlApi}/api/shoppinglist/productLines/${id}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                    body: JSON.stringify({
+                        ProductName: "-",
+                        Amount: 1,
+                        Price: 0,
+                    }),
+                }
+            );
+
             if (response.status === 200) {
                 return { success: true };
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Error adding new product line");
+                throw new Error(
+                    errorData.message || "Error adding new product line"
+                );
             }
         } catch (error) {
             console.error("Error adding new product line:", error);
@@ -163,29 +188,34 @@ const useShoppingList = () => {
         mutationFn: postProductLine,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['product-lines']
+                queryKey: ["product-lines"],
             });
-        }
-    })
+        },
+    });
 
     const putProductLine = async (data) => {
         try {
             const productLineID = data.productLineID;
-            const productData = data.updatedProduct
-            const response = await fetch(`${urlApi}/api/shoppinglist/productLines/${productLineID}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": userToken
-                },
-                body: JSON.stringify(productData)
-            });
-    
+            const productData = data.updatedProduct;
+            const response = await fetch(
+                `${urlApi}/api/shoppinglist/productLines/${productLineID}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                    body: JSON.stringify(productData),
+                }
+            );
+
             if (response.status === 200) {
                 return { success: true };
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Error updating product line");
+                throw new Error(
+                    errorData.message || "Error updating product line"
+                );
             }
         } catch (error) {
             console.error("Error updating product line:", error);
@@ -197,26 +227,31 @@ const useShoppingList = () => {
         mutationFn: putProductLine,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['product-lines']
+                queryKey: ["product-lines"],
             });
-        }
-    })
+        },
+    });
 
-    const deleteProductLine  = async (id) => {
+    const deleteProductLine = async (id) => {
         try {
-            const response = await fetch(`${urlApi}/api/shoppinglist/productLines/${id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": userToken
+            const response = await fetch(
+                `${urlApi}/api/shoppinglist/productLines/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
                 }
-            });
-    
+            );
+
             if (response.status === 200) {
                 return { success: true };
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || "Error deleting product line");
+                throw new Error(
+                    errorData.message || "Error deleting product line"
+                );
             }
         } catch (error) {
             console.error("Error deleting product line:", error);
@@ -225,16 +260,72 @@ const useShoppingList = () => {
     };
 
     const deleteProductLineMutation = useMutation({
-        mutationFn: deleteProductLine ,
+        mutationFn: deleteProductLine,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['product-lines']
+                queryKey: ["product-lines"],
             });
+        },
+    });
+
+    ///////////////////////////////////////////////////////////////////////////////
+    /////////////////////////// COPY RECIPE ///////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
+
+    const postCreateFromRecipe = async (email, title, ingredients) => {
+        try {
+            console.log(email)
+            console.log(title)
+            console.log(ingredients)
+            const response = await fetch(
+                `${urlApi}/api/shoppinglist/createFromRecipe/${email}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: userToken,
+                    },
+                    body: JSON.stringify({
+                        NameList: title,
+                        Ingredients: ingredients,
+                    }),
+                }
+            );
+
+            if (response.status === 200) {
+                return { success: true };
+            } else {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.message || "Error creating new shopping list"
+                );
+            }
+        } catch (error) {
+            console.error("Error creating new shopping list:", error);
+            throw new Error(error.message);
         }
-    })
+    };
 
+    const postCreateFromRecipeMutation = useMutation({
+        mutationFn: ({ email, title, ingredients }) =>
+            postCreateFromRecipe(email, title, ingredients),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["user-shopping-lists"],
+            });
+        },
+    });
 
-    return { getShoppingListsByUser, getProductLinesById, postNewListMutation, deleteListMutation, postProductLineMutation, putProductLineMutation, deleteProductLineMutation };
-}
+    return {
+        getShoppingListsByUser,
+        getProductLinesById,
+        postNewListMutation,
+        deleteListMutation,
+        postProductLineMutation,
+        putProductLineMutation,
+        deleteProductLineMutation,
+        postCreateFromRecipeMutation,
+    };
+};
 
-export default useShoppingList
+export default useShoppingList;

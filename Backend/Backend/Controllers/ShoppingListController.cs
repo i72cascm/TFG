@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.Filters;
 using Backend.DTOs;
+using System.Text.RegularExpressions;
 
 namespace Backend.Controllers
 {
@@ -190,5 +191,75 @@ namespace Backend.Controllers
             return Ok(new { Message = "Product line deleted successfully." });
         }
 
+        ///////////////////////////////////////////////////////////////////////////////
+        /////////////////////////// COPY RECIPE ///////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////
+
+        [HttpPost("createFromRecipe/{email}")]
+        public async Task<ActionResult<ProductLine>> CreateFromRecipe(string email, [FromBody] ShoppingListInsertDto request)
+        {
+            // Buscar al usuario por email
+            var user = await _shoppingListContext.Users
+                    .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                return NotFound(new { Message = "User not found." });
+            }
+
+            // Crear nueva lista de compra basada en la receta
+            var newShoppingList = new ShoppingList
+            {
+                UserID = user.UserID,
+                ShoppingListName = request.NameList,
+                ProductLines = new List<ProductLine>()
+            };
+
+            // Procesar la entrada de ingredientes y crear líneas de producto
+            var ingredients = request.Ingredients?
+                .Split(new[] { ',', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(ingredient => ingredient.Trim())
+                .ToList();
+
+            if (ingredients != null)
+            {
+                foreach (var ingredient in ingredients)
+                {
+                    if (!string.IsNullOrWhiteSpace(ingredient)) // Por si se ha colado algún ingrediente vacío
+                    {
+                        var match = Regex.Match(ingredient, @"^(\d+)\s(?!\/)(g|grams?|)\b");
+
+                        var amount = 1;
+                        var productName = ingredient;
+
+                        if (match.Success)
+                        {
+                            // Verificar si el match incluye 'g', 'grams' o 'gram'
+                            if (string.IsNullOrEmpty(match.Groups[2].Value))
+                            {
+                                // Solo hay número, se asume cantidad real
+                                amount = int.Parse(match.Groups[1].Value);
+                                productName = ingredient.Substring(match.Length).Trim();
+                            }
+                            // Si match incluye 'g', 'grams', o 'gram', se ignora el número para la cantidad
+                        }
+
+                        var newProductLine = new ProductLine
+                        {
+                            ProductName = productName,
+                            Amount = amount,
+                            Price = 0
+                        };
+
+                        newShoppingList.ProductLines.Add(newProductLine);
+                    }
+                }
+            }
+
+            _shoppingListContext.ShoppingLists.Add(newShoppingList);
+            await _shoppingListContext.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }

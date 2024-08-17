@@ -116,7 +116,7 @@ const ShoppingListDetails = ({ list }) => {
                 updateProduct(productLineID, field, 1);
             } else {
                 // Convierte el valor a número para eliminar ceros a la izquierda
-                const newValue = parseInt(value, 10);
+                let newValue = parseInt(value, 10);
                 if (newValue === 0){
                     newValue = 1;
                 }
@@ -200,13 +200,6 @@ const ShoppingListDetails = ({ list }) => {
                         ),
                     },
                 },
-                {
-                    onError: (error) => {
-                        toast.error(
-                            `Failed to update product line: ${error.message}`
-                        );
-                    },
-                }
             );
         }
     };

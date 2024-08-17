@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useRecipe from "../../hooks/mainApp/useRecipe";
 import useLike from "../../hooks/mainApp/useLike";
+import useShoppingList from "../../hooks/mainApp/useShoppingList";
 import useComment from "../../hooks/mainApp/useComment";
 import fondoPizarra from "/fondoPizarra.png";
 import fondoPizarraMirror from "/fondoPizarraMirror.png";
@@ -19,6 +20,7 @@ import {
     Tag,
     Heart,
     Fullscreen,
+    ShoppingCart,
 } from "lucide-react";
 
 // Estilo del modal
@@ -30,7 +32,8 @@ const customStyles = {
         bottom: "auto",
         marginRight: "-50%",
         transform: "translate(-50%, -50%)",
-        maxWidth: "90%",
+        maxWidth: "100vh",
+        overflow: "auto",
         maxHeight: "90%",
         padding: 0,
         overflow: "hidden",
@@ -96,6 +99,7 @@ const Recipe = () => {
     const { getComments, postCommentMutation, deleteCommentMutation } =
         useComment();
     const { getUserByEmail } = useUserSettings();
+    const { postCreateFromRecipeMutation } = useShoppingList();
 
     // Al renderizar esta página, llamar al método de obtención de datos del usuario
     const { data: userInfo } = useQuery({
@@ -227,6 +231,27 @@ const Recipe = () => {
                 }
             );
         }
+    };
+
+    // Crear shoppingList a partir de ingredientes
+    const handleCreateShoppingList = () => {
+        postCreateFromRecipeMutation.mutate(
+            {
+                email: userData.email,
+                title: recipe.title,
+                ingredients: recipe.ingredients,
+            },
+            {
+                onSuccess: () => {
+                    toast.success(
+                        "Created new list! Check your Shopping List."
+                    );
+                },
+                onError: (error) => {
+                    toast.error(`Failed to create new list: ${error.message}`);
+                },
+            }
+        );
     };
 
     useEffect(() => {
@@ -516,9 +541,20 @@ const Recipe = () => {
                         }}
                     >
                         <div className="mt-2 flex flex-col items-center">
-                            <label className="font-semibold text-3xl capitalize text-white mb-3">
-                                Ingredients
-                            </label>
+                            <div className="flex">
+                                <label className="font-semibold text-3xl capitalize text-white mb-3">
+                                    Ingredients
+                                </label>
+                                <button
+                                    className="ml-6 bg-sky-500 hover:bg-sky-600 active:bg-sky-800 rounded-xl border-2 border-gray-800 w-auto px-2"
+                                    onClick={handleCreateShoppingList}
+                                >
+                                    <ShoppingCart
+                                        size={30}
+                                        className="text-white"
+                                    />
+                                </button>
+                            </div>
                             <textarea
                                 name="ingredients"
                                 value={recipe.ingredients}

@@ -88,9 +88,9 @@ const ShoppingLists = () => {
     };
 
     const handleNewList = () => {
-        // Controlar que el nombre no tenga más de 15 caracteres
-        if (newListName.length > 15) {
-            toast.error("List name must be 15 characters or less");
+        // Controlar que el nombre no tenga más de 27 caracteres
+        if (newListName.length > 27) {
+            toast.error("List name must be 27 characters or less");
             return;
         }
 

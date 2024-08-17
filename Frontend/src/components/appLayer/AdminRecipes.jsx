@@ -183,12 +183,14 @@ const AdminRecipes = () => {
                             </span>
                             <div className="flex-1">
                                 {recipe.pending ? (
-                                    <Link
-                                        to={`/app/admin-approval/${recipe.id}`}
-                                        className="bg-green-500 text-white py-1 px-5 rounded mr-2 hover:bg-green-600 font-semibold"
-                                    >
-                                        Pending Approval...
-                                    </Link>
+                                    <button className="bg-green-500 text-white py-1 px-5 rounded mr-2 hover:bg-green-600 font-semibold">
+                                        <Link
+                                            to={`/app/admin-approval/${recipe.id}`}
+                                            
+                                        >
+                                            Pending Approval...
+                                        </Link>
+                                    </button>
                                 ) : (
                                     <>
                                         <button
