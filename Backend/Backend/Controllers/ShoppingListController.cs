@@ -261,5 +261,70 @@ namespace Backend.Controllers
 
             return Ok();
         }
+
+        [HttpPost("addingredientsfromrecipe")]
+        public async Task<ActionResult> AddIngredientsFromRecipe([FromQuery] int idRecipe, [FromQuery] int idShoppingList)
+        {
+            // Obtener la receta por ID
+            var recipe = await _shoppingListContext.Recipes
+                           .FirstOrDefaultAsync(r => r.RecipeID == idRecipe);
+
+            if (recipe == null)
+            {
+                return NotFound(new { Message = "Recipe not found." });
+            }
+
+            // Obtener la lista de compras por ID
+            var shoppingList = await _shoppingListContext.ShoppingLists
+                               .Include(sl => sl.ProductLines)
+                               .FirstOrDefaultAsync(sl => sl.ShoppingListID == idShoppingList);
+
+            if (shoppingList == null)
+            {
+                return NotFound(new { Message = "Shopping list not found." });
+            }
+
+            // Procesar los ingredientes como en el método CreateFromRecipe
+            var ingredients = recipe.Ingredients?
+                .Split(new[] { ',', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(ingredient => ingredient.Trim())
+                .ToList();
+
+            if (ingredients != null)
+            {
+                foreach (var ingredient in ingredients)
+                {
+                    if (!string.IsNullOrWhiteSpace(ingredient)) // Verificar que el ingrediente no está vacío
+                    {
+                        var match = Regex.Match(ingredient, @"^(\d+)\s(?!\/)(g|grams?|)\b");
+
+                        var amount = 1;
+                        var productName = ingredient;
+
+                        if (match.Success)
+                        {
+                            // Extraer la cantidad y el nombre del producto
+                            amount = int.Parse(match.Groups[1].Value);
+                            productName = ingredient.Substring(match.Length).Trim();
+                        }
+
+                        var newProductLine = new ProductLine
+                        {
+                            ShoppingListID = idShoppingList,
+                            ProductName = productName,
+                            Amount = amount,
+                            Price = 0 // Establecer el precio a 0 o calcular si es necesario
+                        };
+
+                        shoppingList.ProductLines!.Add(newProductLine);
+                    }
+                }
+            }
+
+            await _shoppingListContext.SaveChangesAsync();
+
+            return Ok(new { Message = "Ingredients added successfully to shopping list." });
+        }
+
     }
 }

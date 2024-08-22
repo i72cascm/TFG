@@ -274,9 +274,6 @@ const useShoppingList = () => {
 
     const postCreateFromRecipe = async (email, title, ingredients) => {
         try {
-            console.log(email)
-            console.log(title)
-            console.log(ingredients)
             const response = await fetch(
                 `${urlApi}/api/shoppinglist/createFromRecipe/${email}`,
                 {
@@ -316,6 +313,41 @@ const useShoppingList = () => {
         },
     });
 
+    const postAddIngredientsFromRecipe = async (data) => {
+        try {
+            const url = `${urlApi}/api/shoppinglist/addingredientsfromrecipe?idRecipe=${data.idRecipe}&idShoppingList=${data.idShoppingList}`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: userToken,
+                }
+            });
+    
+            if (response.status === 200) {
+                return { success: true };
+            } else {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.message || "Error creating new shopping list"
+                );
+            }
+        } catch (error) {
+            console.error("Error creating new shopping list:", error);
+            throw new Error(error.message);
+        }
+    };
+
+    const postAddIngredientsFromRecipeMutation = useMutation({
+        mutationFn: (idRecipe, idShoppingList) =>
+            postAddIngredientsFromRecipe(idRecipe, idShoppingList),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["product-lines"],
+            });
+        },
+    });
+
     return {
         getShoppingListsByUser,
         getProductLinesById,
@@ -325,6 +357,7 @@ const useShoppingList = () => {
         putProductLineMutation,
         deleteProductLineMutation,
         postCreateFromRecipeMutation,
+        postAddIngredientsFromRecipeMutation
     };
 };
 

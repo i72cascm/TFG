@@ -154,7 +154,7 @@ const AdminRecipes = () => {
                     <span className="flex-1 font-semibold">Name</span>
                     <span className="flex-1 font-semibold">Username</span>
                     <span className="flex-1 font-semibold">Email</span>
-                    <span className="flex-1 font-semibold">Publish</span>
+                    <span className="flex-1 font-semibold">Published</span>
                     <span className="flex-1 font-semibold">Tag</span>
                     <span className="flex-1 font-semibold"></span>
                 </li>

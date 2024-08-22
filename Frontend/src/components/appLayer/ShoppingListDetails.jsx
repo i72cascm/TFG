@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import useShoppingList from "../../hooks/mainApp/useShoppingList";
+import useRecipe from "../../hooks/mainApp/useRecipe";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
 import Modal from "react-modal";
@@ -24,9 +26,33 @@ const customStyles = {
 Modal.setAppElement("#root");
 
 const ShoppingListDetails = ({ list }) => {
+    const getAuthState = () => {
+        // Obtener el valor de la cookie por su nombre
+        const cookieValue = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("_auth_state="))
+            ?.split("=")[1];
+
+        if (!cookieValue) {
+            return null;
+        }
+
+        // Decodificar el valor URL-encoded de la cookie y parsearlo como JSON
+        try {
+            const decodedValue = decodeURIComponent(cookieValue);
+            const authState = JSON.parse(decodedValue);
+            return authState;
+        } catch (error) {
+            console.error("Error parsing auth state:", error);
+            return null;
+        }
+    };
+    const userData = getAuthState();
     // Conjunto de líneas de producto en esta lista
     const [products, setProducts] = useState([]); // Conjunto de listas del usuario
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalAddRecipe, setModalAddRecipe] = useState(false);
+    const [recipeSearch, setRecipeSearch] = useState("");
     const [total, setTotal] = useState("0.00€");
     const navigate = useNavigate();
 
@@ -37,7 +63,9 @@ const ShoppingListDetails = ({ list }) => {
         postProductLineMutation,
         putProductLineMutation,
         deleteProductLineMutation,
+        postAddIngredientsFromRecipeMutation
     } = useShoppingList();
+    const { getUserRecipesWeeklyPlanner } = useRecipe();
 
     // Al renderizar el componente, llamar al método de obtención de líneas de producto
     const { data: listProductLines, isLoading: loadProductLines } = useQuery({
@@ -117,7 +145,7 @@ const ShoppingListDetails = ({ list }) => {
             } else {
                 // Convierte el valor a número para eliminar ceros a la izquierda
                 let newValue = parseInt(value, 10);
-                if (newValue === 0){
+                if (newValue === 0) {
                     newValue = 1;
                 }
                 if (!isNaN(newValue)) {
@@ -171,6 +199,17 @@ const ShoppingListDetails = ({ list }) => {
         setModalIsOpen(false);
     };
 
+    // Función para abrir el modal Recipe
+    const openModalRecipe = () => {
+        setModalAddRecipe(true);
+    };
+
+    // Función para cerrar el modal Recipe
+    const closeModalRecipe = () => {
+        setModalAddRecipe(false);
+        setRecipeSearch("");
+    };
+
     // Función para agregar un nuevo producto
     const addNewProduct = (id) => {
         postProductLineMutation.mutate(id, {
@@ -182,25 +221,41 @@ const ShoppingListDetails = ({ list }) => {
         });
     };
 
+    // Función para agregar los ingredientes de una receta
+    const handleAddNewRecipeIngredients = (idRecipe, idShoppingList) => {
+        postAddIngredientsFromRecipeMutation.mutate({ idRecipe, idShoppingList }, {
+            onSuccess: () => {
+                // Manejar cualquier lógica adicional en caso de éxito, por ejemplo:
+                toast.success("Ingredients added successfully!");
+            },
+            onError: (error) => {
+                // Manejar errores aquí
+                toast.error(`Failed to add ingredients: ${error.message}`);
+            }
+        });
+        closeModalRecipe();
+    };
+
     // Función para actualizar los valores de una línea ya existente
     const handleUpdateProductLine = (productLineID) => {
         const productToUpdate = products.find(
             (p) => p.productLineID === productLineID
         );
         if (productToUpdate) {
-            const productName = productToUpdate.productName.trim() === "" ? "-" : productToUpdate.productName; // Necesario para que no de error el back al mandar una cadena vacia
-            putProductLineMutation.mutate(
-                {
-                    productLineID: productLineID,
-                    updatedProduct: {
-                        ProductName: productName,
-                        Amount: productToUpdate.amount,
-                        Price: parseFloat(
-                            productToUpdate.price.replace("€", "").trim()
-                        ),
-                    },
+            const productName =
+                productToUpdate.productName.trim() === ""
+                    ? "-"
+                    : productToUpdate.productName; // Necesario para que no de error el back al mandar una cadena vacia
+            putProductLineMutation.mutate({
+                productLineID: productLineID,
+                updatedProduct: {
+                    ProductName: productName,
+                    Amount: productToUpdate.amount,
+                    Price: parseFloat(
+                        productToUpdate.price.replace("€", "").trim()
+                    ),
                 },
-            );
+            });
         }
     };
 
@@ -218,6 +273,31 @@ const ShoppingListDetails = ({ list }) => {
                 toast.error(`Failed to delete product line: ${error.message}`);
             },
         });
+    };
+
+    // Buscador de recetas para añadir sus ingredientes
+    const fetchUserRecipes = useCallback(() => {
+        return getUserRecipesWeeklyPlanner(userData?.email, recipeSearch);
+    }, [userData?.email, recipeSearch]);
+
+    // Recetas del usuario filtradas por nombre
+    const { data: foundRecipes, refetch } = useQuery({
+        queryKey: [],
+        queryFn: fetchUserRecipes,
+        keepPreviousData: true,
+        enabled: !!userData?.email,
+    });
+
+    // Función para cambiar valor de la barra de búsqueda
+    const handleChange = (event) => {
+        setRecipeSearch(event.target.value);
+    };
+
+    // Realizar búsqueda por nombre al pulsar el intro
+    const handleKeyDown = (event) => {
+        if (event.key === "Enter") {
+            refetch();
+        }
     };
 
     // Mensaje de cargando datos de listas
@@ -292,7 +372,9 @@ const ShoppingListDetails = ({ list }) => {
                         />
                         <input
                             type="text"
-                            value={product.price === "0.00€" ? "-" : product.price}
+                            value={
+                                product.price === "0.00€" ? "-" : product.price
+                            }
                             className="bg-transparent text-center border-none text-white outline-none ml-4"
                             onChange={(e) =>
                                 handleProductChange(
@@ -321,25 +403,30 @@ const ShoppingListDetails = ({ list }) => {
             </div>
 
             <div className="flex justify-between items-center px-14 mb-5">
-                <span className="flex-1 text-white text-4xl font-semibold whitespace-nowrap">
+                <span className="text-white text-4xl font-semibold whitespace-nowrap">
                     Total: {total}
                 </span>
-                <div className="flex-1 flex justify-center ml-10">
-                    <button
-                        onClick={() => addNewProduct(list.shoppingListID)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded text-2xl"
-                    >
-                        New Product
-                    </button>
-                </div>
-                <div className="flex-1 flex justify-end">
-                    <button
-                        onClick={openModal}
-                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded text-2xl"
-                    >
-                        Delete List
-                    </button>
-                </div>
+
+                <button
+                    onClick={() => addNewProduct(list.shoppingListID)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded text-2xl"
+                >
+                    New Product
+                </button>
+
+                <button
+                    onClick={openModalRecipe}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded text-2xl"
+                >
+                    Add Recipe
+                </button>
+
+                <button
+                    onClick={openModal}
+                    className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded text-2xl"
+                >
+                    Delete List
+                </button>
             </div>
 
             <Modal
@@ -367,6 +454,64 @@ const ShoppingListDetails = ({ list }) => {
                         >
                             Delete
                         </button>
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={modalAddRecipe}
+                onRequestClose={closeModalRecipe}
+                style={customStyles}
+                contentLabel="Confirm Delete"
+            >
+                <div className="flex flex-col items-center justify-center p-5 bg-slate-100">
+                    <h2 className="mb-4 text-xl text-center font-semibold">
+                        Add the ingredientes from one recipe
+                    </h2>
+                    <input
+                        type="text"
+                        value={recipeSearch}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck="false"
+                        onChange={handleChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Your Recipes..."
+                        className="mb-4 p-2 w-full text-center font-semibold placeholder:text-gray-600 bg-slate-300 rounded-xl"
+                    />
+                    <div
+                        className="overflow-y-auto"
+                        style={{
+                            minHeight: "120px",
+                            maxHeight: "200px",
+                        }}
+                    >
+                        {Array.isArray(foundRecipes) &&
+                            foundRecipes.map((event) => (
+                                <div
+                                    key={event.id}
+                                    className="p-2 rounded my-2 bg-sky-600 text-white font-semibold"
+                                >
+                                    <div>{event.title}</div>
+                                    <div className="flex justify-center gap-2">
+                                        <Link
+                                            to={`/app/recipe/${event.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center mt-2 mb-1 px-2 py-1 text-sm font-medium text-center text-white rounded-xl bg-slate-400 hover:bg-slate-500 active:bg-slate-600"
+                                            
+                                        >
+                                            See Recipe
+                                        </Link>
+                                        <button                                      
+                                            className="inline-flex items-center mt-2 mb-1 px-2 py-1 text-sm font-medium text-center text-white rounded-xl bg-slate-400 hover:bg-slate-500 active:bg-slate-600"
+                                            onClick={() => handleAddNewRecipeIngredients(event.id, list.shoppingListID)}
+                                        >
+                                            Add to List
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                     </div>
                 </div>
             </Modal>
