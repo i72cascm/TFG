@@ -28,13 +28,6 @@ Plataforma social donde los usuarios pueden crear, descubrir y valorar recetas d
 | Almacenamiento | Amazon S3 Bucket                                     |
 | Nutrición      | Edamam Nutrition Analysis API                        |
 
-## Tecnologías
-
-- .NET
-- Node.js
-- SQL Server local o RDS
-- Cuenta de AWS
-- Claves API de Edamam
 
 ## Licencia
 
