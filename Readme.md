@@ -40,7 +40,7 @@ Plataforma social donde los usuarios pueden crear, descubrir y valorar recetas d
 
 MIT
 
-**Manuel Casas Castro** — @tu\_usuario
+**Manuel Casas Castro** — i72cascm
 
 > Proyecto desarrollado como Trabajo Final de Grado en Ingeniería Informática, Escuela Politécnica Superior de Córdoba (2024).
 
